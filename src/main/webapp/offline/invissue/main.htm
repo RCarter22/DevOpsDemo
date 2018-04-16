@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+	            <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+	            <h3 class="ui-title" translate="EZMAXMOBILE.INVISSUE">Issues and Transfers</h3>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+	        </div>
+	        <div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="STOREROOMS">Storerooms</li>
+					<li ng-repeat="sr in storerooms">
+						<a ng-click="actions.toIssue(sr)">
+							<p class="ui-aside">{{sr.SITEID}}</p>
+							<h3>{{sr.DESCRIPTION}}</h3>
+							<p>{{sr.LOCATION}}</p>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+							<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online>
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-sync-res>
+							<img src="../../images/map.png" />
+							<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
+							<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, issuestransfersService, paginationService){
+				var viewName = "offline/invissue/main.htm";
+				var queryName = 'STOREROOMS';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('invissue/main.action');				
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.storerooms = EMMServer.DB.getQueryResult("STOREROOMS");
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				
+				issuestransfersService.init({
+					userInfo: $scope.userInfo,
+					viewName: viewName
+				});
+				
+				paginationService.init({
+					pagination : $scope.storerooms.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;
+				$scope.actions = issuestransfersService.actions;
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.goBack = function(){
+					if($scope.userInfo.nativeAppSettings.offlineStartCenterEnabled && $scope.userInfo.nativeAppSettings.sqliteEnabled){
+						EMMServer.DB.Select()
+							.addQuery("STARTCENTER","SELECT * FROM STARTCENTER ORDER BY DESCRIPTION")
+							.addQuery("PORTLET","SELECT * FROM PORTLET WHERE SCCONFIGID IN (SELECT SCCONFIGID FROM STARTCENTER WHERE ISDEFAULT = '1') ORDER BY ORDERNUM ASC")
+							.submit("offline/login/default.htm",true);
+					}
+					else{
+						EMMServer.DB.Select()
+						.addQuery("DUMMY", "SELECT 1")
+						.submit("offline/login/index.htm", true);
+					}
+				};
+			}
+		</script>
+	</body>
+</html>

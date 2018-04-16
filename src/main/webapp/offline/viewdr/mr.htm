@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.VIEWDR">View Requisitions</h3>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !mr.mbo.isDirty(), 'ui-statusbar-c': mr.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="mr.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview ui-inset">
+					<li class="ui-pagination">	
+						<h3 class="title">
+						Step 1 of 2
+						</h3>
+						<a class="ui-pagination-next" ng-click="actions.toMRLines(mr)">	
+							<span class="ui-arrow"></span>							
+						</a>
+					</li>
+				</ul>
+				<ul class="ui-listview">
+					 <li class="ui-field">
+						<label translate="MR.MRNUM">Requisition</label>
+						<input ng-model="mr.MRNUM" ng-readonly="true" ng-required="mr.mbo.isRequired('MRNUM')">
+					</li>
+					<li class="ui-field-block">
+						<label translate="MR.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="mr.DESCRIPTION" ng-readonly="true" ng-required="mr.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field-block">
+						<label translate="MR.LONGDESCRIPTION">Details</label>
+						<textarea data-htmleditor="true" ng-model="mr.LONGDESCRIPTION" ng-readonly="true" ng-required="mr.mbo.isRequired('LONGDESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field ui-details ui-readonly">
+						<label translate="MR.STATUS">Status</label>
+						<p>{{mr.STATUS}}</p>
+						<p>{{mr.STATUSDATE | date : 'short'}}</p>
+					</li>
+					<li class="ui-field">
+						<label translate="MR.REQUIREDDATE">Required Date</label>
+						<datepicker date-format="datetime" id="REQUIREDDATE" ng-model="mr.REQUIREDDATE" ng-required="mr.mbo.isRequired('REQUIREDDATE')" ng-readonly="true" />
+					</li>					
+					<li class="ui-field">
+						<label translate="MR.PRIORITY">Priority</label>
+						<input ng-model="mr.PRIORITY" ng-readonly="true" ng-required="mr.mbo.isRequired('PRIORITY')">
+					</li>
+					<li class="ui-divider ui-divider-c" translate="MR.CHARGEINFO">Charge Information</li>
+					<li class="ui-field">
+						<label translate="MR.WONUM">Work Order</label>
+						<input disabled="true" ng-model="mr.WONUM" ng-readonly="true" ng-required="mr.mbo.isRequired('WONUM')">
+						<a class="ui-arrow" ng-click="domain($event, mr)" data-field="WONUM" data-display="WONUM,DESCRIPTION,ASSETNUM,LOCATION"></a>
+					</li>
+				</ul>	
+						
+			</div>
+			<div class="ui-sidebar">
+				<p class="ui-section" translate="ACTIONS">Actions</p>
+				<ul class="ui-listview ui-inset">
+					<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>	
+					<li>
+				        <a ng-click="editRequisition(mr)">
+				        	<h3 translate="VIEWDR.EDIT">Edit Requisition</h3>
+				        	<span class="ui-arrow"></span>
+				        </a>
+				    </li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, viewdrService,createdrService) {
+				var appName = 'VIEWDR';
+				var viewName = 'offline/viewdr/mr.htm';
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				viewdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				createdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				$scope.editRequisition = function(mr){
+					mr.STATUS = 'DRAFT';
+					EMMServer.DB.Update('MR', 'EDIT')
+					.addObject(mr.getMbo(), "MRID='" + mr.MRID + "'")
+					.submit()
+					.then(function(result) {
+						// Be sure to remove session data
+			        	mr.session.remove();
+			        	EMMServer.DB.Select()
+						.addQuery("MR", "SELECT * FROM MR WHERE MRID = '" + mr.MRID + "'")
+						.addQuery("MRLINES", "SELECT * FROM MRLINES WHERE MRID = '" +  mr.MRID + "'")
+						.submit("offline/createdr/mrlines.htm", true);
+					});
+				}
+				$scope.domain = domainService.domain;
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+
+				// Get MR object data
+				var resultSet = EMMServer.DB.getQueryResult("MR");
+				// Checks if record exists in case where autosync has been triggered
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDS', null, 'No Record(s) Found'));
+					EMMServer.DB.Select().go("offline/login/index.htm");
+					return false;
+				}
+				
+				$scope.mr = new MR(resultSet[0]);
+				$scope.actions = viewdrService.actions;
+				// *Important* to set app name
+				$scope.mr.mbo.appName(appName);
+				
+				$scope.goBack = function() {
+					$scope.mr.session.remove();
+					EMMServer.DB.Select()
+					.go("offline/viewdr/list.htm");	
+				};				
+			}
+		</script>
+	</body>
+</html>

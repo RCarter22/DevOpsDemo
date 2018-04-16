@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="INVENTORY">Inventory</h3>
+				<a ng-show="matusetrans.mbo.isNew()" ng-click="actions.confirmBalanceOnSave(matusetrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : matusetrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !matusetrans.mbo.isDirty(), 'ui-statusbar-c': matusetrans.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="matusetrans.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+				<li class="ui-field">
+    					<label translate="Work Order">Work Order</label>
+    					<input disabled="true" ng-model="matusetrans.WONUM" ng-required="matusetrans.mbo.isRequired('WONUM')" ng-readonly="matusetrans.mbo.isReadOnly('WONUM')"/>	
+					</li>	
+					<!-- <li class="ui-field">
+    					<label translate="Task">Task</label>
+    					<input disabled="true" ng-model="matusetrans.TASKID" ng-required="matusetrans.mbo.isRequired('TASKID')" ng-readonly="matusetrans.mbo.isReadOnly('TASKID')"/>	
+						<a class="ui-arrow" ng-click="domain($event, matusetrans)" data-field="TASKID" data-display="TASKID,DESCRIPTION"></a>
+					</li>		 -->
+					<li class="ui-field">
+    					<label translate="MATUSETRANS.LINETYPE">Line Type</label>
+    					<input disabled="true" ng-model="matusetrans.LINETYPE" ng-required="matusetrans.mbo.isRequired('LINETYPE')" ng-readonly="matusetrans.mbo.isReadOnly('LINETYPE')"/>	
+						<a class="ui-arrow" ng-click="domain($event, matusetrans)" data-field="LINETYPE" data-display="LINETYPE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MATUSETRANS.ITEM">Item</label>
+						<input disabled="true" ng-model="matusetrans.ITEMNUM" ng-required="matusetrans.mbo.isRequired('ITEMNUM')" ng-readonly="matusetrans.mbo.isReadOnly('ITEMNUM')"/>
+						<a class="ui-arrow" ng-click="domain($event, matusetrans)" data-field="ITEMNUM" data-display="ITEMNUM,DESCRIPTION,LOCATION,BINNUM,CURBAL"></a>						
+					</li>
+					<li class="ui-field">
+						<label translate="MATUSETRANS.ROTASSETNUM">Rotating Asset</label>
+						<input ng-model="matusetrans.ROTASSETNUM" ng-readonly="matusetrans.mbo.isReadOnly('ROTASSETNUM')" ng-required="matusetrans.mbo.isRequired('ROTASSETNUM')">
+						<a class="ui-arrow"  ng-click="domain($event, matusetrans)" data-field="ROTASSETNUM" data-display="ASSETNUM,DESCRIPTION,LOCATION"></a>
+					</li>
+					<li class="ui-field-block">
+						<label translate="MATUSETRANS.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="matusetrans.DESCRIPTION" ng-required="matusetrans.mbo.isRequired('DESCRIPTION')" ng-readonly="matusetrans.mbo.isReadOnly('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="MATUSETRANS.STOREROOM">Storeroom</label>
+						<input disabled="true" ng-model="matusetrans.STORELOC" ng-required="matusetrans.mbo.isRequired('STORELOC')" ng-readonly="matusetrans.mbo.isReadOnly('STORELOC')">
+						<a ng-if="matusetrans.ITEMNUM" class="ui-arrow" ng-click="domain($event, matusetrans)" data-field="STORELOC" data-display="LOCATION,BINNUM,CURBAL"></a>
+						<a ng-if="!matusetrans.ITEMNUM" class="ui-arrow" ng-click="domain($event, matusetrans)" data-field="STORELOC" data-display="LOCATION,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MATUSETRANS.BINNUM">Bin</label>
+						<input disabled="true" ng-model="matusetrans.BINNUM" ng-required="matusetrans.mbo.isRequired('BINNUM')" ng-readonly="matusetrans.mbo.isReadOnly('BINNUM')">
+						<a class="ui-arrow" ng-click="domain($event, matusetrans)" data-field="BINNUM" data-display="BINNUM,CURBAL"></a>						
+					</li>
+					<li class="ui-field" ng-show="matusetrans.mbo._invData.CURBAL">
+						<label translate="MATUSETRANS.CURBAL">Current Balance</label>
+						<input disabled="true" ng-model="matusetrans.mbo._invData.CURBAL" ng-readonly="true">
+					</li>			
+					<li class="ui-field">
+						<label translate="MATUSETRANS.QUANTITY">Quantity</label>
+    					<input data-interval="1" data-min="1" data-control="spinner" type="text" ng-model="matusetrans.QUANTITY" ng-required="matusetrans.mbo.isRequired('QUANTITY')" ng-readonly="matusetrans.mbo.isReadOnly('QUANTITY')" ng-blur="matusetrans.mbo.setValue($event)"></input>
+					</li>						
+					<li class="ui-field">
+						<label translate="MATUSETRANS.UNITCOST">Unit Cost</label>
+    					<input type="text" ng-model="matusetrans.UNITCOST" ng-required="matusetrans.mbo.isRequired('UNITCOST')" ng-readonly="matusetrans.mbo.isReadOnly('UNITCOST')"></input>
+					</li>
+					<li class="ui-field">
+    					<label translate="MATUSETRANS.ISSUETYPE">Transaction Type</label>
+    					<input disabled="true" ng-model="matusetrans.ISSUETYPE" ng-required="matusetrans.mbo.isRequired('ISSUETYPE')" ng-readonly="matusetrans.mbo.isReadOnly('ISSUETYPE')"/>	
+						<a class="ui-arrow" ng-click="domain($event, matusetrans)" data-field="ISSUETYPE" data-display="ISSUETYPE"></a>
+					</li>
+					
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, matusetransService) {
+				var queryName = 'MATUSETRANS',
+					viewName = 'offline/matusetrans/matusetrans.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.matusetrans = new MatUseTrans(EMMServer.DB.getQueryResult(queryName)[0]);
+
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName		
+				});
+				matusetransService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.domain = domainService.domain;
+				
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.matusetrans.session.remove();
+					EMMServer.DB.Select().go("offline/matusetrans/main.htm");
+				}
+				
+				$scope.actions = matusetransService.actions;
+			}
+		</script>
+	</body>
+</html>		

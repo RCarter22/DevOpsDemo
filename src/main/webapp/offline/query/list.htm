@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="SAVEDQUERIES">Saved Queries</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="querys">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">				
+				<ul class="ui-listview" ng-repeat="q in querys">
+					<li>
+						<a ng-click="toList(q)">
+							<p><strong>{{q.CLAUSENAME}} </strong></p>
+							<h3>{{q.DESCRIPTION}}</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $filter, queryService){
+				var viewName = 'offline/query/list.htm',
+					queryName = 'QUERY';
+				var pageData = EMMServer.Session.getItem("QUERY_INFO");
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.querys = EMMServer.DB.getMboSet('Query', queryName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				queryService.init({
+					userInfo : $scope.userInfo,
+					queryName : queryName,
+					viewName : viewName
+				});			
+				$scope.toList = queryService.toList;
+				$scope.goBack = function(){
+					EMMServer.DB.Select()
+					.go(pageData.viewName);
+				}
+			}
+		</script>		
+	</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="actions.goback()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.VIEWDR">View Requisitions</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>		
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li>
+						<a ng-click="actions.viewSaved()">
+							<img src="../../images/purchase.png">
+							<h3 translate="VIEWDR.VIEWSAVED">View Saved Requisitions</h3>
+							<span class="ui-bubble" ng-show="SAVEDTOTAL != null">{{SAVEDTOTAL}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a ng-click="actions.viewSubmitted()">
+							<img src="../../images/purchase.png">
+							<h3 translate="VIEWDR.VIEWSUBMITTED">View Submitted Requisitions</h3>
+							<span class="ui-bubble" ng-show="SUBMITTOTAL != null">{{SUBMITTOTAL}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+							<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online>
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-sync-res>
+							<img src="../../images/map.png" />
+							<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
+							<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, viewdrService){
+				var viewName = 'offline/viewdr/main.htm';
+				
+				// Init Sync Settings
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('viewdr/main.action');
+
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				$scope.SAVEDTOTAL = EMMServer.DB.getQueryResult("SAVEDTOTAL")[0].SAVEDTOTAL || 0;
+				$scope.SUBMITTOTAL = EMMServer.DB.getQueryResult("SUBMITTOTAL")[0].SUBMITTOTAL || 0;
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				
+				// Init service
+				viewdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.actions = {
+					viewSaved : function(){
+						
+						EMMServer.Session.setItem('VIEWTYPE','SAVED');
+						viewdrService.toList(null,null);
+					},
+					viewSubmitted : function(){
+					
+						EMMServer.Session.setItem('VIEWTYPE','SUBMIT');
+						viewdrService.toList(null,null);
+					},
+					goback: function(){
+						if($scope.userInfo.nativeAppSettings.offlineStartCenterEnabled && $scope.userInfo.nativeAppSettings.sqliteEnabled){
+							EMMServer.DB.Select()
+								.addQuery("STARTCENTER","SELECT * FROM STARTCENTER ORDER BY DESCRIPTION")
+								.addQuery("PORTLET","SELECT * FROM PORTLET WHERE SCCONFIGID IN (SELECT SCCONFIGID FROM STARTCENTER WHERE ISDEFAULT = '1') ORDER BY ORDERNUM ASC")
+								.submit("offline/login/default.htm",true);
+						}
+						else{
+							EMMServer.DB.Select()
+							.addQuery("DUMMY", "SELECT 1")
+							.submit("offline/login/index.htm", true);
+						}							
+					}
+				}				
+					
+			}
+		</script>
+	</body>
+</html>

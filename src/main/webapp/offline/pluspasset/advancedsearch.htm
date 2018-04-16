@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left">Back</a>
+				<h3 class="ui-title" translate="ADVANCEDSEARCH">Advanced Search</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="ASSET.ASSETNUM">Asset</label>
+						<input ng-model="asset.ASSETNUM"/>
+					</li>														
+					<li class="ui-field-block">
+						<label translate="ASSET.DESCRIPTION">Description</label>
+						<textarea ng-model="asset.DESCRIPTION"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.STATUS">Status</label>
+						<input ng-model="asset.STATUS"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="STATUS" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.LOCATION">Location</label>
+						<input ng-model="asset.LOCATION"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="LOCATION" data-display="LOCATION,DESCRIPTION"></a>
+					</li>	
+					<li class="ui-field">
+						<label translate="ASSET.SITEID">Site</label>
+						<input ng-model="asset.SITEID"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="SITEID" data-display="SITEID,DESCRIPTION"></a>
+					</li>									
+					<li class="ui-field">
+						<label translate="ASSET.PARENT">Parent</label>
+						<input ng-model="asset.PARENT"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="PARENT" data-display="ASSETNUM,DESCRIPTION"></a>
+					</li>								
+					<li class="ui-field">
+						<label translate="ASSET.ASSETTYPE">Type</label>
+						<input ng-model="asset.ASSETTYPE"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="ASSETTYPE" data-display="VALUE,DESCRIPTION"></a>
+					</li>													
+					<li class="ui-field">
+						<label translate="ASSET.GROUPNAME">Meter Group</label>
+						<input ng-model="asset.GROUPNAME"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="GROUPNAME" data-display="GROUPNAME,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="ASSET.SERIALNUM">Serial #</label>
+						<input ng-model="asset.SERIALNUM"/>						
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.VENDOR">Vendor</label>
+						<input ng-model="asset.VENDOR"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="VENDOR" data-display="COMPANY,NAME"></a>						
+					</li>	
+					<li class="ui-field">
+						<label translate="ASSET.MANUFACTURER">Manufacturer</label>
+						<input ng-model="asset.MANUFACTURER"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" data-field="MANUFACTURER" data-display="COMPANY,NAME"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="ASSET.FAILURECODE">Failure Class</label>
+						<input ng-model="asset.FAILURECODE"/>
+						<a class="ui-arrow" ng-click="domain($event, asset)" onclick="" data-field="FAILURECODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>					
+				</ul>		
+			</div>
+			<div class="ui-btn-container">
+				<a class="ui-btn-b" ng-click="clearSearch()">Clear</a>
+				<a class="ui-btn-a" ng-click="advancedSearch(asset)">Search</a>
+			</div>			
+		</div>		
+
+		<script type="text/javascript">
+			function MainController($scope, $window, domainService, pluspassetService) {
+				var appName = 'PLUSPASSET';
+				var viewName = 'offline/pluspasset/advancedsearch.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				// Get Asset object data
+				$scope.asset = new Asset(EMMServer.DB.getQueryResult("ASSET")[0]);
+				$scope.asset.mbo.appName(appName);
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					isAdvanced : '1'
+				});
+				
+				pluspassetService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+						
+				$scope.domain = domainService.domain;
+				$scope.advancedSearch = pluspassetService.doAdvancedSearch;
+
+				$scope.clearSearch = function() {
+					// Clear any changes and remove from session
+					$scope.asset.session.remove();
+					pluspassetService.toAdvancedSearch();
+				}
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					$scope.asset.session.remove();
+					pluspassetService.toList(null,true);
+				};
+			}
+		</script>
+	</body>
+</html>

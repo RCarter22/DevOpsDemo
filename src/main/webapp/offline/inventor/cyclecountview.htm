@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile-Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+	            <a ng-click="goBack(); stayList()" class="ui-btn-left" translate="BACK">Back</a>
+	            <h3 class="ui-title" translate="INVDETAILS">Inventory Details</h3>
+	            <a ng-click="actions.toSaveInvbalance(inventory,invbal); stayList()" class="ui-btn-right" ng-class="{'ui-btn-c' : toBeSaved}" translate="SAVE">Save</a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+	        </div>
+	        <div class="ui-statusbar" ng-class="{'ui-statusbar-f': inventory.mbo.isDirty() === false, 'ui-statusbar-c': inventory.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="inventory.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+	               <li class="ui-field">
+	                   <label translate="INVENTORY.ITEMNUM">Item</label>
+	                   <input ng-model="inventory.ITEMNUM" ng-readonly="true">
+	               </li>
+	               <li class="ui-field-block">
+	                   <label translate="INVENTORY.DESCRIPTION">Description</label>
+	                   <textarea maxlength="100" ng-model="inventory.DESCRIPTION" ng-readonly="true"></textarea>
+	               </li>
+	               <li class="ui-field">
+	                   <label translate="INVENTORY.SITEID">Site</label>
+	                   <input ng-model="inventory.SITEID" ng-readonly="true">
+	               </li>
+	               <li class="ui-field">
+	                   <label translate="INVENTORY.LOCATION">Storeroom</label>
+	                   <input ng-model="inventory.LOCATION" ng-readonly="true">
+	               </li>
+	               <li class="ui-field">
+	                   <label translate="INVENTORY.BINNUM">Default Bin</label>
+	                   <input ng-model="inventory.BINNUM" ng-readonly="true">
+	               </li>
+	               <li class="ui-field">
+	                   <label translate="INVENTORY.STATUS">Status</label>
+	                   <input ng-model="inventory.STATUS" ng-readonly="true">
+	               </li>
+	               <li class="ui-field">
+	                   <label translate="INVENTORY.ISSUEUNIT">Issue Unit</label>
+	                   <input ng-model="inventory.ISSUEUNIT" ng-readonly="true">
+	               </li>
+	               <li class="ui-divider ui-divider-c" translate="INVENTORY.BALSUMMARY">Available Balance Summary</li>
+	               <li class="ui-field ui-readonly">
+	                   <label translate="INVENTORY.CURBAL">Current balance</label>
+	                   <p>{{curbal}}</p>
+	               </li>
+	           
+	               
+	         	</ul>
+				<div class="ui-section" translate="INVENTORY.INVBALANCE">Inventory Balances</div>
+				<ul class="ui-listview" ng-repeat="ib in invbal" >
+					<li>
+						<a>
+							<span class="ui-accessory-left" ng-if="ib.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<h3>{{ 'INVENTORY.BINNUM' | translate }}: {{ib.BINNUM}}</h3>
+							<h3 style="color:red" >{{ 'INVENTORY.CURBAL' | translate }}: {{ib.CURBAL}}</h3> 
+							<h3>{{ 'INVENTORY.PHYSCNT' | translate }}:  <span ng-style="{ color : ib.mbo.toBeSaved() ? 'red' : 'inherit' }"> {{ib.PHYSCNT}}</h3>
+							<p>{{ 'INVENTORY.LOCATION '| translate }}: {{ib.LOCATION}}</p>
+							<p>{{ 'INVENTORY.PHYSCNTDATE' | translate }}: {{ib.PHYSCNTDATE | date}}</p>
+							<p>{{ 'INVENTORY.RECONCILED' | translate }}: {{ib.RECONCILED == '1' ? 'true' : 'false'}}</p>
+						</a>
+					</li>
+					<li class="ui-field">
+						<label translate="NEWCOUNT">New Count</label>
+						<input type="tel" ng-model="ib.PHYSCNT" ng-change="ib.mbo.toBeSaved(true)" data-interval="1.00" data-min = "0" data-control="spinner">	
+					</li>
+					<li class="ui-field">
+						<label>Report Date</label>	
+						<datepicker id="{{$index}}_NEWCNTDATE" ng-model="ib.mbo._newCountDate" date-format="datetime"></datepicker>
+					</li>
+				</ul>
+			</div>
+		    <emm:include value="cyclecountactions.htm"/>
+		</div> 
+		<script type="text/javascript">
+			function MainController($scope, inventoryService) {
+				var viewName = "offline/inventor/cyclecountview.htm";
+				$scope.toBeSaved = false;
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				var resultSet = EMMServer.DB.getQueryResult("INVENTORY");	
+				// Checks if record exists in case where autosync has been triggered
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					EMMServer.DB.Select()
+						.go("offline/inventor/list.htm");
+					return false;
+				}			
+
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.inventory = new Inventory(resultSet[0]);
+				$scope.invbal = EMMServer.DB.getMboSet('InvBalances', 'INVBALANCES');
+				$scope.curbal = EMMServer.DB.getQueryResult("CURBAL")[0].CURBAL || 0;
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+			
+				inventoryService.init({
+					userInfo: $scope.userInfo,
+					viewName: viewName
+				});
+				
+				$scope.setHide = function(){
+					inventoryService.setHide('yes');
+				}
+				
+				$scope.stayList = function(){
+					EMMServer.Session.setItem("goDetails", "no");
+				}
+				
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.actions = inventoryService.actions;
+				
+				$scope.$watch('invbal', function(newValue, oldValue) {
+					if (newValue !== oldValue){
+						$scope.toBeSaved = true;
+					}
+				},true);
+				
+				$scope.goBack = function(){
+					
+					inventoryService.toSearchList(null, $scope.inventory.LOCATION, true, false)
+					//inventoryService.toList($scope.inventory.LOCATION);
+					
+				};
+			}		
+		</script>
+	</body>
+</html>

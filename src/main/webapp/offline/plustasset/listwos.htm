@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page" data-rememberscroll="true">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a class="ui-btn-left" ng-click="goBack()" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSTASSET">Asset (Tr)</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="workorders">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview" ng-show="workorders">
+					<li class="ui-divider ui-divider-c" translate="LIST">List</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				
+				<ul class="ui-listview" ng-repeat="wo in workorders">
+					<li>
+						<a>			
+							<p class="ui-aside">{{wo.SITEID}}</p>
+							<p><strong>{{wo.WONUM}} ({{wo.STATUS}})</strong></p>
+							<h3>{{wo.DESCRIPTION}}</h3>
+							<p>{{ 'WORKORDER.ACTSTART' | translate }}: {{wo.ACTSTART | date}}</p>							
+							<p>{{ 'WORKORDER.LOCATION' | translate }}: {{wo.LOCATION}}</p>
+							<p>{{ 'Repair Facility' | translate }}: {{wo.REPAIRFACILITY}}</p>
+							<p>{{ 'WORKORDER.ASSETNUM' | translate }}: {{wo.ASSETNUM}}</p>
+							<p>{{ 'WORKORDER.ALIAS' | translate }}: {{wo.ALIAS}}</p>
+						</a>
+					</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $window, $filter, plustassetService, paginationService){
+				var viewName = 'offline/plustasset/listwos.htm',
+				queryName = 'WORKORDER',
+				appName = 'PLUSTASSET';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.workorders = EMMServer.DB.getMboSet('WorkOrder', queryName, appName);	
+				
+				plustassetService.init({
+					userInfo : $scope.userInfo
+				});
+				
+				
+				paginationService.init({
+					pagination : $scope.workorders.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;				
+				
+				$scope.goBack = function(){
+					$scope.pageService.clearCache();					
+					EMMServer.DB.Select().go("offline/plustasset/asset.htm");
+				}
+								
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+			}
+		</script>		
+	</body>
+</html>

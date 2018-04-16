@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="DomainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="includes.htm"/>
+		<style type="text/css">
+			.ui-filter-on{
+				background: transparent url(../../images/minus.png) 16px 16px;
+			}
+			.ui-filter-off{
+				background: transparent url(../../images/plus.png) 16px 16px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+				<a ng-click="cancel()" class="ui-btn-left" translate="CANCEL">Cancel</a>
+				<h3 class="ui-title" translate="SELECTVALUE">Select Value</h3>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="domainLookups">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-toolbar ui-toolbar-b" ng-show="!quickscan && searchFields">
+				<div class="ui-container">
+					<a href="#" ng-click="toggleFilterView()"><div class="ui-filter ui-filter-off"></div>{{ 'FILTER' | translate }}</a>
+				</div>
+			</div>
+			<div class="ui-content" ng-show="!quickscan && searchFields">
+				<form id="emm_domainform" data-visible="false">	
+					<ul id="emm_filterform" class="ui-listview ui-inset">					
+						<li class="ui-field" ng-repeat="fld in searchFields">
+							<label>{{fld.display||fld}}</label>
+							<input type="text" ng-model="domain[fld.value]" ng-show="fld.value"/>
+							<input type="text" ng-model="domain[fld]" ng-hide="fld.value"/>
+						</li>				
+					</ul>
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" ng-click="resetFilter()" translate="RESET">Reset</a>
+						<input class="ui-btn-a" type="button" value="{{ 'APPLY' | translate }}" ng-click="applyFilter()"/>
+					</div>
+				</form>	
+			</div>	
+			<div id="emm_list" class="ui-content">
+				<div class="ui-statusbar" ng-repeat="filter in searchFilters" ng-show="!quickscan">
+					<h3 class="ui-title">{{ filter.name + ': ' + filter.value }}</h3>
+				</div>
+				<div class="ui-statusbar" ng-show="quickscan">
+					<h3 class="ui-title">{{ 'QUICKSCAN' | translate }} {{domain.scanValue}}</h3>
+				</div>
+				<div class="ui-btn-container" ng-show="quickscan">
+					<a class="ui-btn-b" ng-click="resetSearch()" translate="RESET">Reset</a>
+				</div>
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>		
+				<ul class="ui-listview">
+					<li ng-if="nullElement"> 
+						<a ng-click="selectValue(nullElement)">
+							<h3>{{ 'NOVALUE' | translate }}</h3>
+							<span emm-domain="lookup"></span>
+						</a>
+                    </li>
+                    <li class="ui-divider ui-divider-b"></li>
+					<li ng-repeat="lookup in domainLookups">
+						<a ng-click="selectValue(lookup)">
+							<span emm-domain="lookup"></span>
+						</a>
+					</li>
+				</ul>
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 	
+			function DomainController ($scope, $window, paginationService){
+				var queryName = 'DOMAIN';
+				var viewName = 'offline/common/domain.htm';
+
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				$scope.domainLookups = EMMServer.DB.getQueryResult(queryName);
+
+				paginationService.init({
+					pagination : $scope.domainLookups.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				$scope.pageService = paginationService;
+				
+				var pageData = EMMServer.Session.getItem('DOMAIN_DATA');
+				if (pageData.domain){
+					$scope.domain = new Domain(pageData.domain);
+					if($scope.domain.searchFields.length>0){
+						$scope.searchFields = $scope.domain.searchFields.replace(/\s+/g, '').split(',');
+						$.each($scope.searchFields, function(k,v){						
+							$scope.searchFields[k] = {display:getText(pageData.domain.table+'.'+v, null, v), value:v};
+							if (v==$scope.searchFields[k].display)
+								$scope.searchFields[k] = {display:getText(pageData.name+'.'+v, null, v), value:v};
+							if (v==$scope.searchFields[k].display)
+								$scope.searchFields[k] = {display:getText(v, null, v), value:v};
+						});
+						$scope.searchFilters = $scope.domain.getSearchFilters();
+						$.each($scope.searchFilters, function(k,v){
+							var orig = v.name;
+							v.name = getText(pageData.domain.table+'.'+v.name, null, v.name);
+							if (v.name==orig)
+								v.name = getText(pageData.name+'.'+v.name, null, v.name);
+							if (v.name==orig)
+								v.name = getText(v.name, null, v.name);									
+							$scope.searchFilters[k] = v;
+						});						
+					}
+					$scope.nullElement = {"RETURNVALUE" : null, "OBJECTKEY" : $scope.domain.field};
+				}
+								
+				$scope.quickscan = (pageData.quickScan) ? pageData.quickScan : false;
+				$scope.displayOrder = pageData.displayOrder;
+				
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				$scope.selectValue = function(val){
+					if ($scope.mboObject.mbo.isReadOnly(val.OBJECTKEY) === false){
+						setValueAndGoBack(val);
+					} else {
+						alert(getText('EMMOF1006W', [val.OBJECTKEY], 'Attribute ' + val.OBJECTKEY + ' is readonly'));
+					}	
+				}
+				
+				$scope.toggleFilterView = function(){
+					$('#emm_domainform, #emm_list').toggle();
+					$('.ui-filter').toggleClass('ui-filter-on ui-filter-off');
+					return false;
+				}
+				
+				$scope.resetFilter = function(){
+					$scope.domain.resetSearchFilter();
+					pageData.domain = $scope.domain;
+					reloadPage();					
+				}				
+				
+				$scope.applyFilter = function(){
+					pageData.domain = $scope.domain;
+					reloadPage();
+				}
+				
+				$scope.resetSearch = function(){
+					$scope.domain.scanValue = "";
+					pageData.quickScan = false;
+					$scope.resetFilter();
+				}
+				
+				$scope.quickSearch = function(){
+					pageData.domain = $scope.domain;
+					pageData.quickScan = true;
+					reloadPage();
+				}
+				
+				$scope.barcodeScan = function (){
+					EMMServer.Barcode.scan('scan')
+				};
+				
+				$window.scan = function(/*Scan Value*/ val){
+					$scope.domain.scanValue = val;
+					$scope.quickSearch();	
+				}
+				
+				function reloadPage(){
+					EMMServer.Session.setItem('DOMAIN_DATA', pageData);
+					
+					EMMServer.DB.Select()
+						.addQuery("DOMAIN", $scope.domain.getSql(), $scope.domainLookups.getPagination().pagenum, $scope.domainLookups.getPagination().pagesize)
+						.submit(viewName, true);					
+				}
+				
+				$scope.cancel = function(){
+					goBack();						
+				}
+				
+				function goBack(){
+					EMMServer.Session.removeItem('DOMAIN_DATA');
+					EMMServer.DB.Select().go(pageData.returnPage);
+				}
+				function setValueAndGoBack(val){
+					
+					// Save the original value
+					var originalValue = $scope.mboObject[val.OBJECTKEY];
+					// Set the new value
+					$scope.mboObject[val.OBJECTKEY] = val.RETURNVALUE;
+					//If the original value and selected value are not the same and if there is a lookup list set crossover attribute.
+					if(originalValue !== val.RETURNVALUE){
+						if($scope.domainLookups[0]){
+							val.CROSSOVERS = $scope.domainLookups[0].CROSSOVERS;
+						}
+					}
+					if (val.CROSSOVERS && val.CROSSOVERS !== ''){
+						var crossFields = val.CROSSOVERS.split(','), crossOverObject = {};
+						for(var i=0; i<crossFields.length; i++){
+							if (!String.isNullOrEmpty(val[crossFields[i]]) && val[crossFields[i]] != '<null>'){
+								crossOverObject[crossFields[i]] = val[crossFields[i]];
+							} else {
+								crossOverObject[crossFields[i]] = null;
+							}
+						}
+						$scope.mboObject.mbo.onChange(val.OBJECTKEY, crossOverObject);
+					} else {
+						$scope.mboObject.mbo.onChange(val.OBJECTKEY);
+					}
+					$scope.mboObject.mbo.toBeSaved(true);
+					$scope.mboObject.session.cache();
+
+					goBack();
+				}
+			}
+			
+			angular.module('emm').directive('emmDomain', function($parse){
+				return {
+					restrict: 'A',
+					replace: true,
+					link: function(scope, elem, attr){
+						var data = $parse(attr.emmDomain)(scope);
+						var displayOrder = scope.displayOrder.split(',');
+						if(data){
+							var i=0, display;
+							for(var i=0; i<displayOrder.length; i++){
+								display = data[displayOrder[i].trim()];
+								if (String.isNullOrEmpty(display) || display == 'null'){
+									display = "";
+								}
+								if (i===0)
+									elem.append("<h3>" + display + "</h3>");
+								else 
+									elem.append("<p>" + display + "</p>");									
+							}
+						}						
+					}	
+				}
+			});			
+		</script>
+	</body>
+</html>

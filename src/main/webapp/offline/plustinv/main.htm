@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+	            <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+	            <h3 class="ui-title" translate="EZMAXMOBILE.INVENTOR">Inventory</h3>
+	            <a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+	        </div>
+	        <div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{messages}}</h3></div>
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+				</form>
+			</div>			
+			<div class="ui-content">
+				<!-- <ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="INVENTORYBYSR">Inventory by Storeroom</li>
+					<li ng-repeat="sr in storerooms">
+						<a ng-click="confirmCycleCount(sr.LOCATION)">
+							<p class="ui-aside">{{sr.SITEID}}</p>
+							<h3>{{sr.DESCRIPTION}}</h3>
+							<p>{{sr.LOCATION}}</p>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul> -->
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+							<span class="ui-badge" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online="plustinv/main">
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, $window, plustinvService, paginationService){
+				var viewName = "offline/plustinv/main.htm";
+				var queryName = 'INVENTORY';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('plustinv/main.action');				
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.storerooms = EMMServer.DB.getQueryResult("STOREROOMS");
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				
+				plustinvService.init({
+					userInfo: $scope.userInfo,
+					viewName: viewName
+				});
+				
+				paginationService.init({
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;			
+				
+				$scope.confirmCycleCount = function (location){		
+					
+						  plustinvService.setMode('cyclecount');
+						  plustinvService.setHide('yes');
+						  EMMServer.Session.setItem('storeroom', location)	
+						  plustinvService.toList(location);
+				}; 
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.quickSearch = function() {
+					plustinvService.setMode('origin');
+					plustinvService.toSearchList($scope.pageService.search);
+				}
+				
+				$scope.barcodeScan = function (){
+					EMMServer.Barcode.scan('scan');
+				};
+				
+				$window.scan = function(/*Scan Value*/ val){
+					$scope.pageService.search = val;
+					$scope.quickSearch();	
+				}	
+				
+				$scope.goBack = function(){
+					EMMServer.DB.Select()
+						.addQuery("DUMMY", "SELECT 1")
+						.submit("offline/login/index.htm", true);
+				};
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="ChangeStatusController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+				<h3 class="ui-title" translate="SELECTVALUE">Select Value</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-content ui-content-narrow">				    	
+				<ul class="ui-listview ui-inset ui-radiobutton">			
+					<li ng-repeat="lookup in domainLookups">
+						<label for="radio_{{lookup.VALUE}}">{{lookup.DESCRIPTION || lookup.VALUE}}</label>
+						<input type="radio" name="newStatus" id="radio_{{lookup.VALUE}}" value="{{lookup.VALUE}}"></input>
+					</li>
+				</ul>			
+				<div class="ui-btn-container">
+					<a class="ui-btn-b" ng-click="cancel()" translate="CANCEL">Cancel</a>
+					<input class="ui-btn-a" type="button" value="OK" ng-click="changeStatus()"/>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript"> 	
+			function ChangeStatusController ($scope){
+				var queryName = 'STATUS';
+				var viewName = 'offline/common/changestatus.htm';
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				$scope.domainLookups = EMMServer.DB.getQueryResult(queryName);
+				/* Page Data should contain the following properties:
+					- fieldName : ie. 'STATUS'
+					- action : ie. 'UPDATE_STATUS'
+					- entityName : ie. 'WORKORDER'
+					- whereClause : ie. 'WORKORDERID = 1001'
+				*/
+				var pageData = EMMServer.Session.getItem('CHANGESTATUS_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				$scope.changeStatus = function(val){
+					if ($("input:radio[name=newStatus]:checked").length > 0){
+						if ($scope.mboObject.mbo.isReadOnly(pageData.fieldName) === false){
+							doChangeStatus();
+						} else {
+							alert(getText('EMMOF1006W', [pageData.fieldName], 'Attribute ' + pageData.fieldName + ' is readonly'));
+						}	
+					} else {
+						alert(getText('EMMOF1007W', null, 'Please select a value'));
+					}
+				}
+				
+				$scope.cancel = function(){
+					goBack();						
+				}
+				
+				function goBack(message){
+					EMMServer.Session.removeItem('CHANGESTATUS_DATA');
+					EMMServer.DB.Select()
+						.addMessage(message)						
+						.go(pageData.returnPage);
+				}
+				function doChangeStatus(){
+					var newStatus = $("input:radio[name=newStatus]:checked").val();
+					var currentTime = new Date();
+					
+					//AEP custom status change logic for PLUSTWO app
+					//cannot change status to COMP unless the current status of the work order is WCOMP
+					//or
+					//cannot change status to WCOMP unless the current status of the work order is INPRG
+					if($scope.mboObject.mbo.appName() == 'PLUSTWO' && (newStatus == 'COMP' && $scope.mboObject.STATUS != 'WCOMP')
+							|| (newStatus == 'WCOMP' && $scope.mboObject.STATUS != 'INPRG')){
+						emm.util.alert({'message':getText('EMMAEP1001E', null, 'You should not change directly to WCOMP or COMP.  Actual flow of a workorder must be WSCH --> SCH or INPRG --> WCOMP --> COMP')});
+						return;
+					}
+					
+					//AEP custom status change logic
+					//Reason for Repair and Work Accomplished fields cannot be empty on
+		            //Work Order Tasks when changing the status of a Work Order to COMPLETE. 
+					if($scope.mboObject.mbo.appName() == 'PLUSTWO' && newStatus == 'WCOMP'){
+						
+						var woActivity = EMMServer.DB.getQueryResult('AEPWOACTIVITY')[0].COUNT;
+						if(woActivity > 0){
+							emm.util.alert({'message':getText('EMMAEP1003E', null, 'Reason for Repair and Work Accomplished fields cannot be empty on Work Order Tasks when changing the status of a Work Order to COMPLETE. Please review the Work Order tasks and specify a value for both fields.')});
+							return;
+						}
+					}		
+					
+					//AEP - Check primary meter reading entered by user and throw error msg 
+					//if new status is WCOMP and the primary meter has not been updated
+					if($scope.mboObject.mbo.appName() == 'PLUSTWO' && newStatus == 'WCOMP' && 
+							$scope.mboObject.ISTASK == '0' && (!$scope.mboObject.PLUSTPRIENTERED || $scope.mboObject.PLUSTPRIENTERED == '0')){
+						
+						var assetMeterSet = EMMServer.DB.getQueryResult('ASSETMETER');
+						var assetMeterCount = 0;
+						
+						if(assetMeterSet)
+							assetMeterCount = assetMeterSet[0].COUNT;
+						
+						if(assetMeterCount > 0){
+							emm.util.alert({'message':getText('EMMAEP1002E', null, 'Primary meter needs to be updated before changing status to WCOMP')});
+							return;
+						}
+					}					
+
+					// Save it to the MBO object
+					$scope.mboObject[pageData.fieldName] = newStatus;
+					
+					var updateData = { 
+							STATUSDATE : currentTime.getTime()
+						};
+					updateData[pageData.fieldName] = newStatus;						
+					
+					EMMServer.DB.Update(pageData.entityName, pageData.action)
+						.addObject(updateData, pageData.whereClause)
+						.submit()
+						.then(function(result){
+							$scope.mboObject.session.remove();
+							goBack(getText('EMMOF1008I', null, 'Status Successfully Changed'));
+						});
+				
+				}		
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+				<a ng-click="cancel()" class="ui-btn-left" translate="CANCEL">Cancel</a>
+				<h3 class="ui-title" translate="ASSETDRILLDOWN">Asset Drilldown</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<ul class="ui-navbar">
+				<li style="margin-right:-5px"><a ng-click="viewTab('LOCATION')" ng-class="{'ui-active' : drilldowntype == 'LOCATION'}" translate="EZMAXMOBILE.LOCATION">Location</a></li>
+				<li><a ng-click="viewTab('ASSET')" ng-class="{'ui-active' : drilldowntype == 'ASSET'}" translate="EZMAXMOBILE.ASSET">Asset</a></li>
+			</ul>
+			<div class="ui-content">
+				<ul class="ui-listview" ng-show="drilldowntype == 'LOCATION'">
+					<li ng-hide="currentLocation == null">
+						<a ng-click="assetDrilldownActions.gotoLocation(currentLocation.PARENT)">
+							<img src="../../images/returnarrow.png"/>
+							<span>
+								<p class="ui-aside">{{currentLocation.ORGID}}</p>
+								<h3>{{currentLocation.LOCATION}}</h3>
+								<p>{{currentLocation.DESCRIPTION}}</p>
+							</span>
+						</a>
+					</li>
+					<li class="ui-divider ui-divider-c" ng-hide="currentLocation == null">{{ 'CHILDRENOF' | translate }} {{currentLocation.LOCATION}}</li>
+					<li class="ui-accessory" ng-repeat="location in childLocation">
+							<a ng-click="assetDrilldownActions.gotoAsset(location, null)">
+								<h3>{{location.LOCATION}}</h3>
+								<p>{{location.DESCRIPTION}}</p>
+							</a>
+							<a class="ui-arrow" ng-show="location.HASCHILDREN == 1" ng-click="assetDrilldownActions.gotoLocation(location.LOCATION)"></a>
+					</li>
+				</ul>
+				<ul class="ui-listview" ng-show="drilldowntype == 'ASSET'">
+					<li ng-hide="currentAsset == null">
+						<a ng-click="assetDrilldownActions.gotoAsset(currentAsset, currentAsset.PARENT)">
+							<img src="../../images/returnarrow.png"/>
+							<span>
+								<h3>{{currentAsset.ASSETNUM}}</h3>
+								<p>{{currentAsset.DESCRIPTION}}</p>
+								<p>{{currentAsset.LOCATION}}</p>
+							</span>
+						</a>
+					</li>
+					<li class="ui-divider ui-divider-c" ng-hide="currentAsset == null">{{ 'CHILDRENOF' | translate }} {{currentAsset.ASSETNUM}}</li>
+					<li class="ui-accessory" ng-repeat="asset in childAsset">
+							<a ng-click="selectValue(asset.ASSETNUM, asset.LOCATION)">
+								<h3>{{asset.ASSETNUM}}</h3>
+								<p>{{asset.DESCRIPTION}}</p>
+							</a>
+							<a class="ui-arrow" ng-show="location.HASCHILDREN == 1" ng-click="assetDrilldownActions.gotoAsset(asset, asset.ASSETNUM)"></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">	
+			function MainController ($scope, domainService){
+				var queryNameChildLoc = "CHILDLOCATIONLIST";
+				var queryNameCurrentLoc = "CURRENTLOCATION";
+				var queryNameChildAsset = "CHILDASSETLIST";
+				var queryNameCurrentAsset = "CURRENTASSET";
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				$scope.drilldowntype = EMMServer.Session.getItem('DRILLDOWNTYPE_DATA') || "ASSET";
+				
+				$scope.viewTab = function(drilldowntype){
+					$scope.drilldowntype = drilldowntype;
+				}
+				
+				$scope.childLocation = EMMServer.DB.getQueryResult(queryNameChildLoc);
+				if(EMMServer.DB.getQueryResult(queryNameCurrentLoc)){
+					$scope.currentLocation = EMMServer.DB.getQueryResult(queryNameCurrentLoc)[0];
+				}
+				if(EMMServer.DB.getQueryResult(queryNameChildAsset)){
+					$scope.childAsset = EMMServer.DB.getQueryResult(queryNameChildAsset);
+				}
+				if(EMMServer.DB.getQueryResult(queryNameCurrentAsset)){
+					$scope.currentAsset = EMMServer.DB.getQueryResult(queryNameCurrentAsset)[0];
+				}
+				
+				var pageData = EMMServer.Session.getItem('ASSETDRILLDOWN_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					returnPage : pageData.returnPage
+				});
+				
+				$scope.assetDrilldownActions = domainService.assetDrilldownActions;
+				
+				$scope.selectValue = function(asset, location){
+					if ($scope.mboObject.mbo.isReadOnly($scope.mboObject[pageData.attributeName]) === false){
+						setValueAndGoBack(asset, {LOCATION:location});
+					} else {
+						alert(getText('EMMOF1006W', [$scope.mboObject[pageData.attributeName]], 'Attribute ' + $scope.mboObject[pageData.attributeName] + ' is readonly'));
+					}	
+				}		
+				
+				function setValueAndGoBack(asset, crossovers){
+					if ($scope.mboObject[pageData.attributeName] != asset){
+						// Save the original value
+						var originalValue = $scope.mboObject[pageData.attributeName];
+						// Set the new value
+						$scope.mboObject[pageData.attributeName] = asset;
+						$scope.mboObject.mbo.onChange(pageData.attributeName, crossovers);
+						
+						$scope.mboObject.mbo.toBeSaved(true);
+						$scope.mboObject.session.cache();
+					}
+					goBack();
+				}	
+				
+				$scope.cancel = function(){
+					goBack();
+				}
+				
+				function goBack(){
+					EMMServer.Session.removeItem('ASSETDRILLDOWN_DATA');
+					EMMServer.Session.removeItem('DRILLDOWNTYPE_DATA');
+					EMMServer.DB.Select().go(pageData.returnPage);
+				};
+			}
+			</script>
+	</body>
+</html>

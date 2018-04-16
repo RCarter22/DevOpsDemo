@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-if="!mrline.mbo.isNew()" ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-if="mrline.mbo.isNew()" ng-click="goBack()" class="ui-btn-left" translate="CANCEL">Cancel</a>
+				<h3 class="ui-title" translate="MRLINE.MRLINEITEM">Requisition Item</h3>
+				<a ng-if="mrline.mbo.toBeSaved()" ng-click="actions.saveMRLine(mrline)" class="ui-btn-right" ng-class="{'ui-btn-c' : mrline.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !mrline.mbo.isDirty(), 'ui-statusbar-c': mrline.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="mrline.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					 <li class="ui-field">
+						<label translate="MRLINE.MRLINENUM">Line</label>
+						<input ng-model="mrline.MRLINENUM" ng-readonly="mrline.mbo.isReadOnly('MRLINENUM')" ng-required="mrline.mbo.isRequired('MRLINENUM')">
+					</li>
+					<li class="ui-field">
+    					<label translate="MRLINE.LINETYPE">Line Type</label>
+    					<input disabled="true" ng-model="mrline.LINETYPE" ng-required="mrline.mbo.isRequired('LINETYPE')" ng-readonly="mrline.mbo.isReadOnly('LINETYPE')"/>	
+						<a class="ui-arrow" ng-click="domain($event, mrline)" data-field="LINETYPE" data-display="LINETYPE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MRLINE.ITEM">Item</label>
+						<input disabled="true" ng-model="mrline.ITEMNUM" ng-required="mrline.mbo.isRequired('ITEMNUM')" ng-readonly="mrline.mbo.isReadOnly('ITEMNUM')"/>
+						<a class="ui-arrow" ng-click="domain($event, mrline)" data-field="ITEMNUM" data-display="ITEMNUM,DESCRIPTION"></a>				
+					</li>
+					<li class="ui-field-block">
+						<label translate="MRLINE.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="mrline.DESCRIPTION" ng-readonly="mrline.mbo.isReadOnly('DESCRIPTION')" ng-required="mrline.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="MRLINE.QTY">Quantity</label>
+						<input id="QTY" type="text" data-interval="1.00" data-min="1" data-control="spinner" ng-model="mrline.QTY" ng-required="mrline.mbo.isRequired('QTY')" ng-readonly="mrline.mbo.isReadOnly('QTY')"></input>
+					</li>
+					<li class="ui-field">
+						<label translate="MRLINE.ORDERUNIT">Order Unit</label>
+						<input disabled = "true" ng-model="mrline.ORDERUNIT" ng-readonly="mrline.mbo.isReadOnly('ORDERUNIT')" ng-required="mrline.mbo.isRequired('ORDERUNIT')">
+						<a class="ui-arrow" ng-click="domain($event, mrline)" data-field="ORDERUNIT" data-display="MEASUREUNITID,ABBREVIATION,DESCRIPTION,SITEID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MRLINE.UNITCOST">Unit Cost</label>
+						<input id="UNITCOST" type="text" data-interval="1.00" data-control="spinner" ng-model="mrline.UNITCOST" ng-required="mrline.mbo.isRequired('UNITCOST')" ng-readonly="mrline.mbo.isReadOnly('UNITCOST')"></input>
+					</li>
+				</ul>	
+						
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, createdrService) {
+				var appName = 'CREATEDR';
+				var viewName = 'offline/createdr/mrline.htm';
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				
+				var pageData = EMMServer.Session.getItem('MRLINE_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				createdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				$scope.domain = domainService.domain;
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+
+				// Get MRLine object data
+				var resultSet = EMMServer.DB.getQueryResult("MRLINE");
+				// Checks if record exists in case where autosync has been triggered
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDS', null, 'No Record(s) Found'));
+					EMMServer.DB.Select().go("offline/login/index.htm");
+					return false;
+				}
+				$scope.mrline = new MRLines(resultSet[0]);
+				
+				var extra = EMMServer.DB.getQueryResult("EXTRA");
+				if (extra){
+					extra = extra[0];
+                	var MRLINENUM = extra.MRLINENUM;
+					$scope.mrline.MRLINENUM = (MRLINENUM) ? MRLINENUM.toNumber() + 1: 1;
+				}
+
+				$scope.actions = createdrService.actions;
+				
+				// *Important* to set app name
+				$scope.mrline.mbo.appName(appName);
+				
+				// emm.util.log($scope.mrline);
+				$scope.goBack = function() {
+					EMMServer.DB.Select()
+						.go("offline/createdr/mrlines.htm");
+				};				
+			}
+		</script>
+	</body>
+</html>

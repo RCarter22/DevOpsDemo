@@ -1,0 +1,64 @@
+<div class="ui-sidebar" ng-hide="asset.mbo.isNew()">
+	<p class="ui-section" translate="ACTIONS">Actions</p>
+	<ul class="ui-listview ui-inset">
+		<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+		<li>
+			<a emm-sync>
+				<img src="../../images/sync.png">
+				<h3 translate="SYNCSERVER">Sync with Server</h3>
+				<span class="ui-badge">{{TXNCOUNT}}</span>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a emm-online="asset/view.action?id={{asset.ASSETUID}}">
+				<img src="../../images/online.png">
+				<h3 translate="GOONLINE">Go Back Online</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+		<li>
+			<a ng-click="actions.toSpareParts(asset)">
+				<img src="../../images/inventory.png">
+				<h3 translate="SPAREPARTS">Spare Parts</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>		
+		<li>
+			<a ng-click="actions.toMeterList(asset)">
+				<img src="../../images/meter.png">
+				<h3 translate="METERREADINGS">Enter Meter Readings</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a data-control="dialog" href="#createsrdialog">			
+				<img src="../../images/addfollowup.png">
+				<h3 translate="CREATESR">Create Service Request</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a data-control="dialog" href="#createwodialog">
+				<img src="../../images/addfollowup.png">
+				<h3 translate="CREATEWO">Create Work Order</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a ng-click="actions.toAttachments(asset)">
+				<img src="../../images/attachment.png">
+				<h3 translate="ATTACHMENTS">Attachments</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a ng-click="actions.toClassify(asset)">
+				<img src="../../images/classification.png">
+				<h3>Classification</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+	</ul>
+</div>

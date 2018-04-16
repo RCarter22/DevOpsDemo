@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="LABORTRANS">Labor Transactions</h3>
+				<a ng-show="labtrans.mbo.isNew() || labtrans.TIMERSTATUS == 'COMPLETE'" ng-click="actions.saveLabTrans(labtrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : labtrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !labtrans.mbo.isDirty(), 'ui-statusbar-c': labtrans.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="labtrans.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+    					<label translate="Work Order">Work Order</label>
+    					<input disabled="true" ng-model="labtrans.WONUM" ng-required="labtrans.mbo.isRequired('WONUM')" ng-readonly="labtrans.mbo.isReadOnly('WONUM')"/>	
+					</li>	
+					 <li ng-show="labtrans.TIMERSTATUS == 'COMPLETE'" class="ui-field">
+						<label translate="Task">Task</label>
+						<input disabled="true" ng-model="labtrans.TASKID" ng-required="labtrans.mbo.isRequired('TASKID')" ng-readonly="labtrans.mbo.isReadOnly('TASKID')"/>
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-display="TASKID,DESCRIPTION,SITEID" data-field="TASKID"></a>
+					</li> 
+					<li class="ui-field">
+						<label translate="LABTRANS.LABORCODE">Labor</label>
+						<input disabled="true" ng-model="labtrans.LABORCODE" ng-required="labtrans.mbo.isRequired('LABORCODE')" ng-readonly="labtrans.mbo.isReadOnly('LABORCODE')"/>
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-display="LABORCODE,CRAFT" data-field="LABORCODE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="LABTRANS.CRAFT">Craft</label>
+						<input disabled="true" ng-model="labtrans.CRAFT" ng-required="labtrans.mbo.isRequired('CRAFT')" ng-readonly="true">
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-display="CRAFT,DESCRIPTION" data-field="CRAFT"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="LABTRANS.STARTDATE">Start Date</label>
+						<datepicker date-format="datetime" id="STARTDATE" ng-model="labtrans.STARTDATE" ng-change="labtrans.mbo.onChange('STARTDATE')" ng-required="labtrans.mbo.isRequired('STARTDATE')" ng-readonly="labtrans.mbo.isReadOnly('STARTDATE')" />
+					</li>
+					<li class="ui-field">
+						<label translate="Start Time">Start Time</label>
+						<datepicker date-format="datetime" id="STARTTIME" ng-model="labtrans.STARTTIME" ng-change="labtrans.mbo.onChange('STARTTIME')" ng-required="labtrans.mbo.isRequired('STARTTIME')" ng-readonly="labtrans.mbo.isReadOnly('STARTTIME')" />
+					</li>	
+					<li class="ui-field">
+						<label translate="End Date">End Date</label>
+						<datepicker date-format="datetime" id="FINISHDATE" ng-model="labtrans.FINISHDATE" ng-change="labtrans.mbo.onChange('FINISHDATE')" ng-required="labtrans.mbo.isRequired('FINISHDATE')" ng-readonly="labtrans.mbo.isReadOnly('FINISHDATE')" />
+					</li>	
+					<li class="ui-field">
+						<label translate="End Time">End Time</label>
+						<datepicker date-format="datetime" id="FINISHTIME" ng-model="labtrans.FINISHTIME" ng-change="labtrans.mbo.onChange('FINISHTIME')" ng-required="labtrans.mbo.isRequired('FINISHTIME')" ng-readonly="labtrans.mbo.isReadOnly('FINISHTIME')" />
+					</li>						
+					<li class="ui-field">
+    					<label translate="LABTRANS.REGULARHRS">Regular Hours</label>
+    					<input id="REGULARHRS" type="text" hours-format data-interval="0.25" data-control="spinner" ng-model="labtrans.REGULARHRS" ng-required="labtrans.mbo.isRequired('REGULARHRS')" ng-readonly="labtrans.mbo.isReadOnly('REGULARHRS')"></input>
+					</li>
+					<li class="ui-field">
+    					<label translate="LABTRANS.PREMIUMPAYCODE">Premium Pay Code</label>
+    					<input disabled="true" ng-model="labtrans.PREMIUMPAYCODE" ng-readonly="labtrans.mbo.isReadOnly('PREMIUMPAYCODE')">
+						<a class="ui-arrow" ng-click="domain($event,labtrans)" data-field="PREMIUMPAYCODE" data-display="PREMIUMPAYCODE,CRAFT"></a>
+					</li>
+                   	<li class="ui-field">
+						<label translate="LABTRANS.PREMIUMPAYHOURS">Premium Pay Hours</label>
+						<input id="PREMIUMPAYHOURS" type="text" hours-format data-interval="0.25" data-control="spinner" ng-model="labtrans.PREMIUMPAYHOURS" ng-readonly="labtrans.mbo.isReadOnly('PREMIUMPAYHOURS')"></input>
+          	        </li>
+          	        <li class="ui-field">
+						<label translate="Type">Type</label>
+						<a class="ui-arrow" ng-click="domain($event,labtrans)" data-field="TRANSTYPE" data-display="VALUE,DESCRIPTION"></a>
+          	        </li>
+          	        <li class="ui-field">
+    					<label translate="LABREP.TIMERSTATUS">Timer Status</label>
+    					<input ng-model="labtrans.TIMERSTATUS" ng-readonly="labtrans.mbo.isReadOnly('TIMERSTATUS')">
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, labtransService , domainService) {
+				var queryName = 'LABTRANS';
+				var viewName = 'offline/labtrans/labtrans.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.labtrans = new LabTrans(EMMServer.DB.getQueryResult(queryName)[0]);
+
+				labtransService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+
+				$scope.domain = domainService.domain;
+				$scope.actions = labtransService.actions;
+				
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.labtrans.session.remove();
+					EMMServer.DB.Select()
+						.go("offline/labtrans/main.htm");
+				};
+			}
+		</script>
+	</body>
+</html>

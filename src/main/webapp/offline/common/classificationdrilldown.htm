@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+				<a ng-click="cancel()" class="ui-btn-left" translate="CANCEL">Cancel</a>
+				<h3 class="ui-title" translate="CLASSIFY.DRILLDOWN">Classification Drilldown</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>	
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li ng-show="currentClassification">
+						<a ng-click="goToClassification(currentClassification.PARENT)">
+							<img src="../../images/returnarrow.png"/>
+							<p class="ui-aside">{{currentClassification.ORGID}}</p>
+							<h3>{{currentClassification.CLASSIFICATIONID}}</h3>
+							<p>{{currentClassification.DESCRIPTION}}</p>
+							<p>{{currentClassification.CLASSSTRUCTUREID}}</p>				
+						</a>
+					</li>
+					<li ng-show="currentClassification" class="ui-divider ui-divider-c">{{ 'CHILDRENOF' | translate }} {{currentClassification.CLASSSTRUCTUREID}}</li>
+					<li class="ui-accessory" ng-repeat="cc in childClassificationList">
+						<a ng-click="selectValue(cc.CLASSSTRUCTUREID)">
+							<h3>{{cc.CLASSIFICATIONID}}</h3>
+							<p>{{cc.DESCRIPTION}}</p>
+							<p>{{cc.CLASSSTRUCTUREID}}</p>
+						</a>
+						<a ng-show="cc.HASCHILDREN" class="ui-arrow" ng-click="goToClassification(cc.CLASSSTRUCTUREID)"></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">	
+			function MainController ($scope, domainService){
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				//GETS CHILD LIST
+				$scope.childClassificationList = EMMServer.DB.getQueryResult("CHILDCLASSIFICATION");
+				//GETS CURRENT CLASSIFICATION
+				$scope.currentClassification = EMMServer.DB.getQueryResult("CURRENTCLASSIFICATION");
+				
+				//IF A CURRENT CLASSIFICATION EXISTS
+				if($scope.currentClassification)
+					$scope.currentClassification = $scope.currentClassification[0];
+				//GETS DATA OF DRILLDOWN PAGE's CALLER
+				var pageData = EMMServer.Session.getItem('CLASSIFICATIONDRILLDOWN_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				//DOMAIN
+				domainService.init({
+					userInfo: $scope.userInfo,
+					returnPage: pageData.returnPage,
+					classificationObject : pageData.classificationObject
+				});
+				
+				
+				$scope.goToClassification = function(classification){
+					domainService.ClassificationDrilldown($scope.mboObject, pageData.attributeName, classification);	
+				}
+				
+				$scope.selectValue = function(val){
+					if ($scope.mboObject.mbo.isReadOnly($scope.mboObject[pageData.attributeName]) === false){
+						setValueAndGoBack(val);
+					} else {
+						alert(getText('EMMOF1006W', [$scope.mboObject[pageData.attributeName]], 'Attribute ' + $scope.mboObject[pageData.attributeName] + ' is readonly'));
+					}	
+				}
+				
+				$scope.cancel = function(){
+					goBack();
+				};
+				
+				
+				function goBack(){
+					EMMServer.Session.removeItem('CLASSIFICATIONDRILLDOWN_DATA');
+					EMMServer.DB.Select().go(pageData.returnPage);
+				};
+				
+				function goBackNewSelection(){
+					EMMServer.Session.removeItem('CLASSIFICATIONDRILLDOWN_DATA');
+		    		
+					var sqlClassificationPath = "WITH RECURSIVE cp AS ("
+						+"SELECT CLASSSTRUCTUREID, CLASSIFICATIONID, PARENT, DESCRIPTION FROM CLASSSTRUCTURE WHERE CLASSSTRUCTUREID = '" + $scope.mboObject.CLASSSTRUCTUREID + "' AND OBJECTVALUE = '" + pageData.classificationObject.MBOOBJECTNAME + "'"
+						+" UNION ALL "
+						+" SELECT CLASSSTRUCTURE.CLASSSTRUCTUREID, CLASSSTRUCTURE.CLASSIFICATIONID, CLASSSTRUCTURE.PARENT, CLASSSTRUCTURE.DESCRIPTION FROM CLASSSTRUCTURE INNER JOIN cp "
+						+" ON CLASSSTRUCTURE.CLASSSTRUCTUREID=cp.PARENT AND CLASSSTRUCTURE.OBJECTVALUE = '" + pageData.classificationObject.MBOOBJECTNAME + "'"
+						+" WHERE cp.PARENT IS NOT NULL "
+						+") "
+						+"SELECT * FROM cp";
+						
+						//TODO Make this better do we really need a classificationObject??!!
+						var sqlSpecs = "SELECT * FROM " + pageData.classificationObject.SPECTABLE + " WHERE ISACTIVE = '1' AND " + pageData.classificationObject.MBOUNIQUEIDNAME + " = '" + $scope.mboObject[pageData.classificationObject.MBOUNIQUEIDNAME] + "' ORDER BY CAST(DISPLAYSEQUENCE AS UNSIGNED) ";
+						var sqlAttributes = "SELECT * FROM ASSETATTRIBUTE WHERE CLASSSTRUCTUREID = '" + $scope.mboObject.CLASSSTRUCTUREID + "' AND (SITEID = '" + $scope.mboObject.SITEID + "' OR SITEID IS NULL) AND OBJECTVALUE = '" + pageData.classificationObject.MBOOBJECTNAME + "'";
+						EMMServer.DB.Select()
+							.addQuery("CLASSIFICATIONPATH", sqlClassificationPath)
+							.addQuery("SPECS", sqlSpecs)
+							.addQuery("ATTRIBUTE",sqlAttributes)
+							.submit(pageData.returnPage,false);
+				};
+				
+				function setValueAndGoBack(val){
+					if ($scope.mboObject[pageData.attributeName] != val){
+						// Save the original value
+						var originalValue = $scope.mboObject[pageData.attributeName];
+						// Set the new value
+						$scope.mboObject[pageData.attributeName] = val;
+						$scope.mboObject.mbo.onChange(pageData.attributeName);
+						if($scope.mboObject.mbo._isClassificationUpdated !== null || $scope.mboObject.mbo._isClassificationUpdated !== undefined){
+							$scope.mboObject.mbo.isClassificationUpdated(true);
+						}
+						$scope.mboObject.mbo.toBeSaved(true);
+						$scope.mboObject.session.cache();
+					}
+					goBackNewSelection();
+				}
+			}
+		</script>
+	</body>
+</html>

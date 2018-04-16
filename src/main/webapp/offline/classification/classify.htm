@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title">Classification</h3>
+				<a class="ui-btn-right" ng-click="actions.saveClassification(mboObject, Specs, AssetAttributes)" ng-class="{'ui-btn-c' : mboObject.mbo.toBeSaved() || Specs.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-statusbar ui-statusbar-b" ng-show="mboObject.mbo.toBeSaved()"><h3 class="ui-title">Record must be saved to show new specifications</h3></div>
+			<div class="ui-content">
+				<div class="ui-content">
+					<ul class="ui-listview">
+						<li class="ui-field ui-field-auto">
+							<label translate="CLASSIFY.CLASSIFICATION">Classification</label>
+							<p><span ng-repeat = "PATH in classificationPathSet track by $index" > {{PATH.CLASSIFICATIONID}} <span ng-show="$index < classificationPathSet.length-1"> / </span> </span></p>
+						</li>
+						<li class="ui-field ui-field-auto" ng-class="{'ui-readonly' : mboObject.mbo.isReadOnly('CLASSSTRUCTUREID')}">
+							<label translate="CLASSIFY.DESCRIPTION">Class Description</label>
+							<p>{{classificationPathSet[classificationPathSet.length-1].DESCRIPTION}}</p>
+							<a class="ui-arrow" onclick="" href="#classificationlookupdialog" data-control="dialog" ng-hide = "mboObject.mbo.isReadOnly('CLASSSTRUCTUREID')"></a>
+						</li>
+					</ul>
+				</div>
+				<p class="ui-section">Specifications</p>
+				<ul class="ui-listview" ng-repeat="s in Specs track by $index" ng-show="!mboObject.mbo.toBeSaved()">
+					<li class="ui-field">
+						<label>{{s.ASSETATTRID}}</label>
+	                    <input type="text" ng-show="s.DATATYPE == 'NUMERIC' && !(s.DOMAINID)" ng-model="s.NUMVALUE" ng-required="s.mbo.isRequired('NUMVALUE')" placeholder="NUMERIC" ng-blur="setValue(s)"/>
+	                    <input type="text" disabled="true" ng-show="s.DATATYPE == 'NUMERIC' && s.DOMAINID" ng-model="s.NUMVALUE" ng-required="s.mbo.isRequired('NUMVALUE')"/>
+						<input type="text" ng-show="s.DATATYPE == 'ALN' && !(s.DOMAINID)" ng-model="s.ALNVALUE" ng-required="s.mbo.isRequired('ALNVALUE')" placeholder="ALN" ng-blur="setValue(s)"/>
+	                   	<input type="text" disabled="true" ng-show="s.DATATYPE == 'ALN' && s.DOMAINID" ng-model="s.ALNVALUE" ng-required="s.mbo.isRequired('ALNVALUE')"/>
+						<a class="ui-arrow" ng-show="s.DATATYPE == 'NUMERIC' && s.DOMAINID" ng-click="domain($event, s)" data-field="NUMVALUE" data-display="VALUE,DESCRIPTION" placeholder="NUMERIC"></a>
+						<a class="ui-arrow" ng-show="s.DATATYPE == 'ALN' && s.DOMAINID" ng-click="domain($event, s)" data-field="ALNVALUE" data-display="VALUE,DESCRIPTION" placeholder="ALN"></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<div id="classificationlookupdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title">Classification</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="ClassificationLookup($event, mboObject)" data-field="CLASSSTRUCTUREID" data-display="CLASSIFICATIONID, DESCRIPTION, CLASSSTRUCTUREID" translate="LOOKUP">Lookup</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="ClassificationDrilldown(mboObject)" translate="DRILLDOWN">Drilldown</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, classificationService, domainService){
+				var viewName = 'offline/classification/classify.htm';
+				var ClassificationPathQuery = "CLASSIFICATIONPATH";
+				var SpecificationsQuery = "SPECS";
+				var AssetAttributeQuery = "ATTRIBUTE";
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				//Get mboObject Data
+				var pageData = EMMServer.Session.getItem('CLASSIFICATIONDATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				var classificationObject = pageData.classificationObject;
+				
+				//Initialize Classification Service
+				classificationService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					classificationObject : classificationObject
+				});
+				
+				//Initialize Domain Service
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					classificationObject : classificationObject
+				});
+				
+				//Get full clasification path of the classified asset
+				//We need to call the reverse function as the query returned from the server is in the reverse order
+				$scope.classificationPathSet = EMMServer.DB.getQueryResult(ClassificationPathQuery).reverse();
+				$scope.Specs = EMMServer.DB.getMboSet(classificationObject.SPECCLASS, SpecificationsQuery);
+				
+				$scope.AssetAttributes = EMMServer.DB.getQueryResult(AssetAttributeQuery);
+				$scope.domain = domainService.domain;
+				$scope.ClassificationLookup = domainService.ClassificationLookup
+				$scope.ClassificationDrilldown = domainService.ClassificationDrilldown;
+				$scope.actions = classificationService.actions;
+				$scope.setValue = function(obj){
+					obj.mbo.toBeSaved(true);
+					obj.session.cache();
+				}
+				//Get the Message Data
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				
+				$scope.$watch('Specs', function(newValue, oldValue) {
+					if (newValue !== oldValue){
+						$scope.Specs.toBeSaved(true);
+					}
+				}, true);
+				
+				$scope.goBack = function(){
+					$scope.mboObject.session.remove();
+					EMMServer.Session.removeItem('CLASSIFICATIONDATA');
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);
+				}
+				
+			}
+		</script>	
+	</body>
+</html>

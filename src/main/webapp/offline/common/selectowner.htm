@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+				<a class="ui-btn-left" ng-click="cancel()" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="SELECTOWNER">Select Owner</h3>
+			</div>
+			<ul class="ui-navbar">
+				<li style="margin-right:-5px"><a ng-click="viewTab('OWNER')" ng-class="{'ui-active' : mode == 'OWNER'}"  translate="OWNER">Owner</a></li>
+				<li><a ng-click="viewTab('OWNERGROUP')" ng-class="{'ui-active' : mode == 'OWNERGROUP'}"  translate="OWNERGROUP">Owner Group</a></li>
+			</ul>
+			<div class="ui-content" ng-show="mode == 'OWNER'">
+				<ul class="ui-listview">
+					<li ng-repeat="o in owner">
+						<a ng-click="selectValue(o)">
+							<span>
+								<h3>{{o.DISPLAYNAME}}</h3>
+								<p>{{o.PERSONID}}</p>		
+							</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div class="ui-content" ng-show="mode == 'OWNERGROUP'">
+				<ul class="ui-listview" >
+					<li ng-repeat="og in ownerGroup">
+						<a ng-click="selectValue(og)">
+							<span>
+								<h3>{{og.PERSONGROUP}}</h3>
+								<p>{{og.DESCRIPTION}}</p>	
+							</span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	
+		<script type="text/javascript">
+			function MainController($scope, domainService){		
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				$scope.owner = EMMServer.DB.Select().getQueryResult("OWNER");
+				$scope.ownerGroup = EMMServer.DB.Select().getQueryResult("OWNERGROUP");
+				
+				var pageData = EMMServer.Session.getItem('SELECTOWNER_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					returnPage : pageData.returnPage
+				});
+				
+				$scope.viewTab = function(val){
+					$scope.mode = val;
+				};
+				
+				// Set default view to current attribute
+				$scope.viewTab(pageData.attributeName);				
+				
+				$scope.selectValue = function(obj){
+					if ($scope.mboObject.mbo.isReadOnly($scope.mboObject[$scope.mode]) === false){
+						if ($scope.mode === 'OWNER')
+							setValueAndGoBack(obj.PERSONID);
+						else if ($scope.mode === 'OWNERGROUP')
+							setValueAndGoBack(obj.PERSONGROUP);
+					} else {
+						alert(getText('EMMOF1006W', [$scope.mboObject[$scope.mode]], 'Attribute ' + $scope.mboObject[$scope.mode] + ' is readonly'));
+					}	
+				}		
+				
+				function setValueAndGoBack(val, crossovers){
+					//if this is coming from the SR app and the status of the SR is NEW
+					//we will also need to change the status of the SR to QUEUED
+					//this is inherent Maximo business logic
+					if($scope.mboObject.mbo.appName() == 'SR' && $scope.mboObject['STATUS'] == 'NEW' && $scope.mboObject[$scope.mode] != val){	
+						var now = new Date();
+						$scope.mboObject['STATUS'] = 'QUEUED';						
+						$scope.mboObject['STATUSDATE'] = now.getTime();						
+						
+						// Save the original value
+						var originalValue = $scope.mboObject[$scope.mode];
+						// Set the new value
+						$scope.mboObject[$scope.mode] = val;
+						$scope.mboObject.mbo.onChange($scope.mode, crossovers);
+													
+						var updateData = { 
+								STATUSDATE : now.getTime(),
+								STATUS : 'QUEUED',								
+							};	
+						updateData[$scope.mode] = val;	
+						
+						EMMServer.DB.Update('SR', 'EDIT')
+							.addObject(updateData, "TICKETUID = '" + $scope.mboObject['TICKETUID'] + "'")
+							.submit()
+							.then(function(result){
+								$scope.mboObject.session.cache();
+								goBack(getText('SRQUEUED', [$scope.mboObject['TICKETID']], 'SR ' + $scope.mboObject['TICKETID'] + ' status changed to QUEUED.'));	
+							});
+					}					
+					else{
+						if ($scope.mboObject[$scope.mode] != val){
+							// Save the original value
+							var originalValue = $scope.mboObject[$scope.mode];
+							// Set the new value
+							$scope.mboObject[$scope.mode] = val;
+							$scope.mboObject.mbo.onChange($scope.mode, crossovers);
+							
+							$scope.mboObject.mbo.toBeSaved(true);
+							$scope.mboObject.session.cache();
+						}
+						goBack();
+					}
+				}	
+				
+				$scope.cancel = function(){
+					goBack();
+				}
+				
+				function goBack(message){
+					EMMServer.Session.removeItem('SELECTOWNER_DATA');
+					EMMServer.DB.Select()
+						.addMessage(message)	
+						.go(pageData.returnPage);
+				};
+			}
+		</script>
+	</body>
+</html>

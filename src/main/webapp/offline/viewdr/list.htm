@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.VIEWDR">View Requisitions</h3>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+				</form>
+			</div>	
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="materialReqs">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field ui-sort">
+						<label translate="SORTBY">Sort By</label>
+						<select ng-change="pageService.changeSortBy()" ng-model="pageService.sortBy" ng-options="o.label for o in pageService.sortOptions">
+						</select>
+						<a ng-click="pageService.changeSortDirection()" class="ui-btn-sort"><span data-sortorder="{{pageService.sortDirection}}"></span></a>
+					</li>
+				</ul>
+				<ul class="ui-listview" ng-show="assets">
+					<li class="ui-divider ui-divider-c" translate="LIST">List</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				
+				<ul class="ui-listview" ng-repeat="mr in materialReqs">
+					<li>
+						<a ng-click="viewMR(mr)">
+							<span class="ui-accessory-left" ng-if="mr.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<p class="ui-aside">{{mr.SITEID}}</p>
+							<p><strong>{{mr.MRNUM}}</strong></p>
+							<h3>{{mr.DESCRIPTION}}</h3>
+							<p>{{ 'MR.STATUS' | translate }}: {{mr.STATUS}}</p>
+							<p>{{ 'MR.ENTERDATE' | translate }}: {{mr.ENTERDATE | date : 'short'}}</p>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $filter, viewdrService, paginationService, applicationService){
+				var viewName = 'offline/viewdr/list.htm',
+					queryName = 'MR',
+					appName = 'VIEWDR';
+								
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.materialReqs = EMMServer.DB.getMboSet('MR', queryName);				
+				
+				viewdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});						
+				
+				paginationService.init({
+					pagination : $scope.materialReqs.getPagination(),
+					queryName : queryName,
+					viewName : viewName,
+					sortOptions : [
+									{ label : getText('SELECTVALUE', null, 'Select Value'), value : ''},
+									{ label : getText('MR.MRNUM', null, 'Requisitions'), value : 'MRNUM'},
+									{ label : getText('MR.DESCRIPTION', null, 'Description'), value : 'DESCRIPTION'},
+									{ label : getText('MR.STATUS', null, 'Status'), value : 'STATUS'},
+									{ label : getText('MR.ENTERDATE', null, 'Entered Date'), value : 'ENTERDATE'}
+								]
+				});
+				$scope.pageService = paginationService;
+								
+				$scope.goBack = function(){				
+					applicationService.goToApp(appName);
+				}
+				
+				$scope.barcodeScan = function() {
+					EMMServer.Barcode.scan()
+						.then(function(val){
+							$scope.pageService.search = val;
+							$scope.quickSearch();						
+						});
+				}
+				$scope.viewMR = viewdrService.viewMR;
+				$scope.quickSearch = function() {
+					viewdrService.toList($scope.pageService.search);
+				}
+			}
+		</script>		
+	</body>
+</html>

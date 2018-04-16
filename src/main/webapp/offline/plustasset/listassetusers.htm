@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSTASSET">Asset (Tr)</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="users">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview" ng-show="users">
+					<li class="ui-field ui-readonly">
+						<label translate="ASSET.ASSETNUM">Asset</label>						
+						<p>{{users[0].ASSETNUM}}</p>
+					</li>
+						
+					<li class="ui-divider ui-divider-c" translate="Operators">Operators</li>
+				</ul>			
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				
+				<ul class="ui-listview" ng-repeat="user in users">
+					<li>
+						<a>
+							<p><strong>{{user.PERSONID}}</strong></p>
+							<h3>{{user.DISPLAYNAME}}</h3>
+							<p>Owner :{{user.ISUSER}}</p>
+							<p>Fleet Supervisor:{{ user.AEPFLEETSUPERVISOR}}</p>	
+						</a>
+					</li>
+				</ul>
+				
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+			    
+			    
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				<ul><li class="ui-divider ui-divider-c" translate="Fleet Groups">Fleet Groups</li></ul>
+				<ul class="ui-listview" ng-repeat="dept in depts">			
+					<li>
+						<a>
+							<p><strong>{{dept.CUSTOMER}}</strong></p>
+							<h3>{{dept.NAME}}</h3>
+							<p>Owning Department? :{{dept.ISUSINGDEPT}}</p>
+							<p>Using Department?:{{ dept.ISOWNINGDEPT}}</p>	
+							<p>Effective Date:{{ dept.AEPEFFECTIVEDATE}}</p>							
+						</a>
+					</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $filter, paginationService){
+				var viewName = 'offline/plustasset/listassetusers.htm',
+					assetPage = 'offline/plustasset/asset.htm',
+					queryName = 'USERS',
+					appName = 'PLUSTASSET';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.users = EMMServer.DB.getQueryResult(queryName);
+				
+				$scope.depts = EMMServer.DB.getQueryResult("ASSETDEPT");
+				/* if (extra){
+					extra = extra[0];
+					$scope.assetDeptInfo = {
+						CUSTOMER : extra.CUSTOMER,
+						NAME : extra.NAME,
+						ISUSINGDEPT : extra.ISUSINGDEPT,
+						ISOWNINGDEPT : extra.ISOWNINGDEPT,
+						AEPEFFECTIVEDATE : extra.AEPEFFECTIVEDATE
+					};
+				}				 */
+				
+				paginationService.init({
+					pagination : $scope.users.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;
+								
+				$scope.goBack = function(){
+					EMMServer.DB.Select().go(assetPage);
+				}			
+			}
+		</script>		
+	</body>
+</html>

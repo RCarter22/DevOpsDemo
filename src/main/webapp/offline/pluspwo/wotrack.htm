@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSPWO">Work Order Tracking (SP)</h3>
+				<a ng-click="actions.saveWorkorder(workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : workorder.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !workorder.mbo.isDirty(), 'ui-statusbar-c': workorder.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="workorder.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview ui-message-e" ng-show="(hazard.length != 0 || material.length != 0 || hazardtag.length !=0) &&(hazard != null || material != null || hazardtag != null)">
+				<li class="ui-divider ui-divider-c" ng-show="hazard.length != 0" translate="WORKORDER.HAZARDS">Hazards</li>				
+				<li ng-repeat="h in hazard">
+					<ul class="ui-listview ui-message-e">
+						<li>
+							<span>
+								<h3><strong>{{h.WHDESCRIPTION}}</strong></h3>
+								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('h.WHLONGDESCRIPTION')">{{htmlToText(h.WHLONGDESCRIPTION)}}</p>
+								<ul class="ui-listview ui-message-e" ng-show="precautionExists(h.HAZARDID) === true">
+									<li class="ui-divider ui-divider-c" translate="WORKORDER.PRECAUTIONS"></li>
+									<li  ng-repeat="p in precaution">
+										<span ng-if="h.HAZARDID == p.HAZARDID">
+											<h3 class="ui-wrap">{{p.WPDESCRIPTION}}</h3>
+											<p class="ui-wrap" ng-show="!String.isNullOrEmpty('p.WPLONGDESCRIPTION')">{{htmlToText(p.WPLONGDESCRIPTION)}}</p>
+										</span>
+									</li>										
+								</ul>
+							</span>
+						</li>
+					</ul>
+				</li>
+				 <li class="ui-divider ui-divider-c" ng-show ="material.length != 0" translate="WORKORDER.HAZARDSMAT">Hazardous Materials</li>
+				<li ng-repeat="m in material">
+					<ul class="ui-listview ui-message-e">
+					
+						<li>
+							<span>
+								<h3><strong>{{m.WHDESCRIPTION}}</strong></h3>
+								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('m.WHLONGDESCRIPTION')">{{htmlToText(m.WHLONGDESCRIPTION)}}</p>
+								<p class="ui-wrap"><strong>Related Location</strong>: {{m.LOC}}</p>
+								<p class="ui-wrap"><strong>Related Asset</strong>: {{m.ASSET}}</p>
+								<p class="ui-wrap"><strong>Health</strong>: {{m.HEALTHRATING}}</p>
+								<p class="ui-wrap"><strong>Flammability</strong>: {{m.FLAMMABILITYRATING}}</p>
+								<p class="ui-wrap"><strong>Reactivity</strong>: {{m.REACTIVITYRATING}}</p>
+								<p class="ui-wrap"><strong>Contact</strong>: {{m.CONTACTRATING}}</p>
+							</span>
+						</li>
+					</ul>
+				</li>
+				<li class="ui-divider ui-divider-c" ng-show ="hazardtag.length != 0" translate="WORKORDER.LOCKTAG">Lock Out/Tag out</li>	
+				<li ng-repeat="h in hazardtag">
+					<ul class="ui-listview ui-message-e">
+						<li>
+							<span>
+								<h3><strong>{{h.WHDESCRIPTION}}</strong></h3>
+								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('h.WHLONGDESCRIPTION')">{{htmlToText(h.WHLONGDESCRIPTION)}}</p>
+							</span>
+							<li ng-repeat="t in tagout">
+								<ul class="ui-listview ui-message-e" ng-show="h.HAZARDID == t.HAZARDID">
+									<li class="ui-divider ui-divider-c" translate="WORKORDER.TAGOUT">Tag Outs</li>	
+									<li>
+										<span>
+											<h3 class="ui-wrap">{{t.WTDESCRIPTION}}</h3>
+											<p class="ui-wrap" ng-show="!String.isNullOrEmpty('t.WTLONGDESCRIPTION')">{{htmlToText(t.WTLONGDESCRIPTION)}}</p>
+											<p class="ui-wrap"><strong>Location</strong>: {{t.LOCATION}}</p>
+											<p class="ui-wrap"><strong>Asset</strong>: {{t.ASSETNUM}}</p>
+											<p class="ui-wrap"><strong>Required State</strong>: {{t.REQUIREDSTATE}}</p>
+											<ul class="ui-listview ui-message-e" ng-show="lockoutExists(t.TAGOUTID) === true">
+												<li class="ui-divider ui-divider-c" translate="WORKORDER.LOCKOUT">Lock Out</li>
+												<li ng-repeat="w in wotaglock">
+													<span ng-show="t.TAGOUTID == w.TAGOUTID">
+														<h3 class="ui-wrap">{{w.WLDESCRIPTION}}</h3>
+														<p class="ui-wrap" ng-show="!String.isNullOrEmpty('w.WLLONGDESCRIPTIONK')">{{htmlToText(w.WLLONGDESCRIPTION)}}</p>
+														<p class="ui-wrap"><strong>Location</strong>: {{w.LOCATION}}</p>
+														<p class="ui-wrap"><strong>Asset</strong>: {{w.ASSETNUM}}</p>
+														<p class="ui-wrap"><strong>Required State</strong>: {{w.REQUIREDSTATE}}</p>
+													</span>
+												</li>
+											</ul>													
+										</span>
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="WORKORDER.WONUM">Work Order</label>
+						<input ng-model="workorder.WONUM" ng-readonly="workorder.mbo.isReadOnly('WONUM')" ng-required="workorder.mbo.isRequired('WONUM')">
+					</li>
+					<li class="ui-field-block">
+						<label translate="WORKORDER.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="workorder.DESCRIPTION" ng-readonly="workorder.mbo.isReadOnly('DESCRIPTION')" ng-required="workorder.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field-block">
+						<label translate="WORKORDER.LONGDESCRIPTION">Details</label>
+						<textarea data-htmleditor="true" ng-model="workorder.LONGDESCRIPTION" ng-readonly="workorder.mbo.isReadOnly('LONGDESCRIPTION')" ng-required="workorder.mbo.isRequired('LONGDESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field ui-details ui-readonly">
+						<label translate="WORKORDER.STATUS">Status</label>
+						<p>{{workorder.STATUS}}</p>
+						<p>{{workorder.STATUSDATE | date : 'short'}}</p>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.PARENT">Parent WO</label>
+						<input ng-model="workorder.PARENT" ng-readonly="workorder.mbo.isReadOnly('PARENT')" ng-required="workorder.mbo.isRequired('PARENT')">
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.SITEID">Site</label>
+						<input ng-model="workorder.SITEID" ng-readonly="workorder.mbo.isReadOnly('SITEID')" ng-required="workorder.mbo.isRequired('SITEID')">
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.LOCATION">Location</label>
+						<input disabled="true" ng-model="workorder.LOCATION" ng-readonly="workorder.mbo.isReadOnly('LOCATION')" ng-required="workorder.mbo.isRequired('LOCATION')">
+						<a class="ui-arrow" data-control="dialog" href="#locationdialog"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.ASSETNUM">Asset</label>
+						<input disabled="true" ng-model="workorder.ASSETNUM" ng-readonly="workorder.mbo.isReadOnly('ASSETNUM')" ng-required="workorder.mbo.isRequired('ASSETNUM')">
+						<a class="ui-arrow" data-control="dialog" href="#assetlookupdialog"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.WORKTYPE">Work Type</label>
+						<input disabled="true" ng-model="workorder.WORKTYPE" ng-readonly="workorder.mbo.isReadOnly('WORKTYPE')" ng-required="workorder.mbo.isRequired('WORKTYPE')">
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="WORKTYPE" data-display="WORKTYPE,WTYPEDESC"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.WOPRIORITY">Priority</label>
+						<input ng-model="workorder.WOPRIORITY" ng-readonly="workorder.mbo.isReadOnly('WOPRIORITY')" ng-required="workorder.mbo.isRequired('WOPRIORITY')">
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.GLACCOUNT">GL Account</label>
+						<input ng-model="workorder.GLACCOUNT" ng-readonly="workorder.mbo.isReadOnly('GLACCOUNT')" ng-required="workorder.mbo.isRequired('GLACCOUNT')">
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.FAILURECODE">Failure Class</label>
+						<input disabled="true" ng-model="workorder.FAILURECODE" ng-readonly="workorder.mbo.isReadOnly('FAILURECODE')" ng-required="workorder.mbo.isRequired('FAILURECODE')">
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="FAILURECODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.PROBLEMCODE">Problem Code</label>
+						<input disabled="true" ng-model="workorder.PROBLEMCODE" ng-readonly="workorder.mbo.isReadOnly('PROBLEMCODE')" ng-required="workorder.mbo.isRequired('PROBLEMCODE')">
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="PROBLEMCODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field ui-details ui-readonly">
+						<label translate="WORKORDER.REPORTEDBY">Reported By</label>
+						<p>{{workorder.REPORTEDBY}}</p>
+						<p>{{workorder.REPORTDATE | date : 'short'}}</p>
+					</li>
+					<li class="ui-divider ui-divider-c" translate="SCHEDULEINFO">Scheduling Info</li>					
+					<li class="ui-field">
+						<label translate="WORKORDER.TARGSTARTDATE">Target Start</label>
+						<datepicker date-format="datetime" id="TARGSTARTDATE" ng-model="workorder.TARGSTARTDATE" ng-change="workorder.mbo.onChange('TARGSTARTDATE')" ng-required="workorder.mbo.isRequired('TARGSTARTDATE')" ng-readonly="workorder.mbo.isReadOnly('TARGSTARTDATE')" />
+					</li>	
+					<li class="ui-field">
+						<label translate="WORKORDER.TARGCOMPDATE">Target Finish</label>
+						<datepicker date-format="datetime" id="TARGCOMPDATE" ng-model="workorder.TARGCOMPDATE" ng-change="workorder.mbo.onChange('TARGCOMPDATE')" ng-required="workorder.mbo.isRequired('TARGCOMPDATE')" ng-readonly="workorder.mbo.isReadOnly('TARGCOMPDATE')" />
+					</li>	
+					<li class="ui-field">
+						<label translate="WORKORDER.SCHEDSTART">Scheduled Start</label>
+						<datepicker date-format="datetime" id="SCHEDSTART" ng-model="workorder.SCHEDSTART" ng-change="workorder.mbo.onChange('SCHEDSTART')" ng-required="workorder.mbo.isRequired('SCHEDSTART')" ng-readonly="workorder.mbo.isReadOnly('SCHEDSTART')" />
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.SCHEDFINISH">Scheduled Finish</label>
+						<datepicker date-format="datetime" id="SCHEDFINISH" ng-model="workorder.SCHEDFINISH" ng-change="workorder.mbo.onChange('SCHEDFINISH')" ng-required="workorder.mbo.isRequired('SCHEDFINISH')" ng-readonly="workorder.mbo.isReadOnly('SCHEDFINISH')" />
+					</li>					
+					<li class="ui-field">
+						<label translate="WORKORDER.ACTSTART">Actual Start</label>
+						<datepicker date-format="datetime" id="ACTSTART" ng-model="workorder.ACTSTART" ng-change="workorder.mbo.onChange('ACTSTART')" ng-required="workorder.mbo.isRequired('ACTSTART')" ng-readonly="workorder.mbo.isReadOnly('ACTSTART')" />
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.ACTFINISH">Actual Finish</label>
+						<datepicker date-format="datetime" id="ACTFINISH" ng-model="workorder.ACTFINISH" ng-change="workorder.mbo.onChange('ACTFINISH')" ng-required="workorder.mbo.isRequired('ACTFINISH')" ng-readonly="workorder.mbo.isReadOnly('ACTFINISH')" />
+					</li>
+					<li class="ui-divider ui-divider-c" translate="RESPONSIBILITY">Responsibility</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.SUPERVISOR">Supervisor</label>
+						<input disabled="true" ng-model="workorder.SUPERVISOR" ng-readonly="workorder.mbo.isReadOnly('SUPERVISOR')" ng-required="workorder.mbo.isRequired('SUPERVISOR')">
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="SUPERVISOR" data-display="PERSONID,DISPLAYNAME"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.CREWID">Crew</label>
+						<input disabled="true" ng-model="workorder.CREWID" ng-readonly="workorder.mbo.isReadOnly('CREWID')" ng-required="workorder.mbo.isRequired('CREWID')">
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="CREWID" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.LEAD">Lead</label>
+						<input disabled="true" ng-model="workorder.LEAD" ng-readonly="workorder.mbo.isReadOnly('LEAD')" ng-required="workorder.mbo.isRequired('LEAD')">
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="LEAD" data-display="PERSONID,DISPLAYNAME"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="WORKORDER.PERSONGROUP">Work Group</label>
+						<input disabled="true" ng-model="workorder.PERSONGROUP" ng-readonly="workorder.mbo.isReadOnly('PERSONGROUP')" ng-required="workorder.mbo.isRequired('PERSONGROUP')">
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="PERSONGROUP" data-display="PERSONGROUP,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-field ui-readonly" ng-hide="workorder.mbo.isNew()">
+						<label translate="WORKORDER.OWNER">Owner</label>
+						<input ng-model="workorder.OWNER" ng-readonly="true">
+					</li>
+					<li class="ui-field ui-readonly" ng-hide="workorder.mbo.isNew()">
+						<label translate="WORKORDER.OWNERGROUP">Owner Group</label>
+						<input ng-model="workorder.OWNERGROUP" ng-readonly="true">
+					</li>
+				</ul>	
+				<emm:include value="actions.htm"/>			
+			</div>
+		</div>
+		<div id="locationdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="WORKORDER.LOCATION">Location</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="domain($event, workorder)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION,SYSTEMID" translate="LOOKUP">Lookup</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="locationDrilldown(workorder)" translate="DRILLDOWN">Drilldown</a>
+					</div>	
+				</div>
+			</div>
+		</div>
+		<div id="assetlookupdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="WORKORDER.ASSETNUM">Asset</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="domain($event, workorder)" data-field="ASSETNUM" data-display="ASSETNUM,DESCRIPTION,LOCATION" translate="LOOKUP">Lookup</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="assetDrilldown(workorder)" translate="DRILLDOWN">Drilldown</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="createfollowupdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="CREATEFOLLOWUP">Create Follow Up</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="actions.createFollowUp(workorder)" translate="YES">Yes</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" data-dismiss="modal" translate="NO">No</a>
+					</div>
+				</div>
+			</div>
+		</div> 
+		<script type="text/javascript">
+			function MainController($scope, domainService, pluspwoService) {
+				var appName = 'PLUSPWO';
+				var viewName = 'offline/pluspwo/wotrack.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				pluspwoService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				$scope.domain = domainService.domain;
+				$scope.locationDrilldown = domainService.locationDrilldown;
+				$scope.assetDrilldown = domainService.assetDrilldown;
+				
+				$scope.lookups = pluspwoService.lookups;
+				$scope.actions = pluspwoService.actions;
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+
+				// Get Work Order object data
+				var resultSet = EMMServer.DB.getQueryResult("WORKORDER");
+				// Checks if record exists in case where autosync has been triggered
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					pluspwoService.toList(null,true);
+					return false;
+				}
+				
+				$scope.htmlToText = function(text) {
+					 return  text ? String(text).replace(/<[^>]+>/gm, '') : '';
+				};
+				
+				$scope.workorder = new WorkOrder(resultSet[0]);
+				
+				$scope.hazard = EMMServer.DB.getQueryResult("WOHAZARD");
+				$scope.material = EMMServer.DB.getQueryResult("WOMATERIAL");
+				$scope.precaution = EMMServer.DB.getQueryResult("WOPRECAUTION");
+				$scope.hazardtag = EMMServer.DB.getQueryResult("WOHAZARDTAG");
+				$scope.tagout = EMMServer.DB.getQueryResult("WOTAGOUT");
+				$scope.wotaglock = EMMServer.DB.getQueryResult("WOTAGLOCK");
+				
+				$scope.precautionExists = function(id){
+					var id = id;
+					var index = false;
+					$.grep($scope.precaution, function (e) {
+						if(e.HAZARDID === id)
+							index = true;
+		    		});
+					return index;
+				}
+				
+				$scope.lockoutExists = function(id){
+					var id = id;
+					var index = false;
+					$.grep($scope.wotaglock, function (e) {
+						if(e.TAGOUTID === id)
+							index = true;
+		    		});
+					return index;
+				}
+				
+				var extra = EMMServer.DB.getQueryResult("EXTRA");
+				if (extra){
+					extra = extra[0];
+					$scope.labtransInfo = {
+						LABTRANSID : extra.TIMERLABTRANSID,
+						LABORCODE : extra.TIMERLABORCODE,
+						CRAFT : extra.TIMERCRAFT,
+						TIMERSTATUS : extra.TIMERSTATUS
+					}
+				}
+				var bounce = EMMServer.DB.getQueryResult("BOUNCE");
+				if (bounce){
+					bounce = bounce[0];
+					if (bounce.ISBOUNCE === '1')
+						$scope.workorder.mbo.toBeSaved(true);
+				}
+				// *Important* to set app name
+				$scope.workorder.mbo.appName(appName);
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					$scope.workorder.session.remove();
+					pluspwoService.toList(null,true);
+				};				
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm" />
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="MULTIASSETS">Multiple Assets, Locations</h3>
+				<a ng-click="actions.saveMultiAssetLocCi(asset)" class="ui-btn-right" ng-class="{'ui-btn-c' : asset.mbo.toBeSaved()}" TRANSLATE="SAVE">Save</a>
+			</div>
+			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
+				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="ASSET.ASSETNUM">Asset</label>
+						<input type="text" ng-readonly="true" ng-model="asset.ASSETNUM" />
+					</li>
+					<li class="ui-field-block">
+						<label translate="ASSET.DESCRIPTION">Asset Description</label>
+						<input type="text" ng-readonly="true" ng-model="extras.ASSETDESC" />
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.LOCATION">Location</label>
+						<input type="text" ng-readonly="true" ng-model="asset.LOCATION" />
+					</li>
+					<li class="ui-field-block">
+						<label translate="ASSET.LOCDESC">Location Description</label>
+						<input type="text" ng-readonly="true" ng-model="extras.LOCDESC" />
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.SEQUENCE">Sequence</label>
+						<input type="text" ng-readonly="true" ng-model="asset.SEQUENCE" />
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.PROGRESS">Mark Progress</label>
+						<input type="checkbox" ng-model="asset.PROGRESS"></input>
+					</li>
+					<li class="ui-field-block">
+						<label translate="ASSET.COMMENTS">Comments</label>
+						<textarea maxlength="250" ng-model="asset.COMMENTS" ng-required="asset.mbo.isRequired('COMMENTS')" ng-readonly="asset.mbo.isReadOnly('COMMENTS')"></textarea>
+					</li>					
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, pluspmultiassetService) {
+				var queryName = 'ROUTE';
+				var extraQueryName = 'EXTRA';
+				var viewName = 'offline/pluspwo/multiasset.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();		
+				$scope.asset = new MultiAssetLocCi(EMMServer.DB.getQueryResult(queryName)[0]);
+				
+				$scope.extras = EMMServer.DB.getQueryResult(extraQueryName)[0];
+				var pageData = EMMServer.Session.getItem('MULTIASSETLOCCI_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE") || null;
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE; 
+				
+				// Init services				
+				pluspmultiassetService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName					
+				});
+				
+				$scope.goBack = function(){
+					EMMServer.DB.Select().go("offline/pluspwo/multiassetlist.htm");
+				}
+				
+				$scope.actions = pluspmultiassetService.actions;
+				
+				//Watch for changes on the model, set 'toBeSaved' if model changes
+				$scope.$watch('asset', function(newValue, oldValue) {
+					if (newValue !== oldValue)
+						$scope.asset.mbo.toBeSaved(true);
+				}, true);	
+			} 
+		</script>
+	</body>
+</html>

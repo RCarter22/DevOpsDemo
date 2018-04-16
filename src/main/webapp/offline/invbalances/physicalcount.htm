@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+	            <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+	            <h3 class="ui-title" translate="INVBALANCES.PHYSCNT">Physical Count</h3>
+	            <a ng-click="savePhysicalCount(invbal)" class="ui-btn-right" ng-class="{'ui-btn-c' : toBeSaved}"  translate="SAVE">Save</a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+	        </div>
+	        <div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="invbal">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview ui-inset" ng-repeat="i in invbal">
+					<li>
+						<span>
+							<span class="ui-accessory-left" ng-if="i.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<h3>{{i.ITEMNUM}}</h3>
+							<h3 class="ui-wrap">{{i.DESCRIPTION}}</h3>
+							<h3>{{ 'INVBALANCES.BINNUM' | translate}}: {{i.BINNUM}}</h3>
+							<h3 style="color:red">{{ 'INVBALANCES.CURBAL' | translate}}:  {{i.CURBAL}}</h3>
+							<h3>{{ 'INVBALANCES.PHYSCNT' | translate}}: <span ng-style="{ color : i.mbo.toBeSaved() ? 'red' : 'inherit' }">{{i.PHYSCNT}}</span></h3>
+							<p>{{ 'INVBALANCES.PHYSCNTDATE' | translate}}: {{i.PHYSCNTDATE | date : 'short'}}</p>
+							<p>{{ 'INVBALANCES.RECONCILED' | translate}}: {{(i.RECONCILED == '1')}}</p>
+							<p>{{ 'INVBALANCES.LOCATION' | translate}}: {{i.LOCATION}}</p>
+						</span>
+					</li>
+					<li class="ui-field">
+						<label translate="NEWCOUNT">New Count</label>
+						<input type="tel" ng-model="i.PHYSCNT" ng-change="i.mbo.toBeSaved(true)" data-interval="1.00" data-min="0.0" data-control="spinner">
+					</li>
+				</ul>
+			</div>
+		</div>
+	<script type="text/javascript">
+		function MainController($scope, invBalancesService){
+			var queryName = "INVBALANCES";
+			var viewName = "offline/inventor/physicalcount.htm";
+			
+			EMMServer.Offline.setSyncViewName(viewName);
+			
+			$scope.userInfo = EMMServer.DB.getUserInfo();
+			$scope.invbal = EMMServer.DB.getMboSet('InvBalances', queryName);
+			$scope.toBeSaved = false;
+
+			invBalancesService.init({
+				userInfo: $scope.userInfo,
+				viewName: viewName
+			});
+			
+			$scope.savePhysicalCount = invBalancesService.savePhysicalCount;
+			
+			$scope.TXCOUNT = EMMServer.DB.getUserTxnCount();
+			var messages = EMMServer.DB.getQueryResult("MESSAGE");
+			if (messages){
+				$scope.message = messages[0].DISPLAYMESSAGE;
+			}
+			
+			$scope.$watch('invbal', function(newValue, oldValue) {
+				if (newValue !== oldValue){
+					$scope.toBeSaved = true;
+				}
+			},true);
+			
+			var pageData = EMMServer.Session.getItem('PHYSCNT_DATA');
+			$scope.goBack = function(){
+				EMMServer.Session.removeItem('PHYSCNT_DATA');
+				EMMServer.DB.Select().go(pageData.returnPage);
+			};
+		}
+	</script>
+	</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html ng-app="map" ng-controller="SidebarController" ng-cloak>
+<head>
+	<title>EZMaxMobile - Offline</title>
+	<emm:include value="../../common/includes.htm"/>
+</head>
+<body>
+	<div class="ui-page">
+		<div class="ui-searchbar">
+			<form ng-submit="quicksearch()" novalidate>
+				<input type="search" placeholder="Search Locations" ng-model="search"/>
+			</form>
+		</div>	
+		<div class="ui-content">		
+			<ul pagination class="ui-listview"></ul>		
+			<ul class="ui-listview">
+				<li class="ui-divider ui-divider-c">List</li>				
+				<li ng-repeat="d in data | startFrom:pageService.startFrom() | limitTo:pageService.getPageSize()">
+					<a ng-click="map(d)">					
+						<p><strong>{{d.LOCATION}}</strong></p>
+						<h3>{{d.DESCRIPTION}}</h3>
+						<span class="ui-arrow"></span>
+					</a>
+				</li>
+			</ul>
+			<ul pagination class="ui-listview"></ul>
+		</div>
+	</div>
+	<script type="text/javascript">
+		var map = angular.module('map', ['emm.pagination']);
+
+		map.controller('SidebarController', function ($scope, $document, $http, pageService){		
+
+			$scope.pageService = pageService;					
+			
+			$scope.search = null;
+			
+			$scope.quicksearch = function(){
+				var filter = {};
+				if ($scope.search){
+					filter["search"] = $scope.search;		
+				}
+				emm.maps.filter('LOCATIONS', filter);
+				$(document.activeElement).blur(); // Hides keyboard				
+			}
+			
+			$document.bind('dataSourceLoaded', function(event, data){
+				$(document).scrollTop();
+				$scope.$apply(function(){
+					$scope.data = data.dataSources['LOCATIONS'];
+					// Update pagination
+					$scope.pageService.setNumberOfRecords($scope.data.length);					
+				});
+			});
+						
+			$scope.map = function(d){
+				emm.maps.zoomTo('LOCATIONS', 'LOCATIONSID', d.LOCATIONSID)
+			}
+			
+		});
+	</script>
+</body>
+</html>

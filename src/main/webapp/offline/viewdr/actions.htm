@@ -1,0 +1,13 @@
+<div class="ui-sidebar">
+	<p class="ui-section" translate="ACTIONS">Actions</p>
+	<ul class="ui-listview ui-inset">
+		<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>	
+		<li ng-show="mr.STATUS === 'DRAFT' || mr.STATUS === 'WAPPR'">
+	        <a ng-click="createMRLine(mr)">
+	        	<h3 translate="NEWREQITEM">New Requisition Item</h3>
+	        	<span class="ui-arrow"></span>
+	        </a>
+	    </li>
+	</ul>
+	
+</div>

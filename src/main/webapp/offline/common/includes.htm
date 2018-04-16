@@ -1,0 +1,90 @@
+<meta content="telephone=no" name="format-detection">
+<meta name="viewport" content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no">
+<meta charset="UTF-8">
+<link type="text/css" rel="stylesheet" href="~/css/ezmaxmobile.ui-full.min.css?v=5.2.1">
+<script type="text/javascript" src="~/javascript/jquery.js"></script>
+<script type="text/javascript" src="~/javascript/angular.min.js"></script>
+<script type="text/javascript" src="~/javascript/angular-translate.min.js"></script>
+<script type="text/javascript" src="~/javascript/ezmaxmobile.core-full.min.js?v=5.2.1"></script>
+
+<script type="text/javascript">
+	// EMM Default Settings
+	emm.setDefaults({
+		language: EMMServer.DB.getUserInfo().language,
+		locale: EMMServer.DB.getUserInfo().locale
+	});	
+</script>
+
+<!-- Localization Files -->
+<emm:include value="../../javascript/localization/en_US.js"/>
+<emm:include value="../../javascript/localization/en_AU.js"/>
+
+<!-- Client Side Class Files -->
+<emm:include value="../classes/Directives.js"/>
+<emm:include value="../classes/Filters.js"/>
+<emm:include value="../classes/Domain.js"/>
+<emm:include value="../classes/LabTrans.js"/>
+<emm:include value="../classes/MatUseTrans.js"/>
+<emm:include value="../classes/MatRecTrans.js"/>
+<emm:include value="../classes/WorkOrder.js"/>
+<emm:include value="../classes/WorkOrderSpec.js"/>
+<emm:include value="../classes/WorkLog.js"/>
+<emm:include value="../classes/WPLabor.js"/>
+<emm:include value="../classes/WPMaterial.js"/>
+<emm:include value="../classes/FailureCode.js"/>
+<emm:include value="../classes/MultiAssetLocCi.js"/>
+<emm:include value="../classes/Inventory.js"/>
+<emm:include value="../classes/InvBalances.js"/>
+<emm:include value="../classes/SR.js"/>
+<emm:include value="../classes/TicketSpec.js"/>
+<emm:include value="../classes/AssetMeter.js"/>
+<emm:include value="../classes/LocationMeter.js"/>
+<emm:include value="../classes/Asset.js"/>
+<emm:include value="../classes/AssetSpec.js"/>
+<emm:include value="../classes/Person.js"/>
+<emm:include value="../classes/MR.js"/>
+<emm:include value="../classes/MRLines.js"/>
+<emm:include value="../classes/ToolTrans.js"/>
+<emm:include value="../classes/Query.js"/>
+<emm:include value="../classes/StartCenter.js"/>
+<emm:include value="../classes/Portlet.js"/>
+<emm:include value="../classes/Doclinks.js"/>
+<emm:include value="../classes/Downtime.js"/>
+<emm:include value="../classes/AssetStatus.js"/>
+<emm:include value="../classes/Assignment.js"/>
+
+<!-- Services -->
+<emm:include value="../services/applicationService.js"/>
+<emm:include value="../services/paginationService.js"/>
+<emm:include value="../services/domainService.js"/>
+<emm:include value="../services/exceptionHandlerService.js"/>
+<emm:include value="../doclinks/services/doclinksService.js"/>
+<emm:include value="../labtrans/services/labtransService.js"/>
+<emm:include value="../labrep/services/labrepService.js"/>
+<emm:include value="../tooltrans/services/tooltransService.js"/>
+<emm:include value="../matusetrans/services/matusetransService.js"/>
+<emm:include value="../wotrack/services/wotrackService.js"/>
+<emm:include value="../wotrack/services/multiassetService.js"/>
+<emm:include value="../asset/services/assetService.js"/>
+<emm:include value="../inventor/services/inventoryService.js"/>
+<emm:include value="../invbalances/services/invBalancesService.js"/>
+<emm:include value="../invissue/services/issuestransfersService.js"/>
+<emm:include value="../worklog/services/worklogService.js"/>
+<emm:include value="../plustlrp/services/plustlrpService.js"/>
+<emm:include value="../wplabor/services/wplaborService.js"/>
+<emm:include value="../wpmaterial/services/wpmaterialService.js"/>
+<emm:include value="../sr/services/srService.js"/>
+<emm:include value="../createdr/services/createdrService.js"/>
+<emm:include value="../viewdr/services/viewdrService.js"/>
+<emm:include value="../startcenter/services/startcenterService.js"/>
+<emm:include value="../query/services/queryService.js"/>
+<emm:include value="../classification/services/classificationService.js"/>
+<emm:include value="../plustwo/services/plustwoService.js"/>
+<emm:include value="../plustwo/services/plustmultiassetService.js"/>
+<emm:include value="../plustwo/services/plustassignmentService.js"/>
+<emm:include value="../plustasset/services/plustassetService.js"/>
+<emm:include value="../plustinv/services/plustinvService.js"/>
+<emm:include value="../pluspasset/services/pluspassetService.js"/>
+<emm:include value="../pluspsr/services/pluspsrService.js"/>
+<emm:include value="../pluspwo/services/pluspwoService.js"/>
+<emm:include value="../pluspwo/services/pluspmultiassetService.js"/>

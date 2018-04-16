@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+<head>
+<title>EZMaxMobile - Offline</title>
+<emm:include value="../common/includes.htm" />
+</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="ASSET.MOVEASSET">Move Asset</h3>
+				<a ng-click="actions.moveAsset(asset,workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : asset.mbo.toBeSaved()}" translate="ASSET.MOVE">Move</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !asset.mbo.isDirty(), 'ui-statusbar-c': asset.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="asset.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="ASSET.ASSETNUM">Asset</label>
+						<input disabled="true" ng-model="asset.ASSETNUM" ng-readonly="asset.mbo.isReadOnly('ASSETNUM')" ng-required="asset.mbo.isRequired('ASSETNUM')">
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.LOCATION">Location</label>
+						<input disabled="true" ng-model="asset.LOCATION" ng-readonly="asset.mbo.isReadOnly('LOCATION')" ng-required="asset.mbo.isRequired('LOCATION')">
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.NEWASSETNUM">New Asset Num</label>
+						<input disabled="true" ng-model="asset.NEWASSETNUM" ng-readonly="true" ng-required="asset.mbo.isRequired('NEWASSETNUM')">
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.NEWSITE">New Site</label>
+						<input disabled="true" ng-model="asset.NEWSITE" ng-readonly="asset.mbo.isReadOnly('NEWSITE')" ng-required="asset.mbo.isRequired('NEWSITE')">
+						<a class="ui-arrow"  ng-click="domain($event, asset)" data-field="NEWSITE" data-display="SITEID,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="ASSET.NEWLOCATION">New Location</label>
+						<input disabled="true" ng-model="asset.NEWLOCATION" ng-readonly="asset.mbo.isReadOnly('NEWLOCATION')" ng-required="asset.mbo.isRequired('NEWLOCATION')">
+						<a class="ui-arrow"  ng-click="domain($event, asset)" data-field="NEWLOCATION" data-display="LOCATION,DESCRIPTION,ORGID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.MOVEMODIFYBINNUM">New Reading</label>
+						<input ng-model="asset.MOVEMODIFYBINNUM" ng-readonly="true" ng-required="asset.mbo.isRequired('MOVEMODIFYBINNUM')">
+					</li>					
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, wotrackService, domainService){
+				var viewName = "offline/wotrack/moveasset.htm";
+				var queryName = 'ASSET';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				wotrackService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.domain = domainService.domain;
+				
+				$scope.asset = new Asset(EMMServer.DB.getQueryResult("ASSET")[0]);
+				/* $scope.measurepoints = EMMServer.DB.getQueryResult(queryName); */
+				var resultSet = EMMServer.DB.getQueryResult("WORKORDER");
+				$scope.workorder = new WorkOrder(resultSet[0]);
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.actions = wotrackService.actions;
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					EMMServer.DB.Select()
+						.go("offline/wotrack/wotrack.htm");
+				};
+				
+			}
+		</script>
+	</body>
+</html>

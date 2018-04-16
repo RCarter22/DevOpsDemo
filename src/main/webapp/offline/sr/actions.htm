@@ -1,0 +1,89 @@
+<div class="ui-sidebar" ng-hide="sr.mbo.isNew()">
+	<p class="ui-section" translate="ACTIONS">Actions</p>
+	<ul class="ui-listview ui-inset">
+		<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+		<li>
+			<a emm-sync>
+				<img src="../../images/sync.png">
+				<h3 translate="SYNCSERVER">Sync with Server</h3>
+				<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+				<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a emm-online="sr/view.action?id={{sr.TICKETUID}}">
+				<img src="../../images/online.png">
+				<h3 translate="GOONLINE">Go Back Online</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a emm-sync-res>
+				<img src="../../images/map.png" />
+				<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
+				<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+	    <li>
+	        <a ng-click="actions.toChangeStatus(sr)">
+	        	<img src="../../images/changestatus.png">
+	        	<h3 translate="CHANGESTATUS">Change Status</h3>
+	        	<span class="ui-arrow"></span>
+	        </a>
+	    </li>	
+	    <li class="ui-divider ui-divider-c"></li>				
+		<li>
+			<a ng-click="actions.takeOwnership(sr)">
+				<img src="../../images/takeownership.png">
+				<h3 translate="TAKEOWNERSHIP">Take Ownership</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>	
+		<li>
+			<a ng-click="actions.selectOwner(sr)">
+				<img src="../../images/selectowner.png">
+				<h3 translate="SELECTOWNER">Select Owner</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>		
+	    <li>	        
+	        <a data-control="dialog" href="#createwodialog">
+	        	<img src="../../images/addfollowup.png">
+	        	<h3 translate="CREATEWO">Create Work Order</h3>
+	        	<span class="ui-arrow"></span>
+	        </a>
+	    </li>	    
+	    <li class="ui-divider ui-divider-c"></li>		
+		<li ng-show="sr.canAddActuals()">
+			<a ng-click="actions.toLabTrans(sr)">
+				<img src="../../images/labor.png">
+				<h3 translate="LABOR">Labor</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a ng-click="actions.toWorkLog(sr)">
+				<img src="../../images/notes.png">
+				<h3 translate="WORKLOG.NAME">Work Log</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>			
+		<li>
+			<a ng-click="actions.toAttachments(sr)">
+				<img src="../../images/attachment.png">
+				<h3 translate="ATTACHMENTS">Attachments</h3>
+				<span class="ui-arrow"></span>
+			</a>			
+		</li>
+		<li>
+			<a ng-click="actions.toClassify(sr)">
+				<img src="../../images/classification.png">
+				<h3 translate="CLASSIFICATION">Classification</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+	</ul>
+</div>	

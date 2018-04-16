@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm" />
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+				<a class="ui-btn-left" ng-click="goBack()" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="METERREADINGS">Enter Meter Readings</h3>
+				<a ng-click="actions.saveAssetLocMeters(workorder, assetMeters, locMeters)" class="ui-btn-right" ng-class="{'ui-btn-c' : isMboSetModified()}" translate="SAVE">Save</a>
+			</div>
+	        <div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+<!-- 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !workorder.mbo.isDirty(), 'ui-statusbar-c': am.mbo.isDirty()}"> -->
+<!-- 				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="workorder.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5> -->
+<!-- 			</div> -->
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<ul class="ui-navbar">
+				<li style="margin-right:-5px"><a ng-click="viewTab('ASSETMETER')" ng-class="{'ui-active' : mode == 'ASSETMETER'}"  translate="ASSETMETER">Asset Meter Readings</a></li>
+				<li><a ng-click="viewTab('LOCATIONMETER')" ng-class="{'ui-active' : mode == 'LOCATIONMETER'}"  translate="LOCATIONMETER">Location Meter Readings</a></li>
+			</ul>
+			
+
+			<div class="ui-statusbar ui-statusbar-c" ng-show="mode == 'ASSETMETER' && assetMeters.length == 0">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content ui-content-narrow" ng-show="mode == 'ASSETMETER'">
+				<ul class="ui-listview ui-inset" ng-repeat="am in assetMeters track by $index">
+					<li class="ui-divider ui-divider-c">{{am.METERNAME}}</li>
+					<li class="ui-field">
+						<label translate="METER.LASTREADING">Last Reading</label>
+						<input disabled="true" ng-model="am.LASTREADING" ng-readonly="am.mbo.isReadOnly('LASTREADING')" ng-required="am.mbo.isRequired('LASTREADING')" ng-style="{'color':(am.mbo.isDirty() == '1'?'red':'inherit')}">
+					</li>
+					<li class="ui-field" ng-hide="am.DOMAINID">
+						<label translate="METER.READING">New Reading</label>
+						<input id="{{am.ASSETMETERID}}_READING" ng-model="am.READING" data-field="ASSETMETER_READING" ng-readonly="am.mbo.isReadOnly('READING')" ng-required="am.mbo.isRequired('READING')" placeholder="{{am.MEASUREUNITID}}" ng-blur="setValue($event, am)" >
+					</li>
+					<li class="ui-field" ng-show="am.DOMAINID">
+						<label translate="METER.READING">New Reading</label>
+						<input disabled="true" ng-model="am.READING" data-field="ASSETMETER_READING" ng-readonly="am.mbo.isReadOnly('READING')" ng-required="am.mbo.isRequired('READING')">
+						<a class="ui-arrow" ng-click="domain($event, am, $index, 'ASSETMETER')" data-field="READING" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+				</ul>
+			</div>
+
+			<div class="ui-statusbar ui-statusbar-c" ng-show="mode == 'LOCATIONMETER' && locMeters.length == 0">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content ui-content-narrow" ng-show="mode == 'LOCATIONMETER'">
+				<ul class="ui-listview ui-inset" ng-repeat="lm in locMeters track by $index"> 
+					<li class="ui-divider ui-divider-c">{{lm.METERNAME}}</li>
+					<li class="ui-field">
+						<label translate="METER.LASTREADING">Last Reading</label>
+						<input disabled="true" ng-model="lm.LASTREADING" ng-readonly="lm.mbo.isReadOnly('LASTREADING')" ng-required="lm.mbo.isRequired('LASTREADING')" ng-style="{'color':(lm.mbo.isDirty() == '1'?'red':'inherit')}">
+					</li>
+					<li class="ui-field" ng-hide="lm.DOMAINID">
+						<label translate="METER.READING">New Reading</label>
+						<input id="{{lm.LOCATIONMETERID}}_READING" ng-model="lm.READING" data-field="LOCATIONMETER_READING" ng-readonly="lm.mbo.isReadOnly('READING')" ng-required="lm.mbo.isRequired('READING')" placeholder="{{lm.MEASUREUNITID}}" ng-blur="setValue($event, lm)"> 
+					</li>
+					<li class="ui-field" ng-show="lm.DOMAINID">
+						<label translate="METER.READING">New Reading</label>
+						<input disabled="true" ng-model="lm.READING" ng-readonly="lm.mbo.isReadOnly('READING')" ng-required="lm.mbo.isRequired('READING')">
+						<a class="ui-arrow" ng-click="domain($event, lm, $index, 'LOCATIONMETER')" data-field="READING" data-display="VALUE,DESCRIPTION"></a>
+					</li>							
+				</ul>
+			</div>
+		</div>
+	
+		<script type="text/javascript">
+			function MainController($scope, domainService, pluspwoService){	
+				var viewName = 'offline/pluspwo/meters.htm',
+				queryAssetMeterName = 'ASSETMETERS',
+				queryLocMeterName = 'LOCMETERS',
+				appName = 'PLUSPWO';
+			
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.assetMeters = EMMServer.DB.getMboSet('AssetMeter', queryAssetMeterName);
+				$scope.locMeters = EMMServer.DB.getMboSet('LocationMeter', queryLocMeterName);
+			
+				pluspwoService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});						
+				$scope.lookups = pluspwoService.lookups;
+				$scope.actions = pluspwoService.actions;
+
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+ 				$scope.domain = domainService.domain;
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				var pageData = EMMServer.Session.getItem('METER_DATA');
+				$scope.workorder = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+
+				$scope.viewTab = function(val){
+					$scope.mode = val;
+					EMMServer.Session.setItem('CURRENTMODE', $scope.mode);
+				};
+				
+				var prevMode = EMMServer.Session.getItem('CURRENTMODE');
+				if (prevMode === null)
+					$scope.viewTab('ASSETMETER');
+				else
+					$scope.viewTab(prevMode);
+				
+				$scope.setValue = function() {
+					var element = $(arguments[0].target || arguments[0]);
+		            var obj = arguments[1]; //object containing the function with try catch
+		            obj.mbo.toBeSaved(true);
+	            	obj.session.cache();
+				}; 
+				
+				$scope.isMboSetModified = function(){
+					for (var i=0; i < $scope.assetMeters.length; i++) {
+						var assetmeter = $scope.assetMeters[i];
+						if(assetmeter.mbo.toBeSaved()){
+							return true;
+						}
+					}
+					
+					for(var i=0; i < $scope.locMeters.length; i++){
+						var locmeter = $scope.locMeters[i];
+						if(locmeter.mbo.toBeSaved()){
+							return true;
+						}
+					}
+					return false;
+				}
+				
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+ 					for(var i=0; i < $scope.assetMeters.length; i++){
+ 						$scope.assetMeters[i].session.remove();
+ 					}
+ 					for(var j=0; j < $scope.locMeters.length; j++){
+ 						$scope.locMeters[j].session.remove();
+ 					}					
+					
+ 					EMMServer.Session.removeItem('CURRENTMODE');
+					EMMServer.DB.Select().go(pageData.returnPage);
+				}
+			}
+		</script>
+	</body>
+</html>

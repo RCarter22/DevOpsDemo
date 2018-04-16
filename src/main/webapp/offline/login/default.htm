@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+	      <title>EZMaxMobile - Offline</title>
+	      <emm:include value="../common/includes.htm"/>
+	</head>
+	<body ng-hide="hidePage">
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-statusbar ui-statusbar-f">
+			      <h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+           
+			<div class="ui-content" ng-if="UserInfo.nativeAppSettings.sqliteEnabled == false || (UserInfo.nativeAppSettings.sqliteEnabled == true && (UserInfo.nativeAppSettings.offlineStartCenterEnabled == null || UserInfo.nativeAppSettings.offlineStartCenterEnabled == false))">   
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="OFFLINEAPPS">Offline Applications</li>
+ 
+					<li ng-repeat-start="a in userApps" ng-if="a.type==='APP'">
+						<a ng-click="goToApp(a.app)"><img ng-src="../../images/{{a.imageName}}"/>
+							<h3>{{a.title}}</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li ng-repeat-end ng-if="a.type==='DIVIDER'" class="ui-divider ui-divider-c">{{a.title}}</li>                                   
+
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+							<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online>
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-sync-res>
+							<img src="../../images/map.png" />
+							<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
+							<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+			<div ng-if="UserInfo.nativeAppSettings.offlineStartCenterEnabled == true && UserInfo.nativeAppSettings.sqliteEnabled == true">
+				<ul class="ui-navbar" ng-show="startCenters">
+					<li ng-repeat="sc in startCenters">
+						<a ng-click="selectStartCenter(sc,startCenters)" ng-class="{'ui-active' : startcenter.SCCONFIGID === sc.SCCONFIGID}">{{sc.DESCRIPTION}}</a>
+					</li>
+				</ul>
+				<div class="ui-statusbar ui-statusbar-c" ng-hide="portlets.length > 0">
+					<h3 class="ui-title" >No Portlets Configured</h3>
+				</div>
+				<div class="ui-content">      
+					<ul class="ui-listview">
+						<li ng-repeat="portlet in portlets">
+							<a ng-click="goToResultSet(portlet)">
+								<img ng-src="{{findAppImage(portlet.QUERYAPP)}}">
+								<h3>{{portlet.DESCRIPTION}}</h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+					</ul> 
+				</div>
+			</div>                  
+		</div>      
+		<script type="text/javascript"> 
+			function MainController ($scope, $window, applicationService, startCenterService){
+				$scope.hidePage = true;
+				var lastVisitedPage = EMMServer.DB.getQueryResult("LASTVISIT");
+				if(lastVisitedPage && lastVisitedPage[0] && lastVisitedPage[0].LASTVISIT){
+					if(EMMServer.DB.Select().getQuery(lastVisitedPage[0].LASTVISIT)){
+						EMMServer.DB.Select().go(lastVisitedPage[0].LASTVISIT);
+						return;
+					}
+				}
+				$scope.hidePage = false;
+				var viewName = "offline/login/default.htm";
+				$scope.UserInfo = EMMServer.DB.getUserInfo();
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.goToApp = applicationService.goToApp;
+				$scope.userApps = applicationService.getMenuApps();                     
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				//If StartCenter is enabled build datastructure to be used in UI
+				if($scope.UserInfo.nativeAppSettings.offlineStartCenterEnabled){
+					var supportedApps = applicationService.getSupportedApps();
+					$scope.findAppImage = function(appName){
+						var baseDir = "../../images/";
+						for(var i = 0; i < supportedApps.length; i++){
+							var appObj = supportedApps[i];
+							if(appObj[0] == appName){
+							      return baseDir += appObj[2];
+							}
+						}
+						return baseDir +="dashboard.png";
+					}
+					$scope.startCenters = EMMServer.DB.getQueryResult("STARTCENTER");
+					$scope.portlets = EMMServer.DB.getQueryResult("PORTLET");
+					
+					$scope.startcenter = startCenterService.helper.getStartCenter($scope.startCenters);
+					$scope.selectStartCenter = startCenterService.selectStartCenter;
+					$scope.getPortletCount = startCenterService.helper.getPortletCount;
+					$scope.goToResultSet = startCenterService.goToPortlet; 
+				}
+				
+				// Clear all sessions
+				EMMServer.Session.clear();          
+			}
+		</script>
+	</body>
+</html>

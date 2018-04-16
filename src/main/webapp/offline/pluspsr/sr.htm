@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a class="ui-btn-left" ng-click="goBack()" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSPSR">Service Requests (SP)</h3>
+				<a ng-click="actions.save(sr)" class="ui-btn-right" ng-class="{'ui-btn-c' : sr.mbo.toBeSaved()}" translate="SAVE">Save</a>	
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !sr.mbo.isDirty(), 'ui-statusbar-c': sr.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="sr.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="SR.SR">Service Request</label>			
+						<input ng-model="sr.TICKETID" ng-readonly="sr.mbo.isReadOnly('TICKETID')" ng-required="sr.mbo.isRequired('TICKETID')">
+					</li>		
+					<li class="ui-field-block">
+						<label translate="SR.SUMMARY">Summary</label>
+						<textarea ng-model="sr.DESCRIPTION" maxlength="100" ng-readonly="sr.mbo.isReadOnly('DESCRIPTION')" ng-required="sr.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field-block">
+						<label translate="SR.DETAILS">Details</label>
+						<textarea data-htmleditor="true" ng-model="sr.LONGDESCRIPTION" ng-readonly="sr.mbo.isReadOnly('LONGDESCRIPTION')" ng-required="sr.mbo.isRequired('LONGDESCRIPTION')"></textarea>
+					</li>	
+					<li class="ui-field ui-details ui-readonly">
+						<label translate="SR.STATUS">Status</label>
+						<p>{{sr.STATUS}}</p>
+						<p>{{sr.STATUSDATE | date : 'short'}}</p>
+					</li>
+					<li class="ui-field">
+						<label translate="SR.AFFECTEDPERSON">Affected Person</label>			
+						<input disabled="true" ng-model="sr.AFFECTEDPERSON" ng-readonly="sr.mbo.isReadOnly('AFFECTEDPERSON')" ng-required="sr.mbo.isRequired('AFFECTEDPERSON')">
+						<a class="ui-arrow" ng-click="domain($event, sr)" data-field="AFFECTEDPERSON" data-display="PERSONID,DISPLAYNAME"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="SR.SITE">Site</label>			
+						<input disabled="true" ng-model="sr.SITEID" ng-readonly="sr.mbo.isReadOnly('SITEID')" ng-required="sr.mbo.isRequired('SITEID')">
+						<a class="ui-arrow" ng-click="domain($event, sr)" onclick="" data-field="SITEID" data-display="SITEID,DESCRIPTION"></a>
+					</li>
+					
+					<li class="ui-field">
+						<label translate="SR.LOCATION">Location</label>			
+						<input disabled="true" ng-model="sr.LOCATION" ng-readonly="sr.mbo.isReadOnly('LOCATION')" ng-required="sr.mbo.isRequired('LOCATION')">
+						<a class="ui-arrow" ng-click="domain($event, sr)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION,SITEID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="SR.ASSETNUM">Asset</label>
+						<input disabled="true" ng-model="sr.ASSETNUM" ng-readonly="sr.mbo.isReadOnly('ASSETNUM')" ng-required="sr.mbo.isRequired('ASSETNUM')">
+						<a class="ui-arrow" ng-click="domain($event, sr)" data-field="ASSETNUM" data-display="ASSETNUM,DESCRIPTION,SITEID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="SR.ASSETSITEID">Asset Site</label>
+						<input disabled="true" ng-model="sr.ASSETSITEID" ng-readonly="sr.mbo.isReadOnly('ASSETSITEID')" ng-required="sr.mbo.isRequired('ASSETSITEID')">
+						<a class="ui-arrow" ng-click="domain($event, sr)" data-field="ASSETSITEID" data-display="SITEID,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="SR.REPORTEDPRIORITY">Reported Priority</label>			
+						<input disabled="true" ng-model="sr.REPORTEDPRIORITY" ng-required="sr.mbo.isRequired('REPORTEDPRIORITY')" ng-readonly="sr.mbo.isReadOnly('REPORTEDPRIORITY')"/>
+						<a class="ui-arrow" ng-click="domain($event, sr)" data-field="REPORTEDPRIORITY" data-display="DESCRIPTION,VALUE"></a>
+					</li>
+					<li class="ui-field" >
+						<label translate="SR.GLACCOUNT">GL Account</label>
+						<input ng-model="sr.GLACCOUNT" ng-readonly="sr.mbo.isReadOnly('GLACCOUNT')" ng-required="sr.mbo.isRequired('GLACCOUNT')">
+					</li>					
+					<li ng-show="!sr.mbo.isNew()" class="ui-divider ui-divider-c" translate="RESPONSIBILITY">Responsibility</li>
+					<li ng-show="!sr.mbo.isNew()" class="ui-field ui-details ui-readonly">
+						<label translate="SR.REPORTEDBY">Reported By</label>			
+						<p>{{sr.REPORTEDBY}}</p>
+						<p>{{sr.REPORTDATE | date : 'short'}}</p>
+					</li>
+					<li ng-show="!sr.mbo.isNew()" class="ui-field ui-readonly">
+						<label translate="SR.OWNER">Owner</label>
+						<input ng-model="sr.OWNER" ng-readonly="true">
+					</li>
+					<li ng-show="!sr.mbo.isNew()" class="ui-field ui-readonly">
+						<label translate="SR.OWNERGROUP">Owner Group</label>
+						<input ng-model="sr.OWNERGROUP" ng-readonly="true">
+					</li>
+				</ul>
+				<emm:include value="actions.htm"/>
+			</div>
+		</div>
+		<div id="createwodialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="CREATEWO">Create Work Order</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="actions.createWorkOrder(sr)" translate="YES">Yes</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" data-dismiss="modal" translate="NO">No</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	<script type="text/javascript">
+		function MainController($scope, pluspsrService, domainService){
+			var appName = 'PLUSPSR';
+			var viewName = 'offline/pluspsr/sr.htm';
+			
+			EMMServer.Offline.setSyncViewName(viewName);			
+			
+			$scope.userInfo = EMMServer.DB.getUserInfo();
+			$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+			
+			// Init services
+			// Set the return page so all lookups return to this page
+			pluspsrService.init({
+				userInfo : $scope.userInfo,
+				viewName : viewName
+			});
+			
+			domainService.init({
+				userInfo : $scope.userInfo,
+				viewName : viewName
+			});
+	
+			$scope.domain = domainService.domain;			
+			$scope.actions = pluspsrService.actions;
+
+			var messages = EMMServer.DB.getQueryResult("MESSAGE");
+			if (messages)
+				$scope.message = messages[0].DISPLAYMESSAGE;
+
+			var resultSet = EMMServer.DB.getQueryResult("SR");
+			// Checks if record exists in case where autosync has been triggered
+			if (!resultSet || !resultSet[0]){
+				alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+				pluspsrService.toList(null,true);
+				return false;
+			}
+			
+			// Check if we are "bounced" to this page
+			$scope.sr = new SR(resultSet[0]);
+			var bounce = EMMServer.DB.getQueryResult("BOUNCE");
+			if (bounce){
+				bounce = bounce[0];
+				if (bounce.ISBOUNCE === '1')
+					$scope.sr.mbo.toBeSaved(true);
+			}
+			
+			// *Important* to set app name
+			$scope.sr.mbo.appName(appName);
+			
+			//Watch for changes on the model, set 'toBeSaved' if model changes
+			$scope.$watch('sr', function(newValue, oldValue) {
+				if (newValue !== oldValue)
+					$scope.sr.mbo.toBeSaved(true);
+			}, true);
+			
+			$scope.goBack = function() {
+				// Clear any changes and remove from session
+				$scope.sr.session.remove();
+				pluspsrService.toList(null,true);
+			};
+		}
+	</script>
+	</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+				<a ng-click="cancel()" class="ui-btn-left" translate="CANCEL">Cancel</a>
+				<h3 class="ui-title" translate="LOCATIONDRILLDOWN">Location Drilldown</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>	
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li ng-show="currentLocation">
+						<a ng-click="goToLocation(currentLocation.PARENT, true)">
+							<img src="../../images/returnarrow.png"/>
+							<p class="ui-aside">{{currentLocation.ORGID}}</p>
+							<h3>{{currentLocation.LOCATION}}</h3>
+							<p>{{currentLocation.DESCRIPTION}}</p>							
+						</a>
+					</li>
+					<li ng-show="currentLocation" class="ui-divider ui-divider-c">{{ 'CHILDRENOF' | translate }} {{currentLocation.LOCATION}}</li>
+					<li class="ui-accessory" ng-repeat="cl in childLocationList">
+						<a ng-click="selectValue(cl.LOCATION)">
+							<h3>{{cl.LOCATION}}</h3>
+							<p>{{cl.DESCRIPTION}}</p>
+						</a>
+						<a ng-show="cl.HASCHILDREN" class="ui-arrow" ng-click="goToLocation(cl.LOCATION, false)"></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">	
+			function MainController ($scope, domainService){
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.childLocationList = EMMServer.DB.getQueryResult("CHILDLOCATION");
+				$scope.currentLocation = EMMServer.DB.getQueryResult("CURRENTLOCATION");
+				if($scope.currentLocation)
+					$scope.currentLocation = $scope.currentLocation[0];
+				
+				var pageData = EMMServer.Session.getItem('LOCATIONDRILLDOWN_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				domainService.init({
+					userInfo: $scope.userInfo,
+					returnPage: pageData.returnPage
+				});
+				
+				$scope.goToLocation = function(location, toParent){
+					domainService.locationDrilldown($scope.mboObject, pageData.attributeName, location, toParent);	
+				}
+					
+				$scope.selectValue = function(val){
+					if ($scope.mboObject.mbo.isReadOnly($scope.mboObject[pageData.attributeName]) === false){
+						setValueAndGoBack(val);
+					} else {
+						alert(getText('EMMOF1006W', [$scope.mboObject[pageData.attributeName]], 'Attribute ' + $scope.mboObject[pageData.attributeName] + ' is readonly'));
+					}	
+				}
+				
+				$scope.cancel = function(){
+					goBack();
+				};
+				
+				function goBack(){
+					EMMServer.Session.removeItem('LOCATIONDRILLDOWN_DATA');
+					EMMServer.DB.Select().go(pageData.returnPage);
+				};
+				
+				function setValueAndGoBack(val){
+					if ($scope.mboObject[pageData.attributeName] != val){
+						// Save the original value
+						var originalValue = $scope.mboObject[pageData.attributeName];
+						// Set the new value
+						$scope.mboObject[pageData.attributeName] = val;
+						$scope.mboObject.mbo.onChange(pageData.attributeName);
+						
+						$scope.mboObject.mbo.toBeSaved(true);
+						$scope.mboObject.session.cache();
+					}
+					goBack();
+				}				
+			}
+			</script>
+	</body>
+</html>

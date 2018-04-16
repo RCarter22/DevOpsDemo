@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+            <div class="ui-header ui-header-b">
+                <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+                <h3 class="ui-title" translate="ATTACHMENTS">Attachments</h3>
+                <a data-control="dialog" href="#doctypedialog" class="ui-btn-right"><img src="../../images/camera.png"></a>
+                <!-- <a ng-click="createNew()" class="ui-btn-right"><img src="../../images/camera.png"></a> -->
+            </div>
+			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
+				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="doclinks">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>             
+            <div class="ui-content">
+            	<ul class="ui-listview">
+            		<li ng-repeat="doc in doclinks">
+						<a ng-click="showDetail(doc)">
+							<span class="ui-accessory-left" ng-if="doc.ISDIRTY == 1">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<p><strong>{{doc.DOCNAME}}</strong></p>
+							<h3>{{doc.DOCDESCRIPTION}}</h3>
+							<span class="ui-arrow"></span>
+						</a>
+            		</li>
+            	</ul>			
+			</div>
+    	</div>
+    	<div id="doctypedialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title">Select Folder</h1>
+				</div>
+				<div class="ui-content">			
+					<ul class="ui-listview ui-radiobutton">	
+						<li ng-repeat="d in doctypes track by $index">
+							<label for="{{'check' + $index}}">{{d.DOCTYPE}}</label>
+							<input type="radio" id="{{'check' + $index}}" name="doctype" ng-checked="d.DOCTYPE === doctype" ng-click="setDoctype(d.DOCTYPE)">
+						</li>
+					</ul>	
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" href="#" data-dismiss="modal">Cancel</a>
+						<a class="ui-btn-a" href="#" ng-click="createNew()" data-dismiss="modal">Ok</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+		function MainController($scope, doclinksService) {
+			var queryName = 'DOCLINKS';
+			var viewName = 'offline/doclinks/main.htm';
+
+			$scope.userInfo = EMMServer.DB.getUserInfo();				
+			$scope.doclinks = EMMServer.DB.getQueryResult(queryName);
+			$scope.doctypes = EMMServer.DB.getQueryResult("APPDOCTYPE");
+			$scope.doctype = $scope.doctypes[0].DOCTYPE;
+			
+			doclinksService.init({
+				userInfo : $scope.userInfo,
+				viewName : viewName
+			});
+			
+			var pageData = EMMServer.Session.getItem('DOCLINKS_DATA');
+			
+			$scope.TXCOUNT = EMMServer.DB.getUserTxnCount();
+			var messages = EMMServer.DB.getQueryResult("MESSAGE") || null;
+			if (messages)
+				$scope.message = messages[0].DISPLAYMESSAGE; 
+			
+			$scope.goBack = function(){
+				EMMServer.DB.Select()
+					.go(pageData.returnPage);
+			}
+			
+			$scope.setDoctype = function(doctype){
+				$scope.doctype = doctype;
+			}
+			/* 
+			$scope.createNew = function(){
+				doclinksService.createNew(pageData.entityName, pageData.entityId);
+			} */
+			
+			$scope.createNew = function(){
+				doclinksService.createNew(pageData.entityName, pageData.entityId, $scope.doctype);
+			}
+			$scope.showDetail = doclinksService.showDetail;
+		}
+		</script>
+	</body>
+</html>	

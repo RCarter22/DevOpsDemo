@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a class="ui-btn-left" ng-click="actions.goBack()" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSPSR">Service Requests (SP)</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+					<a class="ui-btn-side ui-btn-side-b" ng-click="advancedSearch()" translate="ADVANCED">Advanced</a>
+				</form>
+			</div>			
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li>
+						<a ng-click="actions.createNew()">
+							<img src="../../images/addnew.png">
+							<h3 translate="CREATESR">Create Service Request</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>	
+					<li class="ui-divider ui-divider-c"></li>			
+					<li>
+						<a ng-click="newList()">
+							<img src="../../images/sr.png">
+							<h3 translate="SR.NEWREQS">New Service Requests</h3>
+							<span class="ui-bubble">{{NEWSRTOTAL}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>				
+					<li>
+						<a ng-click="activeList()">
+							<img src="../../images/sr.png">
+							<h3 translate="SR.ACTIVEREQS">Active Service Requests</h3> 
+							<span class="ui-bubble">{{ACTIVESRTOTAL}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span class="ui-badge" ng-show="TXNCOUNT != 0">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online>
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	<script type="text/javascript">
+		function MainController($scope, pluspsrService, paginationService){
+			var queryName = "SR";
+			var viewName = 'offline/pluspsr/main.htm';
+			
+			EMMServer.Offline.setSyncViewName(viewName);
+			EMMServer.Offline.setDefaultOnlineAction('pluspsr/main.action');
+			
+			$scope.userInfo = EMMServer.DB.getUserInfo();				
+			$scope.NEWSRTOTAL = EMMServer.DB.getQueryResult("NEWSRTOTAL")[0].NEWSRTOTAL || 0;
+			$scope.ACTIVESRTOTAL = EMMServer.DB.getQueryResult("ACTIVESRTOTAL")[0].ACTIVESRTOTAL || 0;
+			$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+			
+			// Init service
+			pluspsrService.init({
+				userInfo : $scope.userInfo
+			});					
+			
+			paginationService.init({
+				queryName : queryName,
+				viewName : viewName
+			});
+			
+			$scope.pageService = paginationService;
+			
+			$scope.quickSearch = function() {
+				pluspsrService.toList($scope.pageService.search);
+			}			
+			
+			$scope.advancedSearch = pluspsrService.toAdvancedSearch;
+			$scope.newList = pluspsrService.toNewList;
+			$scope.activeList = pluspsrService.toActiveList;
+			
+			$scope.actions = {
+				createNew: pluspsrService.createNew,
+				srlist: pluspsrService.toList,
+				goback: function(){
+					EMMServer.DB.Select()
+						.addQuery("PORTLET", "SELECT P.* FROM PORTLET P INNER JOIN SCCONFIG SC ON P.SCCONFIGID = SC.SCCONFIGID WHERE SC.ISDEFAULT = 1 ORDER BY P._ID ASC")
+						.addQuery("SCCONFIG", "SELECT * FROM SCCONFIG")
+						.submit("offline/login/startcenter.htm", true);								
+				}
+			};		
+		}
+	</script>
+	</body>
+</html>

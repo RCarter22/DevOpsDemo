@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+	            <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+	            <h3 class="ui-title" translate="EZMAXMOBILE.INVISSUE">Issues and Transfers</h3>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+	        </div>
+	        <div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<ul class="ui-navbar">
+				<li><a ng-click="actions.toIssue(storeroom)" class="ui-active" translate="MATUSETRANS.ISSUERETURN">Issue and Return</a></li>
+				<!-- <li><a ng-click="actions.toTransferOut(storeroom)" translate="MATRECTRANS.TRANSFEROUT">Transfer Out</a></li>
+				<li><a ng-click="actions.toTransferIn(storeroom)" translate="MATRECTRANS.TRANSFERIN">Transfer In</a></li>	 -->	
+			</ul>	
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="MATUSETRANS.LOCATION">Location</label>
+						<input type="text" id="LOCATION" ng-model="storeroom.LOCATION" readonly= "true"/>
+					</li>
+					<li class="ui-field-block">
+						<label translate="MATUSETRANS.DESCRIPTION">Description</label>
+						<textarea id="DESCRIPTION" ng-model="storeroom.DESCRIPTION" readonly= "true"></textarea>
+					</li>	
+					<li class="ui-field">
+						<label translate="MATUSETRANS.SITEID">Site</label>
+						<input type="text" id="SITEID" ng-model="storeroom.SITEID" readonly= "true"/>
+					</li>
+				</ul>
+				
+				<div class="ui-section" translate="MATUSETRANS.ISSUERETURN">Issue and Return</div>
+				<ul class="ui-listview" style="margin-left:14px;margin-right:14px;">
+					<ul class="ui-navbar">
+						<li><a ng-click="viewTab('LIST')" ng-class="{'ui-active' : mode == 'LIST'}" translate="VIEWLIST">View List</a></li>
+						<li><a ng-click="viewTab('SUMMARY')" ng-class="{'ui-active' : mode == 'SUMMARY'}" translate="VIEWSUMMARY">View Summary</a></li>
+					</ul>
+					<ul pagination="" class="ui-listview" ng-show="pageService.hasPages() && mode == 'LIST'"></ul>
+					<ul class="ui-listview" ng-show="mode == 'LIST' && issues.length >0">
+						<li ng-repeat="i in issues">
+							<a ng-click="actions.toIssueDetail(storeroom, i)" ng-style="i.MATUSETRANSID == lastscannedID && {'background-color': 'lightgreen'}">
+								<span class="ui-accessory-left" ng-if="i.mbo.isDirty()">
+									<span class="ui-circle ui-circle-c"></span>
+								</span>
+								<p class="ui-aside">{{i.ISSUETYPE}}</p>
+								<p>{{i.ITEMNUM}} ({{i.LINETYPE}})</p>
+								<h3>{{i.DESCRIPTION}}</h3>
+								<h3>Quantity: {{i.QUANTITY}}</h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+					</ul>
+					<ul pagination="" class="ui-listview" ng-show="pageService.hasPages() && mode == 'SUMMARY'"></ul>
+					<ul class="ui-listview" ng-show="mode == 'SUMMARY' && issues.length>0">
+						<li ng-repeat="i in issueSummary">
+	                        <a ng-style="((i.ISSUES - i.RETURNS)<0 && {'color' : 'red'} ) || ((i.ISSUES - i.RETURNS)>0 && {'color' : 'green'} ) ">
+								<p>{{i.ITEMNUM}} ({{i.LINETYPE}})</p>
+	                            <h3>{{i.DESCRIPTION}}</h3>
+	                            <p>Issue Quantity: {{i.ISSUES}}</p>
+	                            <p>Return Quantity: {{i.RETURNS}}</p>
+								<p>Net Change Quantity: {{i.ISSUES - i.RETURNS}}</p>
+							</a>
+						</li> 
+					</ul>
+					<div class="ui-btn-container" ng-show="mode == 'LIST'">
+						<a class="ui-btn-a" ng-click="createNewIssue(storeroom)" translate="ADDNEW">New Row</a>
+					</div>
+                </ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, issuestransfersService, applicationService, paginationService){
+				var viewName = "offline/invissue/issue.htm";
+				var queryName = 'ISSUES';
+				var appName = 'INVISSUE';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('invissue/main.action');
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.issues = EMMServer.DB.getMboSet('MatUseTrans', queryName);
+				$scope.issueSummary = EMMServer.DB.getQueryResult("ISSUESUMMARY");
+				
+				var pageData  = EMMServer.Session.getItem('STOREROOM_DATA');
+				$scope.storeroom = pageData.storeroom;
+				$scope.lastscannedID = pageData.lastscannedID; 
+				$scope.mode = pageData.viewType || "LIST";
+				$scope.viewTab = function(viewType){
+					$scope.mode = viewType;
+				}
+
+				$scope.createNewIssue = issuestransfersService.createNewIssue;
+				
+				issuestransfersService.init({
+					userInfo: $scope.userInfo,
+					viewName: viewName
+				});
+				
+				paginationService.init({
+					pagination : $scope.issues.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				$scope.pageService = paginationService;
+
+				$scope.actions = issuestransfersService.actions;
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+		
+				$scope.goBack = function(){
+					$scope.pageService.clearCache();
+					EMMServer.Session.removeItem('STOREROOM_DATA');
+					applicationService.goToApp(appName);
+				};
+			}
+		</script>
+	</body>
+</html>

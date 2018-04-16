@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+<head>
+<title>EZMaxMobile - Offline</title>
+<emm:include value="../common/includes.htm" />
+</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="MATRECTRANS.TRANSFERIN">Transfer In</h3>
+				<a ng-show="matrectrans.mbo.isNew()" ng-click="actions.confirmTransferOnSave(storeroom, matrectrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : matrectrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !matrectrans.mbo.isDirty(), 'ui-statusbar-c': matrectrans.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="matrectrans.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="MATRECTRANS.LINETYPE">Line Type</label>
+						<input disabled="true" ng-model="matrectrans.LINETYPE" ng-readonly="matrectrans.mbo.isReadOnly('LINETYPE')" ng-required="matrectrans.mbo.isRequired('LINETYPE')">
+						<a class="ui-arrow"  ng-click="domain($event, matrectrans)" data-field="LINETYPE" data-display="LINETYPE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.ITEM">Item</label>
+						<input disabled="true" ng-model="matrectrans.ITEMNUM" ng-readonly="matrectrans.mbo.isReadOnly('ITEMNUM')" ng-required="matrectrans.mbo.isRequired('ITEMNUM')">
+						<a class="ui-arrow"  ng-click="domain($event, matrectrans)" data-field="ITEMNUM" data-display="ITEMNUM,DESCRIPTION,LOCATION,BINNUM,CURBAL"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.ROTASSETNUM">Rotating Asset</label>
+						<input ng-model="matrectrans.ROTASSETNUM" ng-readonly="matrectrans.mbo.isReadOnly('ROTASSETNUM')" ng-required="matrectrans.mbo.isRequired('ROTASSETNUM')">
+						<a class="ui-arrow"  ng-click="domain($event, matrectrans)" data-field="ROTASSETNUM" data-display="ASSETNUM,DESCRIPTION,LOCATION"></a>
+					</li>
+					<li class="ui-field-block">
+						<label translate="MATRECTRANS.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="matrectrans.DESCRIPTION" ng-readonly="true" ng-required="matrectrans.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-divider ui-divider-c" translate="MATRECTRANS.TRANSFERDETAILS">Transfer Details</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.QUANTITY">Quantity</label>
+    					<input data-interval="1" data-min="1" data-control="spinner" type="text"  ng-model="matrectrans.QUANTITY" ng-required="matrectrans.mbo.isRequired('QUANTITY')" ng-readonly="matrectrans.mbo.isReadOnly('QUANTITY')" ng-blur="matrectrans.mbo.setValue($event)" ></input>
+					</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.CONVERSIONFACTOR">Conversion Factor</label>
+    					<input data-interval="1" data-min="1" data-control="spinner" type="text" ng-model="matrectrans.CONVERSION" ng-required="matrectrans.mbo.isRequired('CONVERSION')" ng-readonly="matrectrans.mbo.isReadOnly('CONVERSION')"></input>
+					</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.FROMSTORELOC">From Location</label>
+						<input disabled="true" ng-model="matrectrans.FROMSTORELOC" ng-readonly="matrectrans.mbo.isReadOnly('FROMSTORELOC')" ng-required="matrectrans.mbo.isRequired('FROMSTORELOC')">
+						<a ng-if="matrectrans.ITEMNUM" class="ui-arrow"  ng-click="domain($event, matrectrans)" data-field="FROMSTORELOC" data-display="LOCATION,BINNUM,CURBAL"></a>
+						<a ng-if="!matrectrans.ITEMNUM" class="ui-arrow"  ng-click="domain($event, matrectrans)" data-field="FROMSTORELOC" data-display="LOCATION,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.FROMBIN">From Bin</label>
+						<input disabled="true" ng-model="matrectrans.FROMBIN" ng-readonly="matrectrans.mbo.isReadOnly('FROMBIN')" ng-required="matrectrans.mbo.isRequired('FROMBIN')">
+						<a class="ui-arrow" ng-click="domain($event, matrectrans)" data-field="FROMBIN" data-display="BINNUM,CURBAL"></a>
+					</li>
+					<li class="ui-field" ng-show="matrectrans.mbo._frombinData.CURBAL">
+						<label translate="MATRECTRANS.FROMQTY">From Bin Quantity</label>
+						<input disabled="true" ng-model="matrectrans.mbo._frombinData.CURBAL" ng-readonly="true">
+					</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.TOBIN">To Bin</label>
+						<input ng-model="matrectrans.TOBIN" ng-readonly="matrectrans.mbo.isReadOnly('TOBIN')" ng-required="matrectrans.mbo.isRequired('TOBIN')">
+						<a class="ui-arrow" ng-click="domain($event, matrectrans)" data-field="TOBIN" data-display="BINNUM,CURBAL"></a>
+					</li>
+					<li class="ui-field" ng-show="matrectrans.mbo._tobinData.CURBAL">
+						<label translate="MATRECTRANS.TOQTY">To Bin Quantity</label>
+						<input disabled="true" ng-model="matrectrans.mbo._tobinData.CURBAL" ng-readonly="true">
+					</li>
+					<li class="ui-field">
+						<label translate="MATRECTRANS.FROMSITE">From Site</label>
+						<input disabled="true" ng-model="matrectrans.FROMSITEID" ng-readonly="matrectrans.mbo.isReadOnly('FROMSITEID')" ng-required="matrectrans.mbo.isRequired('FROMSITEID')">
+						<a class="ui-arrow"  ng-click="domain($event, matrectrans)" data-field="FROMSITEID" data-display="SITEID,DESCRIPTION"></a>
+					</li>
+
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, issuestransfersService, domainService){
+				var appName = 'INVISSUE';
+				var queryName = 'TRANSFERIN';
+				var viewName = 'offline/invissue/transferindetail.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				var pageData = EMMServer.Session.getItem('STOREROOM_DATA');
+				$scope.storeroom = pageData.storeroom;
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				issuestransfersService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.domain = domainService.domain;
+				$scope.locationDrilldown = domainService.locationDrilldown;
+				
+				$scope.actions = issuestransfersService.actions;
+				$scope.matrectrans = new MatRecTrans(EMMServer.DB.getQueryResult(queryName)[0]);
+
+				// *Important* to set app name
+				$scope.matrectrans.mbo.appName(appName);
+				$scope.$watch('matrectrans', function(newValue, oldValue) {
+					if (newValue !== oldValue)
+						$scope.matrectrans.mbo.toBeSaved(true);
+				}, true);
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+								
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					$scope.matrectrans.session.remove();
+					EMMServer.DB.Select().go("offline/invissue/transferin.htm");
+				};
+			}
+		</script>
+	</body>
+</html>
