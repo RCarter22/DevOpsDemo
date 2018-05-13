@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left"	translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.LABREP">Labor Reporting</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+					<a class="ui-btn-side ui-btn-side-b" ng-click="advancedSearch()" translate="Advanced">Advanced</a>
+				</form>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="labtrans">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<!-- <ul class="ui-listview">
+					<li class="ui-field ui-sort">
+						<label translate="SORTBY">Sort By</label>
+						<select ng-change="pageService.changeSortBy()" ng-model="pageService.sortBy" ng-options="o.label for o in pageService.sortOptions">
+						</select>
+						<a ng-click="pageService.changeSortDirection()" class="ui-btn-sort"><span data-sortorder="{{pageService.sortDirection}}"></span></a>
+					</li>
+				</ul> -->
+				<ul class="ui-listview" ng-show="labtrans">
+					<li class="ui-divider ui-divider-c" translate="LIST">List</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				<ul class="ui-listview">
+					<li ng-repeat="lr in labtrans">
+					<a ng-click="showDetail(lr)">
+						<span class="ui-accessory-left" ng-if="lr.mbo.isDirty()">
+							<span class="ui-circle ui-circle-c"></span>
+						</span>
+						<!-- attributes here -->
+						<p class="ui-aside">{{lr.SITEID}}</p>
+						<h3 ng-if="lr.WONUM">{{lr.WONUM}}</h3>
+						<h3>{{lr.LABORCODE}}</h3>
+						<p>{{ 'LABREP.TRANSTYPE' | translate }} : {{lr.TRANSTYPE}}</p>
+						<p>{{ 'LABREP.STARTDATE' | translate }} : {{lr.STARTDATE | date : 'shortDate'}}</p>
+						<p>{{ 'LABREP.REGULARHRS' | translate }} : {{lr.REGULARHRS |number :2}}</p>
+						<p>{{ 'LABREP.GENAPPRSERVRECEIPT' | translate }} : {{lr.GENAPPRSERVRECEIPT}}</p>
+						<span class="ui-arrow"></span>
+					</a>
+					<a ng-click="approveLabor(lr)" class="ui-checklistbutton" data-checked="{{lr.GENAPPRSERVRECEIPT == '1'}}"></a>											
+				</ul>
+				<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, $filter, applicationService, labrepService, paginationService) {
+				// Setup
+				var appName = 'LABREP';
+				var viewName = 'offline/labrep/list.htm';
+				var queryName = 'LABREP';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.labtrans = EMMServer.DB.getMboSet('LabTrans', queryName, appName); // Labor Reporting behind the scenes is a LabTrans object.
+				
+				labrepService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				paginationService.init({
+					pagination : $scope.labtrans.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				$scope.pageService = paginationService;
+				
+				
+				// any actions needed on this page
+				$scope.goBack = function() {
+					$scope.pageService.clearCache();
+					applicationService.goToApp(appName);
+				};
+				
+				$scope.showDetail = labrepService.showDetail;
+				
+				$scope.advancedSearch = labrepService.toAdvancedSearch;
+				
+				$scope.quickSearch = function(){
+					labrepService.toList($scope.pageService.search);
+				};
+				
+				$scope.approveLabor = function(lt){
+					if(lt.GENAPPRSERVRECEIPT != '0' && lt.GENAPPRSERVRECEIPT != null){
+						alert(getText('ALREADYAPPR', null, 'Transaction has already been approved'));
+					}else if(lt.TASKID === null && lt.TRANSTYPE === 'WORK'){
+						alert(getText('TASKNEEDED', null, 'Task needed before approval'));					
+					}else{
+						labrepService.actions.approveLabor(lt);
+					}
+				}
+			}
+		</script>
+	</body>
+</html>

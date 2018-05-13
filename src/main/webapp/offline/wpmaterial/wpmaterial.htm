@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="WPMATERIAL.NAME">Planned Materials</h3>
+				<a ng-click="actions.saveWPMaterial(wpmaterial)" class="ui-btn-right" ng-class="{'ui-btn-c' : wpmaterial.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !wpmaterial.mbo.isDirty(), 'ui-statusbar-c': wpmaterial.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="wpmaterial.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+            <div class="ui-content">
+       			<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="WPMATERIAL.LINETYPE">Line Type</label>
+						<input ng-model="wpmaterial.LINETYPE" ng-readonly="wpmaterial.mbo.isReadOnly('LINETYPE')" ng-required="wpmaterial.mbo.isRequired('LINETYPE')"></input>
+						<a class="ui-arrow" ng-click="domain($event, wpmaterial)" data-field="LINETYPE" data-display="LINETYPE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WPMATERIAL.ITEMNUM">Item</label>
+						<input ng-model="wpmaterial.ITEMNUM" ng-readonly="wpmaterial.mbo.isReadOnly('ITEMNUM')" ng-required="wpmaterial.mbo.isRequired('ITEMNUM')"></input>
+						<a class="ui-arrow" ng-click="domain($event, wpmaterial)" data-field="ITEMNUM" data-display="ITEMNUM,DESCRIPTION,LOCATION, SITEID"></a>
+					</li>
+					<li class="ui-field-block">
+						<label translate="WPMATERIAL.DESCRIPTION">Description</label>
+						<textarea ng-model="wpmaterial.DESCRIPTION" ng-readonly="wpmaterial.mbo.isReadOnly('DESCRIPTION')" ng-required="wpmaterial.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="WPMATERIAL.ITEMQTY">Quantity</label>
+						<input ng-model="wpmaterial.ITEMQTY" ng-readonly="wpmaterial.mbo.isReadOnly('ITEMQTY')" ng-required="wpmaterial.mbo.isRequired('ITEMQTY')">
+    					<input id="ITEMQTY" type="text" data-interval="1" data-control="spinner" ng-model="wpmaterial.ITEMQTY" ng-required="wpmaterial.mbo.isRequired('ITEMQTY')" ng-readonly="wplabor.mbo.isReadOnly('ITEMQTY')"></input>
+					</li>
+					<li class="ui-field">
+						<label translate="WPMATERIAL.UNITCOST">Unit Cost</label>
+						<input ng-model="wpmaterial.UNITCOST" ng-readonly="wpmaterial.mbo.isReadOnly('UNITCOST')" ng-required="wpmaterial.mbo.isRequired('UNITCOST')"></input>
+    					<input id="UNITCOST" type="text" data-interval="0.25" data-control="spinner" ng-model="wpmaterial.UNITCOST" ng-required="wpmaterial.mbo.isRequired('UNITCOST')" ng-readonly="wplabor.mbo.isReadOnly('UNITCOST')"></input>
+					</li>
+					<li class="ui-field">
+						<label translate="WPMATERIAL.STOREROOM">Storeroom</label>
+						<input ng-model="wpmaterial.LOCATION" ng-readonly="wpmaterial.mbo.isReadOnly('LOCATION')" ng-required="wpmaterial.mbo.isRequired('LOCATION')"></input>
+						<a class="ui-arrow" ng-click="domain($event, wpmaterial)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION,SITEID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WPMATERIAL.STORELOCSITE">Storeroom Site</label>
+						<input ng-model="wpmaterial.STORELOCSITE" ng-readonly="wpmaterial.mbo.isReadOnly('STORELOCSITE')" ng-required="wpmaterial.mbo.isRequired('STORELOCSITE')">
+						<a class="ui-arrow" ng-click="domain($event, wpmaterial)" data-field="STORELOCSITE" data-display="SITEID,LOCATION,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WPMATERIAL.RESTYPE">Reservation Type</label>
+						<input ng-model="wpmaterial.RESTYPE" ng-readonly="wpmaterial.mbo.isReadOnly('RESTYPE')" ng-required="wpmaterial.mbo.isRequired('RESTYPE')">
+						<a class="ui-arrow" ng-click="domain($event, wpmaterial)" data-field="RESTYPE" data-display="VALUE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WPMATERIAL.REQUIREDATE">Required Date</label>
+						<datepicker date-format="datetime" id="REQUIREDATE" ng-model="wpmaterial.REQUIREDATE" ng-required="wpmaterial.mbo.isRequired('REQUIREDATE')" ng-readonly="wpmaterial.mbo.isReadOnly('REQUIREDATE')" />
+					</li>
+				</ul>
+            </div>
+    	</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, wpmaterialService, applicationService) {
+				var queryName = 'WPMATERIAL';
+				var viewName = 'offline/wpmaterial/wpmaterial.htm';
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.wpmaterial = new WPMaterial(EMMServer.DB.getQueryResult(queryName)[0]);
+				$scope.appService = applicationService;
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				
+				//Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				wpmaterialService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				var pageData = EMMServer.Session.getItem('WPMATERIAL_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				$scope.domain = domainService.domain;
+				
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.wpmaterial.session.remove();
+					EMMServer.DB.Select()
+						.go("offline/wpmaterial/main.htm");
+				}
+				$scope.actions = wpmaterialService.actions;
+				//alert('date on view page' + $scope.wpmaterial.REQUIREDATE);
+			}
+		</script>
+	</body>
+</html>

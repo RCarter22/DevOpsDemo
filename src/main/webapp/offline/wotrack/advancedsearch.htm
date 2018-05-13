@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left">Back</a>
+				<h3 class="ui-title" translate="ADVANCEDSEARCH">Advanced Search</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="WORKORDER.WONUM">Work Order</label>
+						<input ng-model="workorder.WONUM"/>
+					</li>														
+					<li class="ui-field-block">
+						<label translate="WORKORDER.DESCRIPTION">Description</label>
+						<textarea ng-model="workorder.DESCRIPTION"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.STATUS">Status</label>
+						<input ng-model="workorder.STATUS"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="STATUS" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.LOCATION">Location</label>
+						<input ng-model="workorder.LOCATION"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="LOCATION" data-display="LOCATION,DESCRIPTION,SITEID"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="WORKORDER.ASSETNUM">Asset</label>
+						<input ng-model="workorder.ASSETNUM"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="ASSETNUM" data-display="ASSETNUM,DESCRIPTION,SITEID"></a>
+					</li>								
+					<li class="ui-field">
+						<label translate="WORKORDER.WORKTYPE">Work Type</label>
+						<input ng-model="workorder.WORKTYPE"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="WORKTYPE" data-display="WORKTYPE,WTYPEDESC"></a>
+					</li>													
+					<li class="ui-field">
+						<label translate="WORKORDER.WOPRIORITY">Priority</label>
+						<input ng-model="workorder.WOPRIORITY"/>
+					</li>					
+					<li class="ui-field">
+						<label translate="WORKORDER.SUPERVISOR">Supervisor</label>
+						<input ng-model="workorder.SUPERVISOR"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="SUPERVISOR" data-display="PERSONID,DISPLAYNAME"></a>						
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.LEAD">Lead</label>
+						<input ng-model="workorder.LEAD"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="LEAD" data-display="PERSONID,DISPLAYNAME"></a>						
+					</li>	
+					<li class="ui-field">
+						<label translate="WORKORDER.PERSONGROUP">Work Group</label>
+						<input ng-model="workorder.PERSONGROUP"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" data-field="PERSONGROUP" data-display="PERSONGROUP,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="WORKORDER.FAILURECODE">Failure Class</label>
+						<input ng-model="workorder.FAILURECODE"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="FAILURECODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.PROBLEMCODE">Problem Code</label>
+						<input ng-model="workorder.PROBLEMCODE"/>
+						<a class="ui-arrow" ng-click="domain($event, workorder)" onclick="" data-field="PROBLEMCODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>		
+					<li class="ui-divider ui-divider-c" translate="WORKORDER.SCHEDSTART">Scheduled Start</li>
+					<li class="ui-field">
+						<label translate="FROM">From</label>
+						<datepicker id="SCHEDSTARTFROM" ng-model="workorder.SCHEDSTARTFROM" date-format="datetime" />
+					</li>
+					<li class="ui-field">
+						<label translate="TO">To</label>
+						<datepicker id="SCHEDSTARTTO" ng-model="workorder.SCHEDSTARTTO" date-format="datetime" />
+					</li>															
+				</ul>		
+			</div>
+			<div class="ui-btn-container">
+				<a class="ui-btn-b" ng-click="clearSearch()">Clear</a>
+				<a class="ui-btn-a" ng-click="advancedSearch(workorder)">Search</a>
+			</div>			
+		</div>		
+
+		<script type="text/javascript">
+			function MainController($scope, $window, domainService, wotrackService) {
+				var appName = 'WOTRACK';
+				var viewName = 'offline/wotrack/advancedsearch.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				
+				// Get Work Order object data
+				$scope.workorder = new WorkOrder(EMMServer.DB.getQueryResult("WORKORDER")[0]);
+				$scope.workorder.mbo.appName(appName);
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					isAdvanced : '1'
+				});
+				
+				wotrackService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+						
+				$scope.domain = domainService.domain;
+				$scope.advancedSearch = wotrackService.doAdvancedSearch;
+
+				$scope.clearSearch = function() {
+					// Clear any changes and remove from session
+					$scope.workorder.session.remove();
+					wotrackService.toAdvancedSearch();
+				}
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					$scope.workorder.session.remove();
+					wotrackService.toList(null,true);
+				};
+			}
+		</script>
+	</body>
+</html>

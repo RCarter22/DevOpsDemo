@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.CREATEDR">Create Requisition</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview ui-inset">
+					<li class="ui-pagination">	
+						<a class="ui-pagination-prev" ng-click="actions.toMR(mr)">	
+							<span class="ui-arrow"></span>
+						</a>
+						<h3 class="title">
+						Step 2 of 2
+						</h3>
+					</li>
+				</ul>
+				<ul class="ui-listview">
+					 <li class="ui-field">
+						<label translate="MR.MRNUM">Requisition</label>
+						<input ng-model="mr.MRNUM" ng-readonly="mr.mbo.isReadOnly('MRNUM')" ng-required="mr.mbo.isRequired('MRNUM')">
+					</li>
+					<li class="ui-field">
+						<label translate="MR.WONUM">Work Order</label>
+						<input disabled="true" ng-model="mr.WONUM" ng-readonly="mr.mbo.isReadOnly('WONUM')" ng-required="mr.mbo.isRequired('WONUM')">
+						<a class="ui-arrow" ng-click="domain($event, mr)" data-field="WONUM" data-display="WONUM,DESCRIPTION,ASSETNUM,LOCATION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MR.LOCATION">Location</label>
+						<input disabled="true" ng-model="mr.LOCATION" ng-readonly="mr.mbo.isReadOnly('LOCATION')" ng-required="mr.mbo.isRequired('LOCATION')">
+						<a class="ui-arrow" ng-click="domain($event, mr)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field-block">
+						<label translate="MR.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="mr.DESCRIPTION" ng-readonly="mr.mbo.isReadOnly('DESCRIPTION')" ng-required="mr.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field ui-details ui-readonly">
+						<label translate="MR.STATUS">Status</label>
+						<p>{{mr.STATUS}}</p>
+						<p>{{mr.STATUSDATE | date : 'short'}}</p>
+					</li>
+					<li class="ui-field">
+						<label translate="MR.REQUIREDDATE">Required Date</label>
+						<datepicker date-format="datetime" id="REQUIREDDATE" ng-model="mr.REQUIREDDATE" ng-required="mr.mbo.isRequired('REQUIREDDATE')" ng-readonly="mr.mbo.isReadOnly('REQUIREDDATE')" />
+					</li>					
+				</ul>
+				
+<!-- 				<ul class="ui-listview"> -->
+<!-- 					<li class="ui-divider ui-divider-c" translate="MR.MRLINES">Requisition Line Items</li> -->
+<!-- 					<li ng-hide="mrlines">		 -->
+<!-- 						<div class="ui-statusbar ui-statusbar-c"> -->
+<!-- 							<h3 class="ui-title" translate="NORECORDS">No Records Found</h3> -->
+<!-- 						</div> -->
+<!-- 					</li>	 -->
+<!-- 				</ul> -->
+				<div class="ui-section" translate="MR.MRLINES">Requisition Line Items</div>
+				<ul class="ui-listview" ng-show="mrlines">
+					<li ng-repeat="mrl in mrlines">
+            			<a ng-click="actions.toMRLine(mr, mrl)">
+            				<span class="ui-accessory-left" ng-if="mrl.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<p>{{mrl.MRLINENUM}}</p>
+            				<p>{{ 'MRLINE.LINETYPE' | translate }}: {{mrl.LINETYPE}}</p>
+	            			<h3>{{mrl.DESCRIPTION}}</h3>
+		                    <p>{{ 'MRLINE.QTY' | translate }}: {{mrl.QTY}}</p>
+		                    <p>{{ 'MRLINE.UNITCOST' | translate }}: {{mrl.UNITCOST}}</p>
+		                    <span class="ui-arrow"></span>
+	                    </a>
+					</li>
+				</ul>
+				<div class="ui-statusbar ui-statusbar-c" ng-hide="mrlines">	
+					<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+				</div>
+				<div class="ui-btn-container">
+					<a ng-click="actions.saveAsDraft(mr)" class="ui-btn-a" ng-class="{'ui-btn-c' : mr.mbo.toBeSaved()}" translate="CREATEDR.SAVEASDRAFT">Save as Draft</a>
+					<a ng-click="actions.submitMR(mr,mrlines)" class="ui-btn-b" ng-class="{'ui-btn-c' : mr.mbo.toBeSaved()}" translate="CREATEDR.SUBMIT">Submit</a>
+				</div>
+			</div>
+			<div class="ui-sidebar">
+				<p class="ui-section" translate="ACTIONS">Actions</p>
+				<ul class="ui-listview ui-inset">
+					<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+					<li>
+				        <a ng-click="createMRLine(mr)">
+				        	<h3 translate="CREATEDR.NEWREQITEM">New Requisition Item</h3>
+				        	<span class="ui-arrow"></span>
+				        </a>
+				    </li>				
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $filter,  createdrService, domainService){
+				var viewName = 'offline/createdr/mrlines.htm',
+					queryName = 'MRLINES',
+					appName = 'CREATEDR';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();			
+			
+				createdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});	
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				//This data will contain MRLines in cache and what tab we are on
+				$scope.mr = new MR(EMMServer.DB.getQueryResult("MR")[0]);
+				$scope.mrlines = EMMServer.DB.getMboSet("MRLines", queryName);
+				$scope.domain = domainService.domain;
+				
+				$scope.createMRLine = createdrService.createMRLine;
+				$scope.actions = createdrService.actions;
+				
+				$scope.goBack = function (){
+					$scope.actions.toMR($scope.mr);
+				}
+			}
+		</script>		
+	</body>
+</html>

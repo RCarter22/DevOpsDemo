@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="actions.goback()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSTWO">Work Order Tracking (Tr)</h3>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+					<a class="ui-btn-side ui-btn-side-b" ng-click="advancedSearch()" translate="ADVANCED">Advanced</a>
+				</form>
+			</div>			
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li>
+						<a ng-click="actions.createNew()">
+							<img src="../../images/addnew.png">
+							<h3 translate="ADDNEW">Add New</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a ng-click="actions.wolist()">
+							<img src="../../images/wos.png">
+							<h3 translate="MYWOS">My Work Orders</h3>
+<!-- 							<span class="ui-bubble" ng-show="WOTOTAL != null">{{WOTOTAL}}</span>
+ -->							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li class="ui-divider ui-divider-c" ng-show="activeworkorders" translate="ACTIVEWORKORDERS">Active Work Orders</li>
+			    	<li ng-repeat = "wo in activeworkorders">
+			    		<a ng-click="actions.showDetail(wo)">
+							<span class="ui-accessory-left" ng-if="wo.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<p class="ui-aside">{{wo.SITEID}}</p>
+							<p><strong>{{wo.WONUM}} ({{wo.STATUS}})</strong></p>
+							<h3>{{wo.DESCRIPTION}}</h3>
+							<p>{{ 'WORKORDER.LOCATION' | translate }}: {{wo.LOCATION}}</p>
+							<p>{{ 'WORKORDER.LEAD' | translate }}: {{wo.LEAD}}</p>
+							<span class="ui-arrow"></span>
+						</a>
+			    	</li>
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+							<span class="ui-badge" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online>
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, $window, plustwoService, paginationService){
+				var queryName = "WORKORDER";
+				var viewName = 'offline/plustwo/main.htm';
+				
+				// Init Sync Settings
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('plustwo/main.action');
+
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				$scope.WOTOTAL = EMMServer.DB.getQueryResult("WORKORDER")[0].WOTOTAL || 0;
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				
+				$scope.activeworkorders = EMMServer.DB.getMboSet("WorkOrder", "ACTIVEWORKORDER");
+				
+				// Init service
+				plustwoService.init({
+					userInfo : $scope.userInfo
+				});					
+				
+				paginationService.init({
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.actions = {
+					createNew: plustwoService.createNew,
+					showDetail: plustwoService.showDetail,
+					wolist: plustwoService.toList,
+					goback: function(){
+						EMMServer.DB.Select()
+							.addQuery("DUMMY", "SELECT 1")
+							.submit("offline/login/index.htm", true);							
+					}
+				}
+				
+				$scope.pageService = paginationService;
+				
+				$scope.barcodeScan = function (){
+					EMMServer.Barcode.scan('scan')
+				};
+				
+				$window.scan = function(/*Scan Value*/ val){
+					$scope.pageService.search = val;
+					$scope.quickSearch();	
+				}
+				
+				$scope.quickSearch = function() {
+					plustwoService.toSearchList($scope.pageService.search);
+				}
+				
+				$scope.advancedSearch = plustwoService.toAdvancedSearch;	
+			}
+		</script>
+	</body>
+</html>

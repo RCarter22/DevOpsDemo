@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.ASSET">Asset</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="spareparts">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview" ng-show="spareparts">
+					<li class="ui-field ui-readonly">
+						<label translate="ASSET.ASSETNUM">Asset</label>						
+						<p>{{spareparts[0].ASSETNUM}}</p>
+					</li>
+						
+					<li class="ui-divider ui-divider-c" translate="SPAREPARTS">Spare Parts</li>
+				</ul>			
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				
+				<ul class="ui-listview" ng-repeat="part in spareparts">
+					<li>
+						<a>
+							<p class="ui-aside">{{part.SITEID}}</p>
+							<p><strong>{{part.ITEMNUM}}</strong></p>
+							<h3>{{part.ITEMDESCRIPTION}}</h3>
+							<p>{{ 'SPAREPART.QUANTITY' | translate }}: {{part.QUANTITY}}</p>
+							<p>{{ 'SPAREPART.ISSUEDQTY' | translate }}: {{part.ISSUEDQTY}}</p>
+							<p>{{ 'SPAREPART.REMARKS' | translate }}: {{part.REMARKS}}</p>						
+						</a>
+					</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $filter, paginationService){
+				var viewName = 'offline/asset/listspareparts.htm',
+					assetPage = 'offline/asset/asset.htm',
+					queryName = 'SPAREPART',
+					appName = 'ASSET';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.spareparts = EMMServer.DB.getQueryResult(queryName);				
+				
+				paginationService.init({
+					pagination : $scope.spareparts.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;
+								
+				$scope.goBack = function(){
+					EMMServer.DB.Select().go(assetPage);
+				}			
+			}
+		</script>		
+	</body>
+</html>

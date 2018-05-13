@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+<head>
+	<title>EZMaxMobile</title>
+	<emm:include value="../common/includes.htm"/>
+</head>
+<body>
+	<div class="ui-page ui-inset">
+		<emm:include value="../common/menu.htm"/>
+		<div class="ui-header ui-header-b">
+			<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+			<h3 class="ui-title">Report Downtime</h3>
+			<a ng-click="actions.saveDowntime(downtime, asset, mode)" class="ui-btn-right ui-btn-c" translate="SAVE">Save</a>
+		</div>
+		<ul class="ui-navbar">
+			<li style="margin-right:-5px"><a ng-click="viewTab('CHANGESTATUS')" ng-class="{'ui-active' : mode == 'CHANGESTATUS'}"  translate="CHANGESTATUS">Change Status</a></li>
+			<li><a ng-click="viewTab('REPORTDOWNTIME')" ng-class="{'ui-active' : mode == 'REPORTDOWNTIME'}"  translate="REPDOWNTIME">Report Down Time</a></li>
+		</ul>
+		<div class="ui-content">
+			<s:include value="../common/statusbar.jsp"/>
+			<ul class="ui-listview">
+			    <li class="ui-field">
+					<label>Asset</label>
+					<input type = "text" ng-model="downtime.ASSETNUM" ng-readonly="downtime.mbo.isReadOnly('ASSETNUM')" ng-required="downtime.mbo.isRequired('ASSETNUM')">
+				</li>
+				<li class="ui-field">
+					<label translate="ASSET.ISRUNNING">Asset Up?</label>						
+					<input ng-show="downtime.ISRUNNING == '1' || downtime.ISRUNNING == 'Y'" value="Yes" ng-readonly="downtime.mbo.isReadOnly('ISRUNNING')">
+					<input ng-hide="downtime.ISRUNNING == '1' || downtime.ISRUNNING == 'Y'" value="No" ng-readonly="downtime.mbo.isReadOnly('ISRUNNING')">
+				</li>
+			</ul>
+			<p class="ui-section">Downtime Report</p>		
+			<ul class="ui-listview">
+				<li ng-show="mode == 'CHANGESTATUS'" class="ui-field">
+					<label>Status Date</label>
+					<datepicker date-format="datetime" id="STATUSCHANGEDATE" ng-model="downtime.STATUSCHANGEDATE" ng-change="downtime.mbo.onChange('STATUSCHANGEDATE')" ng-required="downtime.mbo.isRequired('STATUSCHANGEDATE')" ng-readonly="downtime.mbo.isReadOnly('STATUSCHANGEDATE')" />
+					<!-- <input disabled="true" id="STATUSCHANGEDATE" type="text" ng-model="downtime.STATUSCHANGEDATE" ng-required="downtime.mbo.isRequired('STATUSCHANGEDATE')" ng-readonly="downtime.mbo.isReadOnly('STATUSCHANGEDATE')"></input>
+					<a data-input="STATUSCHANGEDATE" data-datetype="datetime" data-control="datepicker" class="ui-datepicker" ng-show="downtime.mbo.isReadOnly('STATUSCHANGEDATE') == false"></a> -->
+				</li>
+				<li ng-hide="mode == 'CHANGESTATUS'" class="ui-field">
+					<label>Start Date</label>
+					<datepicker date-format="datetime" id="STARTDATE" ng-model="downtime.STARTDATE" ng-change="downtime.mbo.onChange('STARTDATE')" ng-required="downtime.mbo.isRequired('STARTDATE')" ng-readonly="downtime.mbo.isReadOnly('STARTDATE')" />
+					<!-- <input disabled="true" id="STARTDATE" type="text" ng-model="downtime.STARTDATE" ng-change="downtime.mbo.onChange('STARTDATE')" ng-required="downtime.mbo.isRequired('STARTDATE')" ng-readonly="downtime.mbo.isReadOnly('STARTDATE')"></input>
+					<a data-input="STARTDATE" data-datetype="datetime" data-control="datepicker" class="ui-datepicker" ng-show="downtime.mbo.isReadOnly('STARTDATE') == false"></a> -->
+				</li>		
+			    <li ng-hide="mode == 'CHANGESTATUS'" class="ui-field">
+					<label>End Date</label>
+					<datepicker date-format="datetime" id="ENDDATE" ng-model="downtime.ENDDATE" ng-change="downtime.mbo.onChange('ENDDATE')" ng-required="downtime.mbo.isRequired('ENDDATE')" ng-readonly="downtime.mbo.isReadOnly('ENDDATE')" />
+					<!-- <input disabled="true" id="ENDDATE" type="text" ng-model="downtime.ENDDATE" ng-change="downtime.mbo.onChange('ENDDATE')" ng-required="downtime.mbo.isRequired('ENDDATE')" ng-readonly="downtime.mbo.isReadOnly('ENDDATE')"></input>
+					<a data-input="ENDDATE" data-datetype="datetime" data-control="datepicker" class="ui-datepicker" ng-show="downtime.mbo.isReadOnly('ENDDATE') == false"></a> -->
+				</li>
+			    <li ng-hide="mode == 'CHANGESTATUS'" class="ui-field">
+					<label>Downtime</label>
+   					<input data-interval="0.25" data-control="spinner" type="text" ng-model="downtime.DOWNTIME" ng-required="downtime.mbo.isRequired('DOWNTIME')" ng-readonly="downtime.mbo.isReadOnly('DOWNTIME')"></input>
+				</li>
+				<li class="ui-field">
+					<label>Downtime Code</label>
+					<input disabled="true" ng-model="downtime.STATUSCHANGECODE" ng-readonly="downtime.mbo.isReadOnly('STATUSCHANGECODE')" ng-required="downtime.mbo.isRequired('STATUSCHANGECODE')">
+					<a class="ui-arrow" ng-click="domain($event, downtime)" data-field="STATUSCHANGECODE" data-display="VALUE,DESCRIPTION"></a>
+				</li>
+			</ul>
+			
+			<p class="ui-section">Downtime Type</p>
+			<ul class="ui-listview ui-radiobutton">
+			    <li>
+					<label for="OPERATIONAL_1">Operational</label>
+					<input type="radio"	id="OPERATIONAL_1" ng-value="1" name="OPERATIONAL" ng-model="downtime.OPERATIONAL" ng-checked="downtime.OPERATIONAL == '1'" />
+							
+				</li>		
+			    <li>
+					<label for="OPERATIONAL_0">Non-Operational</label>
+					<input type="radio" id="OPERATIONAL_0"	ng-value="0" name="OPERATIONAL" ng-model="downtime.OPERATIONAL" ng-checked="downtime.OPERATIONAL == '0'"/>
+				</li>
+			</ul>						
+		</div>
+	</div>
+	<script type="text/javascript">
+			function MainController($scope, domainService, assetService) {
+				var viewName = 'offline/asset/downtime.htm';
+				var queryName = 'RECENTDOWNTIME';
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				var pageData = EMMServer.Session.getItem('DOWNTIME_DATA');
+				
+				//Returns the most recent downtime if any for the given asset
+				$scope.mostRecentDowntime = EMMServer.DB.getMboSet('Downtime', queryName);
+				//Get the most recent downtime from mboSet or set value as null
+				if($scope.mostRecentDowntime && $scope.mostRecentDowntime.length > 0)
+					$scope.mostRecentDowntime = $scope.mostRecentDowntime[0];
+				else
+					$scope.mostRecentDowntime = null;
+				$scope.downtime = EMMServer.Session.getMboFromSession(pageData.dtcacheKey);
+				$scope.asset = EMMServer.Session.getMboFromSession(pageData.assetcacheKey);
+				
+				$scope.downtime.mbo.toBeSaved(true);
+				$scope.downtime.mbo._mostRecent = $scope.mostRecentDowntime;
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName		
+				});
+				assetService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.domain = domainService.domain;
+				
+				$scope.viewTab = function(val){
+					$scope.mode = val;
+					if(val == 'CHANGESTATUS'){
+						$scope.downtime.STATUSCHANGEDATE = new Date();
+						$scope.downtime.STARTDATE = null;
+						$scope.downtime.ENDDATE = null;						
+					}else{
+						$scope.downtime.STARTDATE = new Date();
+						$scope.downtime.STATUSCHANGEDATE = null;
+					}						
+					EMMServer.Session.setItem('CURRENTMODE', $scope.mode);
+				};
+				
+				var prevMode = EMMServer.Session.getItem('CURRENTMODE');
+				if (prevMode === null)
+					$scope.viewTab('CHANGESTATUS');
+				else
+					$scope.viewTab(prevMode);				
+				
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.downtime.session.remove();
+					EMMServer.DB.Select().go(pageData.returnPage);
+				}
+				
+				$scope.actions = assetService.actions;
+			}
+		</script>
+</body>
+</html>

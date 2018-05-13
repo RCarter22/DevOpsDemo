@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="WPLABOR.NAME">Planned Labor</h3>
+				<a ng-click="actions.saveWPLabor(wplabor)" class="ui-btn-right" ng-class="{'ui-btn-c' : wplabor.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !wplabor.mbo.isDirty(), 'ui-statusbar-c': wplabor.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="wplabor.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+            <div class="ui-content">
+       			<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="WPLABOR.CRAFT">Craft</label>
+						<input disabled="true" ng-model="wplabor.CRAFT" ng-readonly="wplabor.mbo.isReadOnly('CRAFT')" ng-required="wplabor.mbo.isRequired('CRAFT')">
+						<a class="ui-arrow" ng-click="domain($event, wplabor)" data-field="CRAFT" data-display="CRAFT,SKILLLEVEL,VENDOR,STANDARDRATE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WPLABOR.SKILLLEVEL">Skill Level</label>
+						<input disabled="true" ng-model="wplabor.SKILLLEVEL" ng-readonly="wplabor.mbo.isReadOnly('SKILLLEVEL')">
+					</li>
+					<li class="ui-field">
+						<label translate="WPLABOR.VENDOR">Skill Level</label>
+						<input disabled="true" ng-model="wplabor.VENDOR" ng-readonly="wplabor.mbo.isReadOnly('VENDOR')">
+					</li>
+					<li class="ui-field">
+						<label translate="WPLABOR.AMCREW">Crew</label>
+						<input disabled="true" ng-model="wplabor.AMCREW" ng-readonly="wplabor.mbo.isReadOnly('AMCREW')" ng-required="wplabor.mbo.isRequired('AMCREW')">
+						<a class="ui-arrow" ng-click="domain($event, wplabor)" data-field="AMCREW" data-display="AMCREW,DESCRIPTION,AMCREWTYPE,ORGID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WPLABOR.LABORCODE">Labor</label>
+						<input disabled="true" ng-model="wplabor.LABORCODE" ng-readonly="wplabor.mbo.isReadOnly('LABORCODE')" ng-required="wplabor.mbo.isRequired('LABORCODE')">
+						<a class="ui-arrow" ng-click="domain($event, wplabor)" data-field="LABORCODE" data-display="LABORCODE,DISPLAYNAME"></a>
+					</li>
+					<li class="ui-field">
+    					<label translate="WPLABOR.QUANTITY">Quantity</label>
+    					<input id="QUANTITY" type="text" data-interval="1" data-control="spinner" ng-model="wplabor.QUANTITY" ng-required="wplabor.mbo.isRequired('QUANTITY')" ng-readonly="wplabor.mbo.isReadOnly('QUANTITY')"></input>
+					</li>	       			
+					<li class="ui-field">
+    					<label translate="WPLABOR.LABORHRS">Regular Hours</label>
+    					<input id="LABORHRS" type="text" hours-format data-interval="0.25" data-control="spinner" ng-model="wplabor.LABORHRS" ng-required="wplabor.mbo.isRequired('LABORHRS')" ng-readonly="wplabor.mbo.isReadOnly('LABORHRS')"></input>
+					</li>
+				</ul>
+            </div>
+    	</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, wplaborService, applicationService) {
+				var queryName = 'WPLABOR';
+				var viewName = 'offline/wplabor/wplabor.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.wplabor = new WPLabor(EMMServer.DB.getQueryResult(queryName)[0]);
+				$scope.appService = applicationService;
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName						
+				});					
+				wplaborService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+								
+				var pageData = EMMServer.Session.getItem('WPLABOR_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				$scope.domain = domainService.domain;
+				
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.wplabor.session.remove();
+					EMMServer.DB.Select()
+						.go("offline/wplabor/main.htm");
+				}
+				$scope.actions = wplaborService.actions;
+			}
+		</script>
+	</body>
+</html>

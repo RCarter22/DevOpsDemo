@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+	            <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+	            <h3 class="ui-title" translate="EZMAXMOBILE.INVISSUE">Issues and Transfers</h3>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+	        </div>
+	        <div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<ul class="ui-navbar">			
+				<li><a ng-click="actions.toIssue(storeroom)" translate="MATUSETRANS.ISSUERETURN">Issue and Return</a></li>
+				<li><a ng-click="actions.toTransferOut(storeroom)" translate="MATRECTRANS.TRANSFEROUT">Transfer Out</a></li>
+				<li><a ng-click="actions.toTransferIn(storeroom)" class="ui-active" translate="MATRECTRANS.TRANSFERIN">Transfer In</a></li>				
+			</ul>	
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="MATRECTRANS.LOCATION">Location</label>
+						<input type="text" id="LOCATION" ng-model="storeroom.LOCATION" readonly= "true"/>
+					</li>
+					<li class="ui-field-block">
+						<label translate="MATRECTRANS.DESCRIPTION">Description</label>
+						<textarea id="DESCRIPTION" ng-model="storeroom.DESCRIPTION" readonly= "true"></textarea>
+					</li>	
+					<li class="ui-field">
+						<label translate="MATRECTRANS.SITEID">Site</label>
+						<input type="text" id="SITEID" ng-model="storeroom.SITEID" readonly= "true"/>
+					</li>
+				</ul>
+				
+				<div class="ui-section" translate="MATRECTRANS.TRANSFERIN">Transfer In</div>
+				<ul class="ui-listview" style="margin-left:14px;margin-right:14px;">
+					<ul class="ui-navbar">
+   						<li><a ng-click="viewTab('LIST')" ng-class="{'ui-active' : mode == 'LIST'}" translate="VIEWLIST">View List</a></li>
+						<li><a ng-click="viewTab('SUMMARY')" ng-class="{'ui-active' : mode == 'SUMMARY'}" translate="VIEWSUMMARY">View Summary</a>  </li>
+					</ul>
+					<ul pagination="" class="ui-listview" ng-show="pageService.hasPages() && mode == 'LIST'"></ul>
+					<ul class="ui-listview" ng-show="mode == 'LIST' && transfers.length>0">
+						<li ng-repeat="t in transfers">
+							<a ng-click="actions.toTransferInDetail(storeroom, t)" ng-style="t.MATRECTRANSID == lastscannedID && {'background-color': 'lightgreen'}">
+								<span class="ui-accessory-left" ng-if="t.mbo.isDirty()">
+									<span class="ui-circle ui-circle-c"></span>
+								</span>
+								<p>{{t.ITEMNUM}} ({{t.LINETYPE}})</p>
+								<h3>{{t.DESCRIPTION}}</h3>
+								<p>Quantity:  {{t.QUANTITY}}</p>
+								<span class="ui-arrow"></span>
+							</a>
+   						</li>
+					</ul>
+					<ul pagination="" class="ui-listview" ng-show="pageService.hasPages() && mode == 'SUMMARY'"></ul>
+					<ul class="ui-listview" ng-show="mode == 'SUMMARY' && transfers.length>0">
+						<li class="ui-divider ui-divider-c" ng-repeat-start="storeroom in summaryMap" ng-show="mode == 'SUMMARY'">{{storeroom.FROMSTORELOC}}</li>
+   						<li ng-repeat-end="" ng-repeat="t in storeroom.items">
+       						<a>
+           						<p>{{t.ITEMNUM}}</p>
+           						<h3>{{t.DESCRIPTION}}</h3>
+           						<p>Quantity:  {{t.QUANTITY}}</p>
+       						</a>
+   						</li> 
+					</ul>
+					<div class="ui-btn-container" ng-show="mode == 'LIST'">
+   						<a class="ui-btn-a" ng-click="createNewTransferIn(storeroom)" translate="ADDNEW">New Row</a>
+					</div>                        
+               	</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, issuestransfersService, applicationService, paginationService){
+				var viewName = "offline/invissue/transferin.htm";
+				var queryName = 'TRANSFERIN';
+				var appName = 'INVISSUE';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('invissue/main.action');				
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.transfers = EMMServer.DB.getMboSet('MatRecTrans', queryName);
+				$scope.transferSummary = EMMServer.DB.getQueryResult("TRANSFERSUMMARY");
+				
+				var pageData  = EMMServer.Session.getItem('STOREROOM_DATA');				
+				$scope.storeroom = pageData.storeroom;
+				$scope.lastscannedID = pageData.lastscannedID; 
+				$scope.mode = pageData.viewType || "LIST";
+				$scope.viewTab = function(viewType){
+					$scope.mode = viewType;
+				}
+				$scope.currentStoreRoom = "";
+				
+				$scope.createNewTransferIn = issuestransfersService.createNewTransferIn;
+				
+				issuestransfersService.init({
+					userInfo: $scope.userInfo,
+					viewName: viewName
+				});
+
+				paginationService.init({
+					pagination : $scope.transfers.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				$scope.pageService = paginationService;
+
+				$scope.actions = issuestransfersService.actions;
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+		
+				$scope.summaryMap = {};
+                for(var i= 0; i<$scope.transferSummary.length; i++)
+                {
+                    var t = $scope.transferSummary[i];
+                    if($scope.summaryMap[t.FROMSTORELOC] == null)
+                    {
+                    	$scope.summaryMap[t.FROMSTORELOC] = {
+                            items : {},
+                            FROMSTORELOC : t.FROMSTORELOC
+                        }
+                    }
+                    $scope.summaryMap[t.FROMSTORELOC].items[t.ITEMNUM] = t;
+
+                }
+				
+                $scope.goBack = function(){
+					$scope.pageService.clearCache();	
+					EMMServer.Session.removeItem('STOREROOM_DATA');
+					applicationService.goToApp(appName);
+				};
+			}
+		</script>
+	</body>
+</html>

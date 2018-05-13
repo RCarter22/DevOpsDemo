@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+    <head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">		
+				<a class="ui-btn-left" ng-click="goBack()" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="TASKS">Tasks</h3>
+				<a ng-show="!mboObject.isInHistory()" class="ui-btn-right" ng-click="actions.createNew(mboObject)"><img src="../../images/plus.png"/></a>			
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
+				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="tasks">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+            <div class="ui-content">
+            	<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+			    <ul class="ui-listview">       		
+            		<li ng-repeat="t in tasks">
+            			<a ng-click="actions.toTask(t)">
+            				<span class="ui-accessory-left" ng-if="t.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+	            			<span>
+	            				<p><strong>{{t.TASKID}}</strong></p>
+								<h3>{{t.DESCRIPTION}}</h3>
+	                            <p>{{ 'WORKORDER.LOCATION' | translate }}: {{t.LOCATION}}</p>
+	                            <p>{{ 'WORKORDER.STATUS' | translate }}: {{t.STATUS}}</p>
+	                            <span class="ui-arrow"></span>
+	            			</span>
+	            		</a>
+					</li>
+            	</ul>
+            	<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+            </div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, wotrackService, paginationService) {
+				var queryName = 'TASKLIST',
+					viewName = "offline/wotrack/tasklist.htm";
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				var pageData = EMMServer.Session.getItem('TASKLIST_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				// *Important* must instantiate the mboSet with app name
+				$scope.tasks = EMMServer.DB.getMboSet('WorkOrder', queryName, $scope.mboObject.mbo.appName());
+				
+				
+				wotrackService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				paginationService.init({
+					pagination : $scope.tasks.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;
+				
+				$scope.actions = {
+					createNew: wotrackService.createNewTask,
+					toTask: wotrackService.actions.toTask
+				}				
+				
+				$scope.goBack = function(){
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+	            <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+	            <h3 class="ui-title">Cycle Count</h3>
+	            <a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+	        </div>
+	        <div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+				</form>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="inventory">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>			
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="!isHide()">
+				<h3 class="ui-title">Use the search box to find item(s) in the {{getStoreroom()}} storeroom</h3>
+			</div>
+			
+			<div class="ui-content" ng-hide = "isHide()">
+				<ul class="ui-listview">
+					<li class="ui-field ui-sort">
+						<label translate="SORTBY">Sort By</label>
+						<select ng-change="pageService.changeSortBy()" ng-model="pageService.sortBy" ng-options="o.label for o in pageService.sortOptions">
+						</select>
+						<a ng-click="pageService.changeSortDirection()" class="ui-btn-sort"><span data-sortorder="{{pageService.sortDirection}}"></span></a>
+					</li>
+				</ul>
+				
+				<ul pagination class="ui-listview" id="pages" ng-show="pageService.hasPages()" ></ul> 
+			    
+				<ul class="ui-listview" ng-repeat="i in inventory" >
+					<li>
+		               <a ng-click="showDetails(i)">
+		               		<span class="ui-accessory-left" ng-if="i.mbo.isDirty()" >
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+		                   	<p class="ui-aside">{{i.SITEID}}</p>
+		                   	<p><strong>{{i.ITEMNUM}}</strong></p>
+		                   	<h3>{{i.DESCRIPTION}}</h3>
+							<p ng-style="{ color : i.TOTALINVBAL != i.TOTALINVPHYBAL ? 'red' : 'inherit' }">{{ 'INVENTORY.TOTALINVBAL' | translate}}: {{i.TOTALINVBAL}}</p>
+							<p ng-style="{ color : i.TOTALINVBAL != i.TOTALINVPHYBAL ? 'red' : 'inherit' }">{{ 'INVENTORY.TOTALINVPHYBAL' | translate}}: {{i.TOTALINVPHYBAL}}</p>
+		                   	<h3>{{ 'INVENTORY.BINNUM' | translate}}: {{i.BINNUM}}</h3>                    
+		                   	<p>{{ 'INVENTORY.LOCATION' | translate}}: {{i.LOCATION}}</p>
+		                   	<span class="ui-arrow"></span>
+		               </a>
+		           </li>
+				</ul>				
+				<ul pagination class="ui-listview" id="pages" ng-show="pageService.hasPages()"></ul>
+			</div>
+		</div> 
+		<script type="text/javascript">
+			function MainController($scope, $window, $filter, applicationService, inventoryService, paginationService) {
+				var viewName = "offline/inventor/cyclecountlist.htm",
+					queryName = "INVENTORY",
+					appName = "INVENTOR";
+
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.inventory = EMMServer.DB.getMboSet('Inventory', queryName);
+				
+				var queryResult = EMMServer.DB.getQueryResult('STOREROOM');
+				if (queryResult){
+					$scope.storeroom = queryResult[0].STOREROOM;					
+				} else {
+					$scope.storeroom = null;
+				}
+				
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.dividerTitle = ($scope.storeroom || '') + ' ' + getText('INVENTORY.LOCATION', null, 'Storeroom');
+				
+				inventoryService.init({
+					userInfo: $scope.userInfo,
+					viewName: viewName
+				});
+
+				paginationService.init({
+					pagination : $scope.inventory.getPagination(),
+					queryName : queryName,
+					viewName : viewName,
+					sortOptions : [
+									{ label : getText('SELECTVALUE', null, 'Select Value'), value : ''},
+									{ label : getText('INVENTORY.ITEMNUM', null, 'Item'), value : 'ITEMNUM'},
+									{ label : getText('INVENTORY.BINNUM', null, 'Bin'), value : 'BINNUM'},
+									{ label : getText('INVENTORY.LOCATION', null, 'Storeroom'), value : 'LOCATION'}
+								]
+				});
+				$scope.pageService = paginationService;
+				$scope.showDetails = inventoryService.showDetails;
+				
+// 				if(inventoryService.getMode() == 'cyclecount'){
+				$scope.pageService.search = null;
+// 				}
+				
+				if($scope.inventory.length == 1){ 
+					if((EMMServer.Session.getItem('goDetails') == 'yes')){
+						inventoryService.showDetails($scope.inventory[0]);
+					}
+				}
+
+				$scope.getStoreroom = function() {
+					return EMMServer.Session.getItem('storeroom')		
+				}
+				
+				$scope.isHide = function(){
+					if(inventoryService.getHide() == 'yes')
+						return true;
+					else
+						return false;
+				}
+					
+
+				$scope.adjustPhysicalCounts = function (){
+					var invIds = [];
+					
+					if($scope.inventory && $scope.inventory.length > 0){
+						$.each($scope.inventory, function(k,v){
+							invIds.push(v.INVENTORYID);
+						});
+						inventoryService.actions.toPhysicalCount(invIds);
+					} else {
+						alert(getText('NORECORDSADJ', null, 'No records to adjust physical counts'));
+						return;
+					}
+				};
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+
+				$scope.goBack = function(){
+					$scope.pageService.clearCache();
+ 					applicationService.goToApp(appName);
+				};								
+				
+				$scope.quickSearch = function() {
+					inventoryService.setHide('no');
+					EMMServer.Session.setItem('goDetails', 'yes');
+					inventoryService.toSearchList($scope.pageService.search, $scope.storeroom);
+				}
+			
+				document.getElementById("pages").setAttribute('onclick', 'EMMServer.Session.setItem("goDetails", "no")');
+				 
+				
+				$scope.barcodeScan = function (){
+					EMMServer.Barcode.scan('scan');
+				};
+				
+				$window.scan = function(/*Scan Value*/ val){
+					$scope.pageService.search = val;
+					$scope.quickSearch();	
+				}			
+			}		
+		</script>
+	</body>
+</html>

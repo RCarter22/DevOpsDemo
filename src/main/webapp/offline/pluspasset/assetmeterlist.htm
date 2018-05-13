@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="METER.METERNAME">Meter</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="assetmeters">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview" ng-show="assetmeters">
+					<li class="ui-field">
+						<label translate="ASSET.ASSETNUM">Asset</label>
+						<input ng-model="asset.ASSETNUM" ng-readonly="true">
+					</li>
+						
+					<li class="ui-divider ui-divider-c" translate="METERS">Meters</li>
+				</ul>	
+							
+				<ul class="ui-listview" ng-repeat="m in assetmeters">
+					<li>
+						<a ng-click="actions.enterReadings(m)">
+							<span class="ui-accessory-left" ng-if="m.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<h3>{{m.METERNAME}}</h3>
+							<p>{{ 'METER.LASTREADING' | translate }}: {{m.LASTREADING}}</p>
+							<p>{{ 'METER.LASTREADINGDATE' | translate }}: {{m.LASTREADINGDATE | date}}</p>
+							<p>{{ 'METER.LASTREADINGINSPECTOR' | translate }}: {{m.LASTREADINGINSPCTR}}</p>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $filter, pluspassetService){
+				var viewName = 'offline/pluspasset/assetmeterlist.htm',
+					queryName = 'METERS',
+					appName = 'PLUSPASSET';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.assetmeters = EMMServer.DB.getMboSet('AssetMeter', queryName);
+				
+				var pageData = EMMServer.Session.getItem('ASSET');
+				$scope.asset = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				pluspassetService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});						
+				
+				$scope.actions = pluspassetService.actions;
+				$scope.goBack = function(){
+					$scope.asset.session.remove();
+					EMMServer.DB.Select()
+					.go(pageData.returnPage);
+				}
+				
+			}
+		</script>		
+	</body>
+</html>

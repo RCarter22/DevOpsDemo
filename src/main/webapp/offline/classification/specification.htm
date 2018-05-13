@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="SPECIFICATION">Specification</h3>
+				<a ng-show="specification.mbo.isNew()" ng-click="actions.saveSpecification(specification)" class="ui-btn-right" ng-class="{'ui-btn-c' : specification.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !specification.mbo.isDirty(), 'ui-statusbar-c': specification.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="specification.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="SPECIFICATION.ATTRIBUTE">Attribute</label>
+						<input disabled="true" ng-model="specification.ASSETATTRID" ng-required="specification.mbo.isRequired('ASSETATTRID')" ng-readonly="specification.mbo.isReadOnly('ASSETATTRID')"/>
+						<a class="ui-arrow" ng-click="domain($event, specification)" data-display="ASSETATTRID,DESCRIPTION,DATATYPE" data-field="ASSETATTRID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="SPECIFICATION.MEASUREUNIT">Unit of Measure</label>
+						<input disabled="true" ng-model="specification.MEASUREUNITID" ng-required="specification.mbo.isRequired('MEASUREUNITID')" ng-readonly="specification.mbo.isReadOnly('MEASUREUNITID')"/>
+						<a class="ui-arrow" ng-click="domain($event, specification)" data-display="MEASUREUNITID,ABBREVIATION,DESCRIPTION" data-field="MEASUREUNITID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="SPECIFICATION.ALNVALUE">Alphanumeric Value</label>
+						<input type="text" ng-show="!specification.DOMAINID" ng-model="specification.ALNVALUE" ng-required="specification.mbo.isRequired('ALNVALUE')"/>
+	                   	<input type="text" disabled="true" ng-show=specification.DOMAINID" ng-model="specification.ALNVALUE" ng-required="specification.mbo.isRequired('ALNVALUE')"/>
+						<a class="ui-arrow" ng-show="specification.DOMAINID" ng-click="domain($event, specification)" data-field="ALNVALUE" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="SPECIFICATION.NUMVALUE">Numeric Value</label>
+						<input type="text" ng-show="specification.DOMAINID" ng-model="specification.NUMVALUE" ng-required="specification.mbo.isRequired('NUMVALUE')"/>
+	                   	<input type="text" disabled="true" ng-show="specification.DOMAINID" ng-model="specification.NUMVALUE" ng-required="specification.mbo.isRequired('NUMVALUE')"/>
+						<a class="ui-arrow" ng-show="specification.DOMAINID" ng-click="domain($event, specification)" data-field="NUMVALUE" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, classificationService , domainService) {
+				var queryName = 'SPEC';
+				var viewName = 'offline/classification/specification.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				var pageData = EMMServer.Session.getItem("SPECIFICATION_DATA");
+				var classificationObject = pageData.classificationObject;
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				$scope.specification = new window[classificationObject.MBOOBJECTNAME](EMMServer.DB.getQueryResult(queryName)[0]);
+
+				classificationService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					classificationObject : pageData.classificationObject,
+				});
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+
+				$scope.domain = domainService.domain;
+				$scope.actions = labtransService.actions;
+
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.specification.session.remove();
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);
+				};
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+<head>
+<title>EZMaxMobile - Offline</title>
+<emm:include value="../common/includes.htm" />
+</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="METER.METERNAME">Meter</h3>
+				<a ng-click="actions.saveAssetMeter(meter)" class="ui-btn-right" ng-class="{'ui-btn-c' : meter.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !meter.mbo.isDirty(), 'ui-statusbar-c': meter.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="meter.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="METER.ASSETNUM">Asset</label>
+						<input disabled="true" ng-model="meter.ASSETNUM" ng-readonly="meter.mbo.isReadOnly('ASSETNUM')" ng-required="meter.mbo.isRequired('ASSETNUM')">
+					</li>
+					<li class="ui-field">
+						<label translate="METER.METERNAME">Meter</label>
+						<input disabled="true" ng-model="meter.METERNAME" ng-readonly="meter.mbo.isReadOnly('METERNAME')" ng-required="meter.mbo.isRequired('METERNAME')">
+					</li>
+					<li class="ui-field">
+						<label translate="METER.LASTREADING">Last Reading</label>
+						<input disabled="true" ng-model="meter.LASTREADING" ng-readonly="meter.mbo.isReadOnly('LASTREADING')" ng-required="meter.mbo.isRequired('LASTREADING')" ng-style="{'color':(meter.mbo.isDirty() == '1'?'red':'inherit')}">
+					</li>
+					<li class="ui-field" ng-hide="meter.DOMAINID">
+						<label translate="METER.READING">New Reading</label>
+						<input ng-model="meter.READING" ng-readonly="meter.mbo.isReadOnly('READING')" ng-required="meter.mbo.isRequired('READING')" placeholder="{{meter.MEASUREUNITID}}">
+					</li>
+					<li class="ui-field" ng-show="meter.DOMAINID">
+						<label translate="METER.READING">New Reading</label>
+						<input disabled="true" ng-model="meter.READING" ng-readonly="meter.mbo.isReadOnly('READING')" ng-required="meter.mbo.isRequired('READING')">
+						<a class="ui-arrow" ng-click="domain($event, meter)" data-field="READING" data-display="VALUE,DESCRIPTION"></a>
+					</li>							
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, pluspassetService, domainService){
+				var viewName = "offline/pluspasset/assetmeter.htm";
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				pluspassetService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.domain = domainService.domain;
+				
+				$scope.meter = new AssetMeter(EMMServer.DB.getQueryResult("METER")[0]);
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.actions = pluspassetService.actions;
+				$scope.$watch('meter', function(newValue, oldValue) {
+					if (newValue !== oldValue)
+						$scope.meter.mbo.toBeSaved(true);
+				}, true);
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					EMMServer.DB.Select()
+						.go("offline/pluspasset/assetmeterlist.htm");
+				};
+				
+			}
+		</script>
+	</body>
+</html>

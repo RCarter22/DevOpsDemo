@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left">Back</a>
+				<h3 class="ui-title" translate="ADVANCEDSEARCH">Advanced Search</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="SR.SR">Service Request</label>
+						<input ng-model="sr.TICKETID"/>
+					</li>														
+					<li class="ui-field-block">
+						<label translate="SR.SUMMARY">Summary</label>
+						<textarea ng-model="sr.DESCRIPTION"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="SR.STATUS">Status</label>
+						<input ng-model="sr.STATUS"/>
+						<a class="ui-arrow" ng-click="domain($event, sr)" onclick="" data-field="STATUS" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="SR.LOCATION">Location</label>
+						<input ng-model="sr.LOCATION"/>
+						<a class="ui-arrow" ng-click="domain($event, sr)" onclick="" data-field="LOCATION" data-display="LOCATION,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="SR.ASSETNUM">Asset</label>
+						<input ng-model="sr.ASSETNUM"/>
+						<a class="ui-arrow" ng-click="domain($event, sr)" onclick="" data-field="ASSETNUM" data-display="ASSETNUM,DESCRIPTION"></a>
+					</li>																				
+					<li class="ui-field">
+						<label translate="SR.REPORTEDBY">Reported By</label>
+						<input ng-model="sr.REPORTEDBY"/>
+						<a class="ui-arrow" ng-click="domain($event, sr)" onclick="" data-field="REPORTEDBY" data-display="PERSONID,DISPLAYNAME"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="SR.OWNER">Owner</label>
+						<input ng-model="sr.OWNER"/>
+						<a class="ui-arrow" ng-click="domain($event, sr)" onclick="" data-field="OWNER" data-display="PERSONID,DISPLAYNAME"></a>						
+					</li>					
+				</ul>		
+			</div>
+			<div class="ui-btn-container">
+				<a class="ui-btn-b" ng-click="clearSearch()">Clear</a>
+				<a class="ui-btn-a" ng-click="advancedSearch(sr)">Search</a>
+			</div>			
+		</div>		
+
+		<script type="text/javascript">
+			function MainController($scope, $window, domainService, pluspsrService) {
+				var appName = 'SR';
+				var viewName = 'offline/pluspsr/advancedsearch.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				// Get SR object data
+				$scope.sr = new SR(EMMServer.DB.getQueryResult("SR")[0]);
+				$scope.sr.mbo.appName(appName);
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					isAdvanced : '1'
+				});
+				
+				pluspsrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+						
+				$scope.domain = domainService.domain;
+				$scope.advancedSearch = pluspsrService.doAdvancedSearch;
+
+				$scope.clearSearch = function() {
+					// Clear any changes and remove from session
+					$scope.sr.session.remove();
+					pluspsrService.toAdvancedSearch();
+				}
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					$scope.sr.session.remove();
+					pluspsrService.toList(null,true);
+				};
+			}
+		</script>
+	</body>
+</html>

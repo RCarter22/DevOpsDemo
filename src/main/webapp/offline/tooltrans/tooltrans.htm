@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title">Tools</h3>
+				<a ng-show="tooltrans.mbo.isNew()" ng-click="actions.saveToolTrans(tooltrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : tooltrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">	
+					<li class="ui-field">
+    					<label translate="TOOLTRANS.ITEM">Item</label>
+    					<input disabled="true" ng-model="tooltrans.ITEMNUM" ng-required="tooltrans.mbo.isRequired('ITEMNUM')" ng-readonly="tooltrans.mbo.isReadOnly('ITEMNUM')"/>
+						<a class="ui-arrow" ng-click="domain($event, tooltrans)" data-field="ITEMNUM" data-display="ITEMNUM, DESCRIPTION"></a>
+					</li>
+					<li class="ui-field-block">
+						<label translate="TOOLTRANS.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="tooltransInfo.DESCRIPTION" ng-readonly="true"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="TOOLTRANS.LOCATION">Location</label>
+						<input disabled="true" ng-model="tooltrans.LOCATION" ng-readonly="tooltrans.mbo.isReadOnly('LOCATION')">
+						<a class="ui-arrow" ng-click="domain($event, tooltrans)" data-field="LOCATION" data-display="LOCATION, DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="WORKORDER.ASSETNUM">Asset</label>
+						<input disabled="true" ng-model="tooltrans.ASSETNUM" ng-readonly="tooltrans.mbo.isReadOnly('ASSETNUM')">
+						<a class="ui-arrow" ng-click="domain($event, tooltrans)" data-field="ASSETNUM" data-display="ASSETNUM, DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="TOOLTRANS.TOOLQTY">Quantity</label>
+    					<input data-interval="1" data-min="1" data-control="spinner" type="text" ng-model="tooltrans.TOOLQTY" ng-readonly="tooltrans.mbo.isReadOnly('TOOLQTY')" ng-required="tooltrans.mbo.isRequired('TOOLQTY')"></input>
+					</li>
+					<li class="ui-field">
+						<label translate="TOOLTRANS.TOOLHRS">Tool Hours</label>
+    					<input data-interval="1" data-min="1" data-control="spinner" type="text" ng-model="tooltrans.TOOLHRS" ng-required="tooltrans.mbo.isRequired('TOOLHRS')" ng-readonly="tooltrans.mbo.isReadOnly('TOOLHRS')"></input>
+					</li>
+					<li class="ui-field">
+						<label translate="TOOLTRANS.TOOLRATE">Tool Rate</label>
+						<input  type="text" ng-model="tooltrans.TOOLRATE" ng-required="tooltrans.mbo.isRequired('TOOLRATE')" ng-readonly="tooltrans.mbo.isReadOnly('TOOLRATE')"></input>
+					</li>
+					<li class="ui-field">
+						<label translate="TOOLTRANS.LINECOST">Line Cost</label>
+    					<input type="text" ng-model="tooltrans.LINECOST" ng-required="tooltrans.mbo.isRequired('LINECOST')" ng-readonly="tooltrans.mbo.isReadOnly('LINECOST')"></input>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, tooltransService) {
+				var queryName = 'TOOLTRANS',
+					viewName = 'offline/tooltrans/tooltrans.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				
+				var updateLineCost = function(){ 
+					$scope.tooltrans.TOOLQTY = $scope.tooltrans.TOOLQTY.toNumber();
+					$scope.tooltrans.LINECOST = ($scope.tooltrans.TOOLHRS * $scope.tooltrans.TOOLRATE * $scope.tooltrans.TOOLQTY).toFixed(2); 
+					if(!Number.isNumber($scope.tooltrans.LINECOST) || $scope.tooltrans.LINECOST.toNumber() == 0){
+						$scope.tooltrans.LINECOST = 0.00;
+						$scope.tooltrans.LINECOST = ($scope.tooltrans.LINECOST).toFixed(2);
+					}
+				}
+				//to dynamically change the value of line cost corresponding to tool rate, hours and quantity
+				$scope.$watch('tooltrans.TOOLHRS',updateLineCost);
+				$scope.$watch('tooltrans.TOOLRATE',updateLineCost);
+				$scope.$watch('tooltrans.TOOLQTY',updateLineCost);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.tooltrans = new ToolTrans(EMMServer.DB.getQueryResult(queryName)[0]);
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName		
+				});
+				tooltransService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				var extra = EMMServer.DB.getQueryResult("EXTRA");
+				if (extra){
+					extra = extra[0];
+					$scope.tooltransInfo = {
+						DESCRIPTION : extra.DESCRIPTION
+						
+					}
+				}
+				else{
+					$scope.tooltransInfo = {
+						DESCRIPTION : $scope.tooltrans.mbo._toolItemDesc
+					}
+				};
+				
+				$scope.domain = domainService.domain;
+				
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.tooltrans.session.remove();
+					EMMServer.DB.Select().go("offline/tooltrans/main.htm");
+				}
+				$scope.actions = tooltransService.actions;
+			}
+		</script>
+	</body>
+</html>		

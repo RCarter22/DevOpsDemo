@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.ASSET">Asset</h3>
+				<a ng-click="actions.saveAsset(asset)" class="ui-btn-right" ng-class="{'ui-btn-c' : asset.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !asset.mbo.isDirty(), 'ui-statusbar-c': asset.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="asset.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="ASSET.ASSETNUM">Asset</label>
+						<input ng-model="asset.ASSETNUM" ng-readonly="asset.mbo.isReadOnly('ASSETNUM')" ng-required="asset.mbo.isRequired('ASSETNUM')">
+					</li>
+					<li class="ui-field-block">
+						<label translate="ASSET.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="asset.DESCRIPTION" ng-readonly="asset.mbo.isReadOnly('DESCRIPTION')" ng-required="asset.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field-block">
+						<label translate="ASSET.LONGDESCRIPTION">Long Description</label>
+						<textarea data-htmleditor="true" ng-model="asset.LONGDESCRIPTION" ng-readonly="asset.mbo.isReadOnly('LONGDESCRIPTION')" ng-required="asset.mbo.isRequired('LONGDESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field ui-readonly">
+						<label translate="ASSET.STATUS">Status</label>
+						<p>{{asset.STATUS}}</p>
+						<p>{{asset.STATUSDATE | date : 'short'}}</p>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.PARENT">Parent WO</label>
+						<input ng-model="asset.PARENT" ng-readonly="asset.mbo.isReadOnly('PARENT')" ng-required="asset.mbo.isRequired('PARENT')">
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.SITEID">Site</label>
+						<input ng-model="asset.SITEID" ng-readonly="asset.mbo.isReadOnly('SITEID')" ng-required="asset.mbo.isRequired('SITEID')">
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.LOCATION">Location</label>
+						<input disabled="true" ng-model="asset.LOCATION" ng-readonly="asset.mbo.isReadOnly('LOCATION')" ng-required="asset.mbo.isRequired('LOCATION')">
+						<a class="ui-arrow"  ng-click="domain($event, asset)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION,ORGID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.DEFAULTREPLOC">Location</label>
+						<input disabled="true" ng-model="asset.DEFAULTREPLOC" ng-readonly="asset.mbo.isReadOnly('DEFAULTREPLOC')" ng-required="asset.mbo.isRequired('DEFAULTREPLOC')">
+						<a class="ui-arrow"  ng-click="domain($event, asset)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.PLUSTYEAR">Location</label>
+						<input disabled="true" ng-model="asset.PLUSTYEAR" ng-readonly="asset.mbo.isReadOnly('PLUSTYEAR')" ng-required="asset.mbo.isRequired('PLUSTYEAR')">
+						<a class="ui-arrow"  ng-click="domain($event, asset)" data-field="PLUSTYEAR" data-display="PLUSTYEAR"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.PLUSTMODEL">Location</label>
+						<input disabled="true" ng-model="asset.PLUSTMODEL" ng-readonly="asset.mbo.isReadOnly('PLUSTMODEL')" ng-required="asset.mbo.isRequired('PLUSTMODEL')">
+						<a class="ui-arrow"  ng-click="domain($event, asset)" data-field="AEPMFGMAKEMODEL" data-display="MODEL,MANUFACTURER,MAKE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.AEPMAKE">Location</label>
+						<input disabled="true" ng-model="asset.AEPMAKE" ng-readonly="asset.mbo.isReadOnly('AEPMAKE')" ng-required="asset.mbo.isRequired('AEPMAKE')">
+						<a class="ui-arrow"  ng-click="domain($event, asset)" data-field="AEPMAKE" data-display="VALUE,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-field">
+						<label translate="ASSET.SERIALNUM">Asset</label>
+						<input ng-model="asset.SERIALNUM" ng-readonly="asset.mbo.isReadOnly('SERIALNUM')" ng-required="asset.mbo.isRequired('SERIALNUM')">
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.ASSETTYPE">Asset Type</label>
+						<input disabled ="true" ng-model="asset.ASSETTYPE" ng-readonly="asset.mbo.isReadOnly('ASSETTYPE')" ng-required="asset.mbo.isRequired('ASSETTYPE')">
+						<a class="ui-arrow" ng-click="domain($event, asset)" data-field="ASSETTYPE" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.FAILURECODE">Failure Class</label>
+						<input disabled="true" ng-model="asset.FAILURECODE" ng-readonly="asset.mbo.isReadOnly('FAILURECODE')" ng-required="asset.mbo.isRequired('FAILURECODE')">
+						<a class="ui-arrow" ng-click="domain($event, asset)" data-field="FAILURECODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>					
+					<li class="ui-divider ui-divider-c" translate="PURCHASEINFO">Purchase Information</li>
+					<li class="ui-field">
+						<label translate="ASSET.VENDOR">Vendor</label>
+						<input disabled="true" ng-model="asset.VENDOR" ng-readonly="asset.mbo.isReadOnly('VENDOR')" ng-required="asset.mbo.isRequired('VENDOR')">
+						<a class="ui-arrow" ng-click="domain($event, asset)" data-field="VENDOR" data-display="COMPANY,NAME,TYPE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.MANUFACTURER">Manufacture</label>
+						<input disabled="true" ng-model="asset.MANUFACTURER" ng-readonly="asset.mbo.isReadOnly('MANUFACTURER')" ng-required="asset.mbo.isRequired('MANUFACTURER')">
+						<a class="ui-arrow" ng-click="domain($event, asset)" data-field="MANUFACTURER" data-display="COMPANY,NAME,TYPE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSET.PURCHASEPRICE">Purchase price</label>
+						<input ng-model="asset.PURCHASEPRICE" ng-readonly="asset.mbo.isReadOnly('PURCHASEPRICE')" ng-required="asset.mbo.isRequired('PURCHASEPRICE')">
+					</li>					
+					<li class="ui-field ui-readonly">
+						<label translate="ASSET.INSTALLDATE">Install Date</label>
+						<p>{{asset.INSTALLDATE | date : 'short'}}</p>
+						<p></p>
+					</li>					
+					<li class="ui-divider ui-divider-c" translate="DOWNTIME">Downtime</li>
+					<li class="ui-field">
+						<label translate="ASSET.ISRUNNING">Asset Up</label>
+						<input type="checkbox" disabled="true" ng-model="asset.ISRUNNING" ng-readonly="asset.mbo.isReadOnly('ISRUNNING')" ng-required="asset.mbo.isRequired('ISRUNNING')">
+					</li>
+					<li class="ui-field ui-readonly">
+						<label translate="ASSET.STATUSDATE">Last Changed Date</label>
+						<p>{{asset.STATUSDATE | date : 'short'}}</p>
+						<p></p>
+					</li>													
+					<li class="ui-field">
+						<label translate="ASSET.TOTDOWNTIME">Total Downtime</label>
+						<input disabled="true" ng-model="asset.TOTDOWNTIME" ng-readonly="asset.mbo.isReadOnly('TOTDOWNTIME')" ng-required="asset.mbo.isRequired('TOTDOWNTIME')">
+					</li>
+				</ul>	
+				<emm:include value="actions.htm"/>			
+			</div>
+		</div>
+		
+		<div id="createwodialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="CREATEWO">Create Work Order</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="actions.createWorkOrder(asset)" translate="YES">Yes</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" data-dismiss="modal" translate="NO">No</a>
+					</div>
+				</div>
+			</div>
+		</div>		
+		
+		<div id="createsrdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="CREATESR">Create Service Request</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="actions.createServiceRequest(asset)" translate="YES">Yes</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" data-dismiss="modal" translate="NO">No</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+			function MainController($scope, domainService, assetService, classificationService) {
+				var appName = 'ASSET';
+				var viewName = 'offline/asset/asset.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				
+				
+				// Init services
+				// Set the return page so all lookups return to this page
+				assetService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.domain = domainService.domain;
+				$scope.locationDrilldown = domainService.locationDrilldown;
+				
+				$scope.actions = assetService.actions;
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+
+				// Get Work Order object data
+				var resultSet = EMMServer.DB.getQueryResult("ASSET");
+				// Checks if record exists in case where autosync has been triggered
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					assetService.toList(null,true);
+					return false;
+				}
+				$scope.asset = new Asset(resultSet[0]);
+				
+				// *Important* to set app name
+				$scope.asset.mbo.appName(appName);
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					$scope.asset.session.remove();
+					assetService.toList(null,true);
+				};
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,57 @@
+<div class="ui-panel ui-panel-b">
+	<h1 class="ui-title">
+		<span style="float:left;text-align:left;width:70%;display:inline-block;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;" id="userid_main_menu"></span>
+	</h1>
+	<a id="btn_main_menu" href="#main_menu" class="ui-btn-toggle"><span class="ui-arrow"></span><span translate="GOTO">Go To</span></a>
+</div>
+<ul id="main_menu" class="ui-listview ui-panel-content" style="z-index:99999999" ng-controller="MenuController">
+	<li class="ui-divider" translate="APPS">Apps</li>
+	<li ng-show="UserInfo.nativeAppSettings.offlineStartCenterEnabled && UserInfo.nativeAppSettings.sqliteEnabled">
+		<a ng-click="goToStartCenter()"><img ng-src="../../images/startcenter.png"/>
+			<h3 translate="STARTCENTER">Start Center</h3>
+		</a>
+	</li>
+	<li class="ui-divider" ng-show="UserInfo.nativeAppSettings.offlineStartCenterEnabled && UserInfo.nativeAppSettings.sqliteEnabled"></li>
+	<li ng-repeat-start="a in userApps" ng-if="a.type==='APP'">
+     	<a ng-click="goToApp(a.app)"><img ng-src="../../images/{{a.imageName}}"/>
+			<h3>{{a.title}}</h3>
+    	</a>    	
+	</li>
+	<li ng-repeat-end ng-if="a.type==='DIVIDER'" class="ui-divider">{{a.title}}</li>
+	
+	<li class="ui-divider" translate="SYNCHRONIZATION">Synchronization</li>	
+	<li>
+		<a emm-sync>
+			<img src="../../images/sync.png" />
+			<h3 translate="SYNCSERVER">Sync with Server</h3>
+			<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+			<span class="ui-badge ui-badge-b">{{TXNCOUNT}}</span>
+		</a>	
+	</li>
+	<li>
+		<a emm-online>
+			<img src="../../images/online.png" />
+			<h3 translate="GOONLINE">Go Back Online</h3>
+		</a>
+	</li>
+	<li>
+		<a emm-online="txntrack/main.action">
+			<img src="../../images/map.png" />
+			<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
+			<span class="ui-badge ui-badge-a">{{TXNERRORCOUNT}}</span>
+		</a>
+	</li>
+</ul>
+
+<script type="text/javascript">	
+	function MenuController($scope, applicationService) {		
+		$scope.UserInfo = EMMServer.DB.getUserInfo();
+		$scope.goToApp = applicationService.goToApp;
+		$scope.userApps = applicationService.getMenuApps();				
+		$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+		$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+		$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+		$scope.goToStartCenter = applicationService.goToStartCenter
+		$('#userid_main_menu').text(EMMServer.DB.getUserInfo().displayName);		
+	}	
+</script>

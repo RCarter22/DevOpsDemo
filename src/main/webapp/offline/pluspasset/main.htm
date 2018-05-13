@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="actions.goback()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSPASSET">Asset (SP)</h3>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+					<a class="ui-btn-side ui-btn-side-b" ng-click="advancedSearch()" translate="ADVANCED">Advanced</a>
+				</form>
+			</div>				
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span class="ui-badge" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online>
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, $window, pluspassetService, paginationService){
+				var viewName = 'offline/pluspasset/main.htm';
+				var queryName = 'ASSET';
+				
+				// Init Sync Settings
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('pluspasset/main.action');
+
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				$scope.ASSETTOTAL = EMMServer.DB.getQueryResult("ASSET")[0].ASSETTOTAL || 0;
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				
+				// Init service
+				pluspassetService.init({
+					userInfo : $scope.userInfo
+				});					
+
+				paginationService.init({
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;
+				
+				$scope.quickSearch = function() {
+					pluspassetService.toList($scope.pageService.search);
+				}			
+				
+				$scope.advancedSearch = pluspassetService.toAdvancedSearch;	
+				
+				$scope.barcodeScan = function (){
+					EMMServer.Barcode.scan('scan');
+				};
+				
+				$window.scan = function(/*Scan Value*/ val){
+					$scope.pageService.search = val;
+					$scope.quickSearch();	
+				}
+				
+				$scope.actions = {
+					assetlist: pluspassetService.toList,
+					goback: function(){
+						EMMServer.DB.Select()
+							.addQuery("PORTLET", "SELECT P.* FROM PORTLET P INNER JOIN SCCONFIG SC ON P.SCCONFIGID = SC.SCCONFIGID WHERE SC.ISDEFAULT = 1 ORDER BY P._ID ASC")
+							.addQuery("SCCONFIG", "SELECT * FROM SCCONFIG")
+							.submit("offline/login/startcenter.htm", true);								
+					}
+				}
+			}
+		</script>
+	</body>
+</html>

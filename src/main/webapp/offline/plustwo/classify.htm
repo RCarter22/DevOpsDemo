@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="CLASSIFY.CLASSWO">Classify Work Order</h3>
+				<a ng-click="actions.saveWorkOrderClassifications(workorder,workorderspecs,genDesc, pathSet)" class="ui-btn-right" ng-class="{'ui-btn-c' : specsToBeSaved()}"  translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-content">
+				<div class="ui-content">
+					<ul class="ui-listview">
+						<li class="ui-field">
+							<label translate="WORKORDER.WONUM">Work Order</label>
+							<p>{{workorder.WONUM}}</p>
+						</li>
+						<li class="ui-field ui-field-auto">
+							<label translate="CLASSIFY.CLASSIFICATION">Classification</label>
+							<p>{{classstructure.HIERARCHY}}</p>
+						</li>
+						<li class="ui-field ui-field-auto">
+							<label translate="CLASSIFY.DESCRIPTION">Class Description</label>
+							<p>{{classstructure.DESCRIPTION}}</p>
+							<a class="ui-arrow" onclick="" href="#classificationlookupdialog" data-control="dialog"></a>
+						</li>
+					</ul>
+				</div>
+				<d ng-show='workorderspecs.length > 0'>
+					<ul class="ui-listview">		
+						<li class="ui-field" ng-repeat="s in workorderspecs track by $index" ng-show="s.DATATYPE == 'ALN' || s.DATATYPE == 'NUMERIC'">
+							<label>{{s.ASSETATTRID}}</label>
+							<input type="text" ng-show="s.DATATYPE == 'NUMERIC' && !(s.DOMAINID)" ng-model="s.NUMVALUE" ng-required="s.mbo.isRequired('NUMVALUE')" placeholder="NUMERIC" ng-blur="setValue($event, s)"/>
+                            <input type="text" disabled="true" ng-show="s.DATATYPE == 'NUMERIC' && s.DOMAINID" ng-model="s.NUMVALUE" ng-required="s.mbo.isRequired('NUMVALUE')"/>
+							<input type="text" ng-show="s.DATATYPE == 'ALN' && !(s.DOMAINID)" ng-model="s.ALNVALUE" ng-required="s.mbo.isRequired('ALNVALUE')" placeholder="ALN" ng-blur="setValue($event, s)"/>
+                            <input type="text" disabled="true" ng-show="s.DATATYPE == 'ALN' && s.DOMAINID" ng-model="s.ALNVALUE" ng-required="s.mbo.isRequired('ALNVALUE')"/>
+							<a class="ui-arrow" ng-show="s.DATATYPE == 'NUMERIC' && s.DOMAINID" ng-click="domain($event, s, submitData)" data-field="NUMVALUE" data-display="VALUE,DESCRIPTION"></a>
+							<a class="ui-arrow" ng-show="s.DATATYPE == 'ALN' && s.DOMAINID" ng-click="domain($event, s, submitData)" data-field="ALNVALUE" data-display="VALUE,DESCRIPTION"></a>
+						</li>
+					</ul>
+				</d>
+			</div>
+		</div>
+		<div id="classificationlookupdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title">Classification</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="domainClassify($event, workorder, submitData)" data-field="CLASSSTRUCTUREID" data-display="CLASSIFICATIONID, DESCRIPTION, CLASSSTRUCTUREID" translate="LOOKUP">Lookup</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="classificationDrilldown(workorder, null, null, submitData)" translate="DRILLDOWN">Drilldown</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, plustwoService, domainService){
+				var viewName = 'offline/plustwo/classify.htm',
+					specsQueryName = 'SPECS',
+					dbspecsQueryName = 'DBSPECS',
+					classQueryName = 'CLASSSTRUCT',
+					assetAttributeQueryName = 'ASSETATTR',
+					appName = 'PLUSTWO';
+								
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				
+				//Initialize Work Order Service
+				plustwoService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				//Initialize Domain Service
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				$scope.domain = domainService.domain;
+				$scope.domainClassify = domainService.domainClassify;
+				$scope.classificationDrilldown = domainService.classificationDrilldown;
+				$scope.actions = plustwoService.actions;
+				var classify = plustwoService.classify;
+				
+
+				//Get the Message Data
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				
+				// Get Classstructure Object Data
+				var classSet = EMMServer.DB.getQueryResult(classQueryName);
+				if (classSet){
+					if (classSet.length>0)
+                    {
+						classSet = classSet[0];
+						$scope.classstructure = {
+							CLASSIFICATIONID : classSet.CLASSIFICATIONID,
+							DESCRIPTION : classSet.DESCRIPTION,
+							GENASSETDESC : classSet.GENASSETDESC
+							
+						}
+						//Get ClassStructure Path
+						$scope.pathSet = EMMServer.DB.getQueryResult("PATH");
+						if($scope.pathSet)
+							$scope.classstructure.HIERARCHY = classify.getClassHierarchy($scope.pathSet);
+							
+                    } 
+				}
+				
+				
+				//Gen Description
+				$scope.genDesc= false;
+				if($scope.classstructure)
+				{
+                    if($scope.classstructure.GENASSETDESC == '1')
+					   $scope.genDesc = true;	
+				}
+				
+				
+				//Get Work Order Data
+				var pageData = EMMServer.Session.getItem('WORKORDER');
+				$scope.workorder = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				$scope.workorder.mbo.appName(appName);
+				
+				//Get The WorkOrderSpecs Data
+				var assetAttributeSet = EMMServer.DB.getQueryResult(assetAttributeQueryName);
+				if(assetAttributeSet)//If new set of attributes is needed
+				{
+					$scope.workorderspecs = classify.createWorkOrderSpecs($scope.workorder, assetAttributeSet);
+					var sqlSpecs = classify.getWorkOrderSpecSQL($scope.workorderspecs);
+					var sqlClass = "SELECT * FROM CLASSSTRUCTURE WHERE CLASSSTRUCTUREID = '" + $scope.workorder.CLASSSTRUCTUREID + "' AND OBJECTVALUE = 'WORKORDER'";
+					var sqlPath = "WITH RECURSIVE cp AS ("
+			    					+"SELECT CLASSSTRUCTUREID, CLASSIFICATIONID, PARENT FROM CLASSSTRUCTURE WHERE CLASSSTRUCTUREID = '" + $scope.workorder.CLASSSTRUCTUREID + "' AND OBJECTVALUE = 'WORKORDER'"
+			    					+" UNION ALL "
+			    					+" SELECT CLASSSTRUCTURE.CLASSSTRUCTUREID, CLASSSTRUCTURE.CLASSIFICATIONID, CLASSSTRUCTURE.PARENT FROM CLASSSTRUCTURE INNER JOIN cp "
+			    					+" ON CLASSSTRUCTURE.CLASSSTRUCTUREID=cp.PARENT AND CLASSSTRUCTURE.OBJECTVALUE = 'WORKORDER'"
+			    					+" WHERE cp.PARENT IS NOT NULL "
+				    			+")"
+				    			+"SELECT * FROM cp";
+					var sqlDBSpecs = "SELECT * FROM WORKORDERSPEC WHERE WORKORDERID = '" + $scope.workorder.WORKORDERID + "' AND CLASSSTRUCTUREID = '" + $scope.workorder.CLASSSTRUCTUREID+ "' ORDER BY CAST(DISPLAYSEQUENCE AS UNSIGNED)";
+					EMMServer.Session.setItem('WORKORDER',{
+						returnPage : pageData.returnPage,
+						cacheKey : $scope.workorder.session.cacheKey()
+					});
+					try
+					{
+						EMMServer.DB.Select()
+						.addQuery("SPECS", sqlSpecs)
+						.addQuery("CLASSSTRUCT", sqlClass)
+						.addQuery("PATH", sqlPath)
+						.addQuery("DBSPECS", sqlDBSpecs)
+						.submit("offline/plustwo/classify.htm",true);
+					}
+					catch(err)
+					{
+						$scope.classstructure.HIERARCHY = $scope.classstructure.CLASSIFICATIONID + ": Unable to retreive HIERARCHY";
+					}
+				}
+				else
+				{
+					var specset = EMMServer.DB.getMboSet('WorkOrderSpec', specsQueryName);
+					var dbspecset = [];
+					var dbspecresult = EMMServer.DB.getQueryResult(dbspecsQueryName);
+					if(dbspecresult)
+                    {
+						var dbspecset = EMMServer.DB.getMboSet('WorkOrderSpec', dbspecsQueryName);
+                    }
+					
+					if(dbspecset.length>0)
+						$scope.workorderspecs = dbspecset;
+					else
+						$scope.workorderspecs = specset;
+				}
+				
+				//Page and Object Data to Provide to Lookup and Drilldown
+				var whereclause = "OBJECTVALUE = 'WORKORDER' AND (SITEID = '"+$scope.workorder.SITEID+"' OR SITEID IS NULL)";
+				var submitData = 
+				{
+					object:'WORKORDER',
+					returnpage:'offline/plustwo/wotrack.htm',
+					submit:"offline/plustwo/classify.htm",
+					where: whereclause
+				};
+                $scope.submitData = submitData;
+
+				//Watches work order and assetspecs to be saved
+				var i = 0;
+				while(i<$scope.workorderspecs.length)
+				{
+					var temp = 'workorderspecs['+i+']';
+                    var spec = $scope.workorderspecs[i];
+					$scope.$watch('workorderspecs['+i+']', function(newValue, oldValue) {
+						if (newValue !== oldValue)
+                        {
+							spec.mbo.toBeSaved(true);
+                        }
+					}, true);
+					i++;
+				}
+				
+				//Returns if this page needs to be saved
+				$scope.specsToBeSaved = function(){
+					if($scope.workorder.mbo.toBeSaved())
+						return true;
+					var i = 0;
+					while(i<$scope.workorderspecs.length)
+					{
+						if($scope.workorderspecs[i].mbo.toBeSaved())
+							return true;
+						i++;
+					}
+					return false;
+				}
+				
+				$scope.setValue = function() {
+					var element = $(arguments[0].target || arguments[0]);
+		            var obj = arguments[1]; //object containing the function with try catch
+	            	$scope.workorder.mbo.toBeSaved(true);
+	            	obj.session.cache();
+				}
+				
+				$scope.goBack = function(){
+					$scope.workorder.session.remove();
+					for(var i=0; i < $scope.workorderspecs.length; i++){
+ 						$scope.workorderspecs[i].session.remove();
+ 					}
+					EMMServer.DB.Select()
+					.go(pageData.returnPage);
+				}
+				
+			}
+		</script>		
+	</body>
+</html>

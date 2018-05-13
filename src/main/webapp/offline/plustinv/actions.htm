@@ -1,0 +1,37 @@
+<div class="ui-sidebar" ng-hide="inventory.mbo.isNew()">
+	<p class="ui-section" translate="ACTIONS">Actions</p>
+	<ul class="ui-listview ui-inset">
+		<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+		<li>
+			<a emm-sync>
+				<img src="../../images/sync.png">
+				<h3 translate="SYNCSERVER">Sync with Server</h3>
+				<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+				<span class="ui-badge" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a emm-online="plustinv/view.action?id={{inventory.INVENTORYID}}">
+				<img src="../../images/online.png">
+				<h3 translate="GOONLINE">Go Back Online</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+		<li>
+			<a ng-click="actions.toPhysicalCount(inventory)">
+				<img src="../../images/balance.png">
+				<h3 translate="INVBALANCES.PHYSCNT">Physical Count</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<!-- <li>
+			<a ng-click="invissue/actions.toIssueDetail(storeroom,i)">
+				<img src="../../images/balance.png">
+				<h3 translate="Issue Item">Issue Item</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li> -->
+	</ul>
+</div>

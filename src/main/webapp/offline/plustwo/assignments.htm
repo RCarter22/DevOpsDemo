@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="ASSIGNMENT.ASSIGNMENTS">Assignments</h3>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="assignments">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview" ng-repeat="a in assignments">
+					<li>
+						<a ng-click="assignService.viewAssignment(a)">
+							<span class="ui-accessory-left" ng-if="a.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<p><strong>{{ 'ASSIGNMENT.STATUS' | translate }}: {{a.STATUS}}</strong></p>
+							<h3>{{workorder.DESCRIPTION}}</h3>
+							<p>{{ 'ASSIGNMENT.CRAFT' | translate }}: {{a.CRAFT}}</p>
+<!-- 							<p>{{ 'ASSIGNMENT.SKILLLEVEL' | translate }}: {{a.SKILLLEVEL}}</p> -->
+							<p>{{ 'ASSIGNMENT.LABORCODE' | translate }}: {{a.LABORCODE}}</p>
+							<p>{{ 'ASSIGNMENT.STARTDATE' | translate }}: {{a.STARTDATE | date}}</p>
+							<p>{{ 'ASSIGNMENT.LABORHRS' | translate }}: {{a.LABORHRS | number}}</p>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+				<div class="ui-sidebar">
+					<p class="ui-section" translate="ACTIONS">Actions</p>
+					<ul class="ui-listview ui-inset">
+						<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+						<li>
+							<a emm-sync>
+								<img src="../../images/sync.png">
+								<h3 translate="SYNCSERVER">Sync with Server</h3>
+								<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+								<span class="ui-badge" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+						<li>
+							<a emm-online="plustwo/view.action?id={{workorder.WORKORDERID}}">
+								<img src="../../images/online.png">
+								<h3 translate="GOONLINE">Go Back Online</h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+						<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+						<li>
+							<a ng-click="assignService.createNew(workorder, laborInfo)">
+								<img src="../../images/addnew.png">
+								<h3>Add New</h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, applicationService, plustassignmentService, paginationService){
+				var queryName = 'ASSIGNMENTS';
+				var laborInfo = 'LABORINFO';
+				var viewName = 'offline/plustwo/assignments.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				
+				var pageData = EMMServer.Session.getItem('ASSIGNMENT_DATA');
+				$scope.workorder = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.assignments = EMMServer.DB.getMboSet('Assignment', queryName);
+				$scope.laborInfo = EMMServer.DB.getQueryResult(laborInfo)[0];
+				
+				plustassignmentService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				$scope.assignService = plustassignmentService; 
+				
+				$scope.TXCOUNT = EMMServer.DB.getUserTxnCount();
+				var messages = EMMServer.DB.getQueryResult("MESSAGE") || null;
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE; 
+				
+				$scope.goBack = function(){
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);
+				}
+			}
+		</script>		
+	</body>
+</html>

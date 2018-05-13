@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="FailureController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="cancel()" class="ui-btn-left">Cancel</a>
+				<h3 class="ui-title" translate="FAILUREREPORT">Failure Reporting</h3>
+				<a ng-click="save()" class="ui-btn-right" ng-class="{'ui-btn-c' : failureCode.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="FAILURECODE.FAILURECODE">Failure Class</label>
+						<p>{{failureCode.FAILURECODE}}</p>
+						<a class="ui-arrow" ng-click="domain($event, failureCode)" data-field="FAILURECODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field" ng-show="failureCode.FAILURECODE">
+						<label translate="FAILURECODE.PROBLEMCODE">Problem</label>
+						<p>{{failureCode.PROBLEMCODE}}</p>
+						<a class="ui-arrow" ng-click="domain($event, failureCode)" data-field="PROBLEMCODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field" ng-show="failureCode.PROBLEMCODE">
+						<label translate="FAILURECODE.CAUSECODE">Cause</label>
+						<p>{{failureCode.CAUSECODE}}</p>
+						<a class="ui-arrow" ng-click="domain($event, failureCode)" data-field="CAUSECODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field" ng-show="failureCode.CAUSECODE">
+						<label translate="FAILURECODE.REMEDYCODE">Remedy</label>
+						<p>{{failureCode.REMEDYCODE}}</p>
+						<a class="ui-arrow" ng-click="domain($event, failureCode)" data-field="REMEDYCODE" data-display="FAILURECODE,DESCRIPTION"></a>
+					</li>				
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function FailureController($scope, domainService, pluspwoService) {
+				var queryName = 'FAILUREREPORT';
+				var viewName = 'offline/pluspwo/failurereporting.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.failureCode = new FailureCode(EMMServer.DB.getQueryResult(queryName)[0]);
+				$scope.failureCode.session.restore();
+				
+				// Init service
+				// Set the return page so all lookups return to this page
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				$scope.domain = domainService.domain;
+				
+				pluspwoService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				var pageData = EMMServer.Session.getItem('FAILURE_DATA');
+				$scope.workorder = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				//Properly handle failure report if the workorder is a task
+				if($scope.workorder.ISTASK == '1') {
+					$scope.TASKID = $scope.workorder.TASKID;
+					$scope.ISTASK = '1';
+					pageData = EMMServer.Session.getItem('TASKLIST_DATA'); //This will get the parent workorder from session
+					pageData.returnPage = "offline/pluspwo/task.htm";
+					$scope.workorder = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				}
+
+				if (!$scope.failureCode.ORGID){
+					$scope.failureCode.WORKORDERID = $scope.workorder.WORKORDERID;
+					$scope.failureCode.WONUM = $scope.workorder.WONUM;
+					$scope.failureCode.ORGID = $scope.workorder.ORGID;
+				}
+				
+				function goBack(){
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);						
+				}
+				
+				$scope.cancel = function(){
+					$scope.failureCode.session.remove();
+					goBack();
+				}		
+				
+				$scope.save = function(){
+					pluspwoService.actions.saveFailureReport($scope.workorder, $scope.failureCode);
+				}
+			}		
+		</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:lang="http://www.springframework.org/schema/lang"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd"
+	   default-lazy-init="false"> <!-- false == On, true == Off -->
+	
+	<!-- Deprecated as of version 5.0.0 -->
+	<bean id="OfflineCachedDataProviderAction" class="com.interprosoft.ezmaxmobile.offline.action.OfflineCachedDataProviderAction">
+	</bean>
+	
+	<bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="triggerForDomainService"/>
+				<ref bean="triggerForPersonGroupTeamService"/>
+				<ref bean="triggerForCraftService"/>
+				<ref bean="triggerForWorkTypeService"/>
+				<ref bean="triggerForStoreroomService"/>
+				<ref bean="triggerForAMCrewService"/>
+				<ref bean="triggerForSpecDomainService"/>
+				<ref bean="triggerForMeasureUnitService"/>
+				<ref bean="triggerForPlusPCustomerService"/>
+				<ref bean="triggerForPlusPCustomerAssocService"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="triggerForSpecDomainService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedSpecDomainSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cacheSpecDomain"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+	
+	<bean id="triggerForMeasureUnitService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedMeasureUnitSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cacheMeasureUnit"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+	
+	<bean id="triggerForPlusPCustomerService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedPlusPCustomerSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cachePlusPCustomer"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+	
+	<bean id="triggerForPlusPCustomerAssocService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedPlusPCustomerAssocSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cachePlusPCustAssoc"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+	
+	<bean id="triggerForDomainService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedDomainSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cacheDomain"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+	
+	<bean id="triggerForPersonGroupTeamService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedPersonGroupTeamSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cachePersonGroupTeam"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+
+	<bean id="triggerForCraftService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedCraftSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cacheCraft"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+	
+	<bean id="triggerForWorkTypeService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedWorkTypeSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cacheWorktype"/>
+				<property name="concurrent" value="false"/>
+			</bean>	
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+
+	<bean id="triggerForStoreroomService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedStoreroomSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cacheStorerooms"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>
+	
+	<bean id="triggerForAMCrewService" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail">
+			<bean id="cachedAMCrewSynchronizeJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+				<property name="targetObject" ref="OfflineCachedDataProviderAction"/>
+				<property name="targetMethod" value="cacheAMCrew"/>
+				<property name="concurrent" value="false"/>
+			</bean>
+		</property>
+		<property name="startDelay" value="15000"/>
+		<property name="repeatInterval" value="600000"/> <!-- 600000 = Repeat Hourly -->
+	</bean>	
+	
+</beans>
+

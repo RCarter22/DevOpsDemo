@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm" />
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="MULTIASSETS">Multiple Assets, Locations</h3>
+				<a class="ui-btn-right" ng-click="actions.createNew(mboObject)"><img src="../../images/plus.png"/></a>	
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
+				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="multiAsset">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				<ul class="ui-listview" ng-show="multiAsset">					
+					<li class="ui-divider ui-divider-c" translate="MULTIASSETS">Multiple Assets, Locations</li>
+            		<li ng-repeat="asset in multiAsset">
+            			<a ng-click="showDetail(asset)">
+            				<span class="ui-accessory-left" ng-if="asset.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<span>
+			            		<h3>{{ 'MULTIASSETLOCCI.ASSETNUM' | translate }}: {{asset.ASSETNUM}}</h3>
+				                <p>{{ 'MULTIASSETLOCCI.LOCATION' | translate }}: {{asset.LOCATION}}</p>
+				                <p>{{ 'MULTIASSETLOCCI.SEQUENCE' | translate }}: {{asset.SEQUENCE}}</p>
+				                <span class="ui-arrow"></span>
+			                </span>
+	                    </a>
+	                    <a ng-click="actions.markProgress(asset)" class="ui-checklistbutton" data-checked="{{asset.PROGRESS==true}}"></a>
+            		</li>
+            	</ul>
+            	<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+            </div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, multiassetService, paginationService) {
+				var queryName = 'MULTIASSETLOCCI';
+				var viewName = 'offline/wotrack/multiassetlist.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				
+				var pageData = EMMServer.Session.getItem('MULTIASSETLOCCI_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				$scope.multiAsset = EMMServer.DB.getMboSet('MultiAssetLocCi', queryName, $scope.mboObject.mbo.appName());
+				
+				multiassetService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName					
+				});
+				
+				paginationService.init({
+					pagination : $scope.multiAsset.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE") || null;
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE; 
+				
+				$scope.pageService = paginationService;
+				$scope.showDetail = multiassetService.showDetail;
+				$scope.actions = multiassetService.actions;
+
+				$scope.goBack = function(){
+					EMMServer.DB.Select().go(pageData.returnPage);
+				}
+			} 
+		</script>
+	</body>
+</html>

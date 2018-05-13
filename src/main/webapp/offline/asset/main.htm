@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="actions.goback()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.ASSET">Asset</h3>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+					<a class="ui-btn-side ui-btn-side-b" ng-click="advancedSearch()" translate="ADVANCED">Advanced</a>
+				</form>
+			</div>				
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+					<li>
+						<a emm-sync>
+							<img src="../../images/sync.png">
+							<h3 translate="SYNCSERVER">Sync with Server</h3>
+							<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+							<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-online>
+							<img src="../../images/online.png">
+							<h3 translate="GOONLINE">Go Back Online</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+					<li>
+						<a emm-sync-res>
+							<img src="../../images/map.png" />
+							<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
+							<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, $window, assetService, paginationService){
+				var viewName = 'offline/asset/main.htm';
+				var queryName = 'ASSET';
+				
+				// Init Sync Settings
+				EMMServer.Offline.setSyncViewName(viewName);
+				EMMServer.Offline.setDefaultOnlineAction('asset/main.action');
+
+				$scope.userInfo = EMMServer.DB.getUserInfo();				
+				$scope.ASSETTOTAL = EMMServer.DB.getQueryResult("ASSET")[0].ASSETTOTAL || 0;
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				
+				// Init service
+				assetService.init({
+					userInfo : $scope.userInfo
+				});					
+
+				paginationService.init({
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;
+				
+				$scope.quickSearch = function() {
+					assetService.toList($scope.pageService.search);
+				}			
+				
+				$scope.advancedSearch = assetService.toAdvancedSearch;	
+				
+				$scope.barcodeScan = function (){
+					EMMServer.Barcode.scan('scan');
+				};
+				
+				$window.scan = function(/*Scan Value*/ val){
+					$scope.pageService.search = val;
+					$scope.quickSearch();	
+				}
+				
+				$scope.actions = {
+					assetlist: assetService.toList,
+					goback: function(){
+						if($scope.userInfo.nativeAppSettings.offlineStartCenterEnabled && $scope.userInfo.nativeAppSettings.sqliteEnabled){
+							EMMServer.DB.Select()
+								.addQuery("STARTCENTER","SELECT * FROM STARTCENTER ORDER BY DESCRIPTION")
+								.addQuery("PORTLET","SELECT * FROM PORTLET WHERE SCCONFIGID IN (SELECT SCCONFIGID FROM STARTCENTER WHERE ISDEFAULT = '1') ORDER BY ORDERNUM ASC")
+								.submit("offline/login/default.htm",true);
+						}
+						else{
+							EMMServer.DB.Select()
+							.addQuery("DUMMY", "SELECT 1")
+							.submit("offline/login/index.htm", true);
+						}
+									
+					}
+				}
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a class="ui-btn-left" href="" ng-click="goBack()" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="TASKS">Tasks</h3>
+				<a ng-click="actions.saveTask(workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : workorder.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !workorder.mbo.isDirty(), 'ui-statusbar-c': workorder.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="workorder.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+            <div class="ui-content">
+				<ul id="taskdetails" class="ui-listview">				
+                   <li class="ui-field">
+	                   <label translate="WORKORDER.WONUM">Work Order</label>
+	                   <input ng-model="workorder.PARENT" ng-readonly="workorder.isReadOnly('PARENT')"/>
+                   	</li>
+                   	<li class="ui-field">
+	                   <label translate="WORKORDER.TASKID">Task</label>
+	                   <input ng-model="workorder.TASKID" ng-readonly="workorder.isReadOnly('TASKID')"/>
+                   	</li>
+                   	<li class="ui-field-block">
+	                    <label translate="WORKORDER.DESCRIPTION">Description</label>
+	                    <textarea maxlength="100" ng-model="workorder.DESCRIPTION" ng-required="workorder.mbo.isRequired('DESCRIPTION')" ng-readonly="workorder.mbo.isReadOnly('DESCRIPTION')"></textarea>
+                   	</li>
+                   	<li class="ui-field-block">
+	                    <label translate="WORKORDER.LONGDESCRIPTION">Details</label>
+	                    <textarea data-htmleditor="true" maxlength="100" ng-model="workorder.LONGDESCRIPTION" ng-readonly="workorder.mbo.isReadOnly('LONGDESCRIPTION')"></textarea>
+                   	</li>
+                   	<li class="ui-field ui-details ui-readonly">
+	                    <label translate="WORKORDER.STATUS">Status</label>
+	                    <p>{{workorder.STATUS}}</p>
+	                    <p>{{workorder.STATUSDATE | date}}</p>
+                   	</li>
+                   	<li class="ui-field">
+	                    <label translate="WORKORDER.LOCATION">Location</label>
+	                    <input ng-model="workorder.LOCATION" ng-readonly="true"/>
+                   	</li>
+                   	<li class="ui-field">
+	                    <label translate="WORKORDER.ASSETNUM">Asset</label>
+	                    <input ng-model="workorder.ASSETNUM" ng-readonly="true"/>
+                   	</li>
+	                    <li class="ui-field">
+	                    <label translate="WORKORDER.OBSERVATION">Observation</label>
+	                    <input type="text" ng-model="workorder.OBSERVATION" ng-readonly="workorder.isReadOnly('OBSERVATION')"/>
+                  	 </li>
+                   	<li class="ui-field">
+	                    <label translate="WORKORDER.MEASUREMENTVALUE">Measurement Value</label>
+	                    <input type="text" ng-model="workorder.MEASUREMENTVALUE" ng-readonly="workorder.isReadOnly('MEASUREMENTVALUE')"/>
+               		</li>
+				</ul>
+				
+				<emm:include value="actions.htm"/>			
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, pluspwoService){
+				var appName = 'PLUSPWO';
+				var queryName = "TASK";
+				var	viewName = "offline/pluspwo/task.htm";
+
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				var resultSet = EMMServer.DB.getQueryResult(queryName);
+				// Checks if record exists in case where autosync has been triggered
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					EMMServer.DB.Select()
+						.go("offline/pluspwo/tasklist.htm");
+					return false;
+				}
+				$scope.workorder = new WorkOrder(resultSet[0]);
+				var extra = EMMServer.DB.getQueryResult("EXTRA");
+				if (extra){
+					extra = extra[0];
+					$scope.labtransInfo = {
+						LABTRANSID : extra.TIMERLABTRANSID,
+						LABORCODE : extra.TIMERLABORCODE,
+						CRAFT : extra.TIMERCRAFT,
+						TIMERSTATUS : extra.TIMERSTATUS
+					}
+				}
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});	
+				pluspwoService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE") || null;
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE; 
+				
+				//Checks to see if task is new and properly assigns a value for the TASKID
+                if ($scope.workorder.mbo.isNew()){
+                	var TASKID = EMMServer.DB.getQueryResult("EXTRA")[0].TASKID;
+					$scope.workorder.TASKID = (TASKID) ? parseInt(TASKID) + 10 : 10;
+                }
+
+				// *Important* to set app name
+				$scope.workorder.mbo.appName(appName);				
+				
+				//Watch for changes on the model, set 'toBeSaved' if model changes
+				$scope.$watch('workorder', function(newValue, oldValue){
+					if(newValue !== oldValue)
+						$scope.workorder.mbo.toBeSaved(true);
+				},true);
+				
+				$scope.actions = pluspwoService.actions;
+				
+				$scope.goBack = function(){
+					$scope.workorder.session.remove();
+					EMMServer.DB.Select()
+						.go("offline/pluspwo/tasklist.htm");
+				}
+			}
+		</script>
+	</body>
+</html>

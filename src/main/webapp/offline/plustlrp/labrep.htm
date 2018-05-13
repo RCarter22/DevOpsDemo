@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.PLUSTLRP">Labor Reporting (Tr)</h3>
+				<a ng-click="actions.saveLabTrans(labtrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : labtrans.mbo.toBeSaved()}" translate="SAVE">Save</a>				
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !labtrans.mbo.isDirty(), 'ui-statusbar-c': labtrans.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="labtrans.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div> 
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="LABREP.LABORCODE">Labor</label>
+						<input disabled="true" ng-model="labtrans.LABORCODE" ng-required="labtrans.mbo.isRequired('LABORCODE')" ng-readonly="labtrans.mbo.isReadOnly('LABORCODE')"/>
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-display="LABORCODE,CRAFT" data-field="LABORCODE"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.NAME">Name</label>
+						<input disabled="true" ng-model="person" ng-readonly="true"/>
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.GENAPPRSERVRECEIPT">Approved</label>
+						<input type="checkbox" ng-model="labtrans.GENAPPRSERVRECEIPT" ng-readonly="labtrans.mbo.isReadOnly('GENAPPRSERVRECEIPT')" ng-required="labtrans.mbo.isRequired('GENAPPRSERVRECEIPT')">
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.CRAFT">Craft</label>
+						<input ng-model="labtrans.CRAFT" ng-readonly="labtrans.mbo.isReadOnly('CRAFT')" ng-required="labtrans.mbo.isRequired('CRAFT')">
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-field="CRAFT" data-display="CRAFT,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.STARTDATE">Start Date</label>
+						<datepicker date-format="datetime" id="STARTDATE" ng-model="labtrans.STARTDATE" ng-readonly="labtrans.mbo.isReadOnly('STARTDATE')" ng-required="labtrans.mbo.isRequired('STARTDATE')" />
+					</li>	
+					<li class="ui-field">
+						<label translate="LABREP.STARTTIME">Start Time</label>
+						<datepicker date-format="time" id="STARTTIME" ng-model="labtrans.STARTTIME" ng-readonly="labtrans.mbo.isReadOnly('STARTTIME')" ng-required="labtrans.mbo.isRequired('STARTTIME')" />
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.REGULARHRS">Regular Hours</label>
+						<input ng-model="labtrans.REGULARHRS" type="text" hours-format data-interval="0.25" data-control="spinner" ng-readonly="labtrans.mbo.isReadOnly('REGULARHRS')" ng-required="labtrans.mbo.isRequired('REGULARHRS')">
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.PAYRATE">Rate</label>
+						<input ng-model="labtrans.PAYRATE" type="text" ng-readonly="labtrans.mbo.isReadOnly('PAYRATE')" ng-required="labtrans.mbo.isRequired('PAYRATE')">
+					</li>
+					<li class="ui-field">
+    					<label translate="LABREP.PREMIUMPAYCODE">Premium Pay Code</label>
+    					<input disabled="true" ng-model="labtrans.PREMIUMPAYCODE" ng-readonly="labtrans.mbo.isReadOnly('PREMIUMPAYCODE')">
+						<a class="ui-arrow" ng-click="domain($event,labtrans)" data-field="PREMIUMPAYCODE" data-display="PREMIUMPAYCODE,CRAFT"></a>
+					</li>
+                   	<li class="ui-field">
+						<label translate="LABREP.PREMIUMPAYHOURS">Premium Pay Hours</label>
+						<input id="PREMIUMPAYHOURS" type="text" hours-format data-interval="0.25" data-control="spinner" ng-model="labtrans.PREMIUMPAYHOURS" ng-readonly="labtrans.mbo.isReadOnly('PREMIUMPAYHOURS')"></input>
+          	        </li>
+          	        <li class="ui-field">
+    					<label translate="LABREP.PREMIUMPAYRATE">Premium Pay Rate</label>
+    					<input disabled="true" ng-model="labtrans.PREMIUMPAYRATE" ng-readonly="labtrans.mbo.isReadOnly('PREMIUMPAYRATE')">
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.TRANSTYPE">Type</label>
+						<input ng-model="labtrans.TRANSTYPE" ng-readonly="labtrans.mbo.isReadOnly('TRANSTYPE')" ng-required="labtrans.mbo.isRequired('TRANSTYPE')">
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-field="TRANSTYPE" data-display="VALUE,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.WONUM">Work Order</label>
+						<input ng-model="labtrans.WONUM" ng-readonly="labtrans.mbo.isReadOnly('WONUM')" ng-required="labtrans.mbo.isRequired('WONUM')">
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-field="WONUM" data-display="WONUM,DESCRIPTION,LOCATION,ASSETNUM,SITEID"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="Task">Task</label>
+						<input ng-model="labtrans.TASKID" ng-readonly="labtrans.mbo.isReadOnly('TASKID')" ng-required="labtrans.mbo.isRequired('TASKID')">
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-field="TASKID" data-display="TASKID,DESCRIPTION"></a>
+					</li>
+					<!-- <li class="ui-field">
+						<label translate="LABREP.TICKETID">Ticket</label>
+						<input ng-model="labtrans.TICKETID" ng-readonly="labtrans.mbo.isReadOnly('TICKETID')" ng-required="labtrans.mbo.isRequired('TICKETID')">
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-field="TICKETID" data-display="TICKETID,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+    					<label translate="LABREP.TICKETCLASS">Ticket Class</label>
+    					<input ng-model="labtrans.TICKETCLASS" ng-readonly="labtrans.mbo.isReadOnly('TICKETCLASS')">
+					</li> -->
+					<li class="ui-field">
+						<label translate="LABREP.LOCATION">Location</label>
+						<input ng-model="labtrans.LOCATION" ng-readonly="labtrans.mbo.isReadOnly('LOCATION')" ng-required="labtrans.mbo.isRequired('LOCATION')">
+						<a class="ui-arrow" ng-click="domain($event, labtrans)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="LABREP.ASSETNUM">Asset</label>
+						<input ng-model="labtrans.ASSETNUM" ng-readonly="labtrans.mbo.isReadOnly('ASSETNUM')" ng-required="labtrans.mbo.isRequired('ASSETNUM')">
+						<a class="ui-arrow" data-control="dialog" href="#assetlookupdialog"></a>
+					</li>
+					<li class="ui-field">
+    					<label translate="LABREP.TIMERSTATUS">Timer Status</label>
+    					<input ng-model="labtrans.TIMERSTATUS" ng-readonly="labtrans.mbo.isReadOnly('TIMERSTATUS')">
+					</li>
+				</ul>
+				<ul class="ui-listview" ng-show="!(labtrans.mbo.isNew())">
+					<li>
+						<a ng-click="enterByLabor(laborInfo)">
+							<img src="../../images/addnew.png">
+							<h3 translate="ADDMORE">Add More...</h3>
+						</a>
+					</li>
+				</ul>
+			</div>
+			
+		</div>
+		<div id="locationdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="LABREP.LOCATION">Location</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="domain($event, labtrans)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION" translate="LOOKUP">Lookup</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="locationDrilldown(labtrans)" translate="DRILLDOWN">Drilldown</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="assetlookupdialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="LABREP.ASSETNUM">Asset</h1>
+				</div>
+				<div class="ui-content">
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="domain($event, labtrans)" data-field="ASSETNUM" data-display="ASSETNUM,DESCRIPTION,LOCATION" translate="LOOKUP">Lookup</a>
+					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="assetDrilldown(labtrans)" translate="DRILLDOWN">Drilldown</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, domainService, plustlrpService, paginationService) {
+				// Setup
+				var appName = 'PLUSTLRP';
+				var viewName = 'offline/plustlrp/labrep.htm';
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				var resultSet = EMMServer.DB.getQueryResult("LABREP");
+				
+				if(!resultSet || !resultSet[0]){
+					alert(getText('NORECORDS',null,'No Record(s) Found'));
+					plustlrpService.toList(null,true);
+					return false;
+				}
+				$scope.labtrans = new LabTrans(resultSet[0]); // labor reporting is a labtrans object underneath 
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.labtrans.mbo.appName(appName);
+				
+				plustlrpService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				$scope.domain = domainService.domain;
+				$scope.locationDrilldown = domainService.locationDrilldown;
+				$scope.assetDrilldown = domainService.assetDrilldown;
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.pageService = paginationService;
+ 				$scope.laborInfo = EMMServer.DB.getQueryResult("LABORINFO")[0];
+ 				$scope.person = EMMServer.DB.getQueryResult("PERSON")[0].DISPLAYNAME;
+ 			
+				$scope.enterByLabor = plustlrpService.enterByLabor;
+				
+				$scope.goBack = function() {
+					// clear any changes and remove from session
+					$scope.labtrans.session.remove();
+					
+					var listView = 'offline/plustlrp/list.htm';
+					if (EMMServer.DB.Select().getQuery(listView))
+						EMMServer.DB.Select().go(listView);
+					else
+						plustlrpService.toList(null,true);
+				};
+				
+				$scope.actions = plustlrpService.actions;
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.VIEWDR">View Requisitions</h3>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="mr.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content ui-content-narrow">
+				<ul class="ui-listview ui-inset">
+					<li class="ui-pagination">	
+						<a class="ui-pagination-prev" ng-click="actions.toMR(mr)">	
+							<span class="ui-arrow"></span>
+						</a>
+						<h3 class="title">
+							Step 2 of 2
+						</h3>
+					</li>
+				</ul>
+				<ul class="ui-listview">
+					 <li class="ui-field">
+						<label translate="MR.MRNUM">Requisition</label>
+						<input ng-model="mr.MRNUM" ng-readonly="true" ng-required="mr.mbo.isRequired('MRNUM')">
+					</li>
+					<li class="ui-field">
+						<label translate="MR.WONUM">Work Order</label>
+						<input ng-model="mr.WONUM" ng-readonly="true" ng-required="mr.mbo.isRequired('WONUM')">
+						<a class="ui-arrow" ng-click="domain($event, mr)" data-field="WONUM" data-display="WONUM,DESCRIPTION,ASSETNUM,LOCATION"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="MR.LOCATION">Location</label>
+						<input ng-model="mr.LOCATION" ng-readonly="true" ng-required="mr.mbo.isRequired('LOCATION')">
+						<a class="ui-arrow" ng-click="domain($event, mr)" data-field="LOCATION" data-display="LOCATION,DESCRIPTION"></a>
+					</li>
+					<li class="ui-field-block">
+						<label translate="MR.DESCRIPTION">Description</label>
+						<textarea maxlength="100" ng-model="mr.DESCRIPTION" ng-readonly="true" ng-required="mr.mbo.isRequired('DESCRIPTION')"></textarea>
+					</li>
+					<li class="ui-field ui-details ui-readonly">
+						<label translate="MR.STATUS">Status</label>
+						<p>{{mr.STATUS}}</p>
+						<p>{{mr.STATUSDATE | date : 'short'}}</p>
+					</li>
+					<li class="ui-field">
+						<label translate="MR.REQUIREDDATE">Required Date</label>
+						<datepicker date-format="datetime" id="REQUIREDDATE" ng-model="mr.REQUIREDDATE" ng-required="mr.mbo.isRequired('REQUIREDDATE')" ng-readonly="true" />
+					</li>									
+				</ul>
+				
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c" translate="MR.MRLINES">Requisition Line Items</li>
+					<li ng-hide="mrlines">		
+						<div class="ui-statusbar ui-statusbar-c">
+							<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+						</div>
+					</li>	
+				</ul>
+				
+				<ul class="ui-listview">
+					<li ng-repeat="mrl in mrlines">
+            			<a ng-click="actions.toMRLine(mr, mrl)">
+            				<span class="ui-accessory-left" ng-if="mrl.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<p>{{mrl.MRLINENUM}}</p>
+            				<p>{{ 'MRLINE.LINETYPE' | translate }}: {{mrl.LINETYPE}}</p>
+	            			<h3>{{mrl.DESCRIPTION}}</h3>
+		                    <p>{{ 'MRLINE.QTY' | translate }}: {{mrl.QTY}}</p>
+		                    <p>{{ 'MRLINE.UNITCOST' | translate }}: {{mrl.UNITCOST}}</p>
+		                    <span class="ui-arrow"></span>
+	                    </a>
+					</li>
+				</ul>
+			</div>
+			<div class="ui-sidebar">
+				<p class="ui-section" translate="ACTIONS">Actions</p>
+				<ul class="ui-listview ui-inset">
+					<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>	
+					<li>
+				        <a ng-click="editRequisition(mr)">
+				        	<h3 translate="VIEWDR.EDIT">Edit Requisition</h3>
+				        	<span class="ui-arrow"></span>
+				        </a>
+				    </li>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController ($scope, $filter,  viewdrService,createdrService){
+				var viewName = 'offline/viewdr/mrlines.htm',
+					queryName = 'MRLINES',
+					appName = 'VIEWDR';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();			
+			
+				viewdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				createdrService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				$scope.editRequisition = function(mr){
+					mr.STATUS = 'DRAFT';
+					EMMServer.DB.Update('MR', 'EDIT')
+					.addObject(mr.getMbo(), "MRID='" + mr.MRID + "'")
+					.submit()
+					.then(function(result) {
+						// Be sure to remove session data
+			        	mr.session.remove();
+			        	EMMServer.DB.Select()
+						.addQuery("MR", "SELECT * FROM MR WHERE MRID = '" + mr.MRID + "'")
+						.addQuery("MRLINES", "SELECT * FROM MRLINES WHERE MRID = '" +  mr.MRID + "'")
+						.submit("offline/createdr/mrlines.htm", true);
+					});
+				}
+				//This data will contain MRLines in cache and what tab we are on
+				$scope.mr = new MR(EMMServer.DB.getQueryResult("MR")[0]);
+				$scope.mrlines = EMMServer.DB.getMboSet("MRLines", queryName);
+				
+				$scope.actions = viewdrService.actions;
+				
+				$scope.goBack = function (){
+					$scope.actions.toMR($scope.mr);
+				}
+			}
+		</script>		
+	</body>
+</html>

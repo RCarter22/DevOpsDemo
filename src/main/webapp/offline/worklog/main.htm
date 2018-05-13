@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+            <div class="ui-header ui-header-b">
+                <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+                <h3 class="ui-title" translate="WORKLOG.NAME">Work Log</h3>
+                <a ng-show="!mboObject.isInHistory()" ng-click="createNew(mboObject)" class="ui-btn-right"><img src="../../images/plus.png"/></a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>            
+            </div>
+			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
+				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="worklogs">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+            <div class="ui-content">
+            	<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+            	<ul class="ui-listview">
+            		<li ng-repeat="w in worklogs">
+            			<a ng-click="showDetails(w)">
+	            			<span class="ui-accessory-left" ng-if="w.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+	            			<h3>{{w.DESCRIPTION}}</h3>
+		                    <p>{{ 'WORKLOG.CREATEBY' | translate }}: {{w.CREATEBY}}</p>
+		                    <p>{{ 'WORKLOG.CREATEDATE' | translate }}: {{w.CREATEDATE | date}}</p>
+		                    <span class="ui-arrow"></span>
+	                    </a>
+            		</li>
+            	</ul>
+            	<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+            </div>
+    	</div>
+		<script type="text/javascript">
+			function MainController($scope, worklogService, paginationService) {
+				var queryName = 'WORKLOG';
+				var viewName = 'offline/worklog/main.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				var pageData = EMMServer.Session.getItem('WORKLOG_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();	
+				// *Important* must instantiate the mboSet with app name
+				$scope.worklogs = EMMServer.DB.getMboSet('WorkLog', queryName, $scope.mboObject.mbo.appName());
+				
+				worklogService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				paginationService.init({
+					pagination : $scope.worklogs.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});				
+				
+				$scope.TXCOUNT = EMMServer.DB.getUserTxnCount();
+				var messages = EMMServer.DB.getQueryResult("MESSAGE") || null;
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE; 
+				
+				$scope.goBack = function(){
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);
+				}
+				
+				$scope.createNew = worklogService.createNew;
+				$scope.showDetails = worklogService.showDetails;
+			}
+		</script>
+	</body>
+</html>

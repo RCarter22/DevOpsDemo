@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<h3 class="ui-title" translate="ASSIGNMENT.ASSIGNMENT">Assignment</h3>
+				<a ng-show="assignment.mbo.isNew()" ng-click="actions.saveAssignment(assignment)" class="ui-btn-right" ng-class="{'ui-btn-c' : assignment.mbo.toBeSaved()}" translate="SAVE">Save</a>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !assignment.mbo.isDirty(), 'ui-statusbar-c': assignment.mbo.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="assignment.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field">
+						<label translate="ASSIGNMENT.STATUS">Status</label>
+						<input disabled="true" ng-model="assignment.STATUS" ng-required="assignment.mbo.isRequired('STATUS')" ng-readonly="assignment.mbo.isReadOnly('STATUS')"/>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSIGNMENT.LABORCODE">Labor</label>
+						<input disabled="true" ng-model="assignment.LABORCODE" ng-required="assignment.mbo.isRequired('LABORCODE')" ng-readonly="assignment.mbo.isReadOnly('LABORCODE')"/>
+						<a class="ui-arrow" ng-click="domain($event, assignment)" data-display="LABORCODE,CRAFT" data-field="LABORCODE"></a>
+					</li>
+					<li class="ui-field-block">
+						<label translate="ASSIGNMENT.DESCRIPTION">Description</label>
+						<textarea data-htmleditor="true" ng-model="workorder.DESCRIPTION" ng-readonly="true"></textarea>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSIGNMENT.CRAFT">Craft</label>
+						<input disabled="true" ng-model="assignment.CRAFT" ng-required="assignment.mbo.isRequired('CRAFT')" ng-readonly="true">
+						<a class="ui-arrow" ng-click="domain($event, assignment)" data-display="CRAFT,DESCRIPTION" data-field="CRAFT"></a>
+					</li>
+					<li class="ui-field">
+						<label translate="ASSIGNMENT.STARTDATE">Start Date</label>
+						<datepicker date-format="datetime" id="STARTDATE" ng-model="assignment.STARTDATE" ng-change="assignment.mbo.onChange('STARTDATE')" ng-required="assignment.mbo.isRequired('STARTDATE')" ng-readonly="assignment.mbo.isReadOnly('STARTDATE')" />
+					</li>					
+					<li class="ui-field">
+    					<label translate="ASSIGNMENT.LABORHRS">Hours</label>
+    					<input id="LABORHRS" type="text" data-interval="0.25" data-control="spinner" ng-model="assignment.LABORHRS" ng-required="assignment.mbo.isRequired('LABORHRS')" ng-readonly="assignment.mbo.isReadOnly('LABORHRS')"></input>
+					</li>
+				</ul>
+				<div class="ui-sidebar">
+					<p class="ui-section" translate="ACTIONS">Actions</p>
+					<ul class="ui-listview ui-inset">
+						<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+						<li>
+							<a emm-sync>
+								<img src="../../images/sync.png">
+								<h3 translate="SYNCSERVER">Sync with Server</h3>
+								<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+								<span class="ui-badge" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+						<li>
+							<a emm-online="plustwo/view.action?id={{workorder.WORKORDERID}}">
+								<img src="../../images/online.png">
+								<h3 translate="GOONLINE">Go Back Online</h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+						<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+						<li ng-show="assignment.STATUS !== 'COMPLETE'">
+							<a ng-click="actions.completeAssignment(assignment)">
+								<h3>Complete Assignment</h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, plustassignmentService, domainService) {
+				var queryName = 'ASSIGNMENT';
+				var viewName = 'offline/plustwo/assignment.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+
+				plustassignmentService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				domainService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				var pageData = EMMServer.Session.getItem('ASSIGNMENT_DATA');
+				$scope.workorder = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				var resultSet = EMMServer.DB.getQueryResult(queryName);
+				
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					plustassignmentService.toAssignments($scope.workorder)
+					return false;
+				}
+				
+				$scope.assignment = new Assignment(resultSet[0]);
+			
+
+				$scope.domain = domainService.domain;
+				$scope.actions = plustassignmentService.actions;
+
+				$scope.goBack = function(){
+					// Clear any changes and remove from session
+					$scope.assignment.session.remove();
+					EMMServer.DB.Select()
+						.go("offline/plustwo/assignments.htm");
+				};
+			}
+		</script>
+	</body>
+</html>
