@@ -1,0 +1,9 @@
+META-INF/
+docs/
+.settings
+target/
+.classpath
+.project
+derby
+*.log
+tools/
