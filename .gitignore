@@ -11,3 +11,4 @@ seg0/
 *.dat
 *.ctrl
 *.lck
+log/
