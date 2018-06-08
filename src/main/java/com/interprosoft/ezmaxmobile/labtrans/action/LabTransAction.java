@@ -143,9 +143,9 @@ public class LabTransAction extends BaseAction {
 				mbo = this.simpleService.findById(OWNERMBO,id);
 				setMboSession(OWNERMBO,this.mbo);
 			}
-			if(mbo.getString("TIMERSTATUS").equalsIgnoreCase("COMPLETE")){
+			/*if(mbo.getString("TIMERSTATUS").equalsIgnoreCase("COMPLETE")){
 				mbo.setFieldFlag(new String[]{"TASKID"}, MboConstants.REQUIRED, true);
-			}
+			}*/
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());

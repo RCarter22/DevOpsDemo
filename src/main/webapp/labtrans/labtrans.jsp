@@ -39,7 +39,7 @@
 					</s:else>
 				</li>
 					<li class="ui-field">
-						<s:if test="mbo.getString('TIMERSTATUS') eq 'COMPLETE'">
+						<%-- <s:if test="mbo.getString('TIMERSTATUS') eq 'COMPLETE'"> --%>
 						
 						<label><s:property value="mbo.getMboValueInfoStatic('TASKID').getTitle()" /></label>
 						<input type="text"
@@ -50,7 +50,7 @@
 								onchange="emm.core.setValue(this)"
 						/>
 						<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="TASKID" data-source="TASKID" data-display="TASKID,DESCRIPTION" data-search="TASKID,DESCRIPTION"></a>
-						</s:if>
+						
 					</li> 
 			<%-- 	<li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('WONUM').getTitle()" /></label>
