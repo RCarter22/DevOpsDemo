@@ -24,7 +24,7 @@
 			</a>
 		</li>
 		<li>
-			<a href="../labtrans/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
+			<a href="../labtrans/main2.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
 				<img src="../images/labor.png" />
 				<h3><s:text name="labtrans.labor"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('LABTRANS').count()"/></span>
