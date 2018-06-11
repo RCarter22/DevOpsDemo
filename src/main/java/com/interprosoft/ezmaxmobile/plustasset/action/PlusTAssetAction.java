@@ -248,6 +248,18 @@ public class PlusTAssetAction extends BaseAction {
 	public String view() {
 		try{
 			populateMbo(OWNERMBO, APPNAME);
+			
+			//Duplicating Automation Script in core Maximo
+			//Need to duplicate because it uses the interactive implicit variable
+			//EZMax sets interactive to "false" and the auto script is assuming true
+			MboSetRemote lastvistedMboSet = this.user.getSession().getMboSet("AEPLASTVISITED");
+			MboRemote newMbo = lastvistedMboSet.add();
+			newMbo.setValue("OWNERID",mbo.getInt("ASSETID"),9);
+			newMbo.setValue("OWNERTABLE",OWNERMBO,9);
+			newMbo.setValue("AEPVISITEDBY",this.user.getUserId(),9);
+			lastvistedMboSet.getMXTransaction().save();
+			lastvistedMboSet.close();
+			
 		} catch (NullPointerException e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
