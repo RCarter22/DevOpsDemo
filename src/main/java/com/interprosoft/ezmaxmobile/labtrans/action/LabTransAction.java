@@ -192,6 +192,38 @@ public class LabTransAction extends BaseAction {
 		return SUCCESS;
 	}
 	
+	@Action(value="view2",
+			results={
+				@Result(name="success", location="labtrans2.jsp"),
+				@Result(name="error", location="labtrans2.jsp")
+			}
+		)
+	public String view2() {
+		try{
+			String currentMbo = this.getSessionValueByName(EMMConstants.CURRENTMBONAME);
+			if(currentMbo == null || currentMbo.equalsIgnoreCase(""))
+				return EMMConstants.HOME;
+			mbo = (MboRemote)this.getSessionObject(currentMbo);
+			if ( mbo!=null && !mbo.getName().equalsIgnoreCase(OWNERMBO)){
+				mbo = this.simpleService.findById(mbo.getMboSet(OWNERMBO),id);
+				setMboSession(OWNERMBO,this.mbo);
+			}
+			if(this.mbo == null && id>0){
+				mbo = this.simpleService.findById(OWNERMBO,id);
+				setMboSession(OWNERMBO,this.mbo);
+			}
+			/*if(mbo.getString("Start Time") != null ||  mbo.getString("TIMERSTATUS").equalsIgnoreCase("COMPLETE")){
+			}*/
+			mbo.setFieldFlag(new String[]{"TASKID"}, MboConstants.REQUIRED, true);
+
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}		
+		return SUCCESS;
+	}
+	
 	@Action(value="add",
 			results={
 				@Result(name="success", type="redirect", location="view.action", params={"id","${id}"}),
@@ -271,6 +303,46 @@ public class LabTransAction extends BaseAction {
 			@Result(name="error",location="main.action",type="redirect",params={"id","${id}"})
 		})
 	public String goback(){
+		try {			
+			String currentMbo = this.getSessionValueByName(EMMConstants.CURRENTMBONAME);
+			if(currentMbo == null || currentMbo.equalsIgnoreCase(""))
+				return EMMConstants.HOME;
+			mbo = (MboRemote)this.getSessionObject(currentMbo);
+			// Going back causes an error if the record is unsaved.
+			if(this.mbo.toBeSaved() && mbo.getOwner() != null){	
+				MboSetRemote ownerSet = mbo.getOwner().getThisMboSet();
+				ownerSet.reset();
+				id = mbo.getOwner().getUniqueIDValue();
+				this.setMboSession(currentMbo, null);
+				this.setMboSession(mbo.getOwner().getName(), ownerSet.getMbo(0));
+			} else if(mbo.getOwner() != null){
+				this.setMboSession(currentMbo, null);
+				this.setMboSession(mbo.getOwner().getName(), mbo.getOwner());
+				id = mbo.getOwner().getUniqueIDValue();
+			} else{
+				this.setMboSession(currentMbo, null);
+				MboRemote ownerMbo = mbo.getMboSet("WORKORDER").getMbo(0);
+				if(ownerMbo.getBoolean("ISTASK"))
+					ownerMbo = ownerMbo.getMboSet("PARENT").getMbo(0);
+				this.setMboSession(ownerMbo.getName(), ownerMbo);
+				id = ownerMbo.getUniqueIDValue();
+			}
+		} catch (RemoteException e) {
+			setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}	
+	
+	
+	@Action(value="goback2", results={
+			@Result(name="success",location="main2.action",type="redirect",params={"id","${id}"}),
+			@Result(name="error",location="main2.action",type="redirect",params={"id","${id}"})
+		})
+	public String goback2(){
 		try {			
 			String currentMbo = this.getSessionValueByName(EMMConstants.CURRENTMBONAME);
 			if(currentMbo == null || currentMbo.equalsIgnoreCase(""))

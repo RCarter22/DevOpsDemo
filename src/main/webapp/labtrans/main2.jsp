@@ -28,7 +28,7 @@
 					<s:include value="../common/pagination.jsp"/>
 					<s:iterator value="mboList">
 						<li>
-							<a href="view.action?id=<s:property value="getUniqueIDValue()" />">
+							<a href="view2.action?id=<s:property value="getUniqueIDValue()" />">
 								<p class="ui-aside">Task: <s:property value="getString('TASKID')"/></p>
 								<h3><s:property value="getString('PERSON.DISPLAYNAME')"/></h3>
 								<p><s:property value="getMboValueInfoStatic('STARTDATE').getTitle()" />: <s:property value="getString('STARTDATE')"/> <s:property value="getString('STARTTIME')"/></p>
