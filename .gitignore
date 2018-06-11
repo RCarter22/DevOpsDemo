@@ -9,4 +9,7 @@ derby
 tools/
 seg0/
 logs/
+*.dat
+*.ctrl
+*.lck
 log/

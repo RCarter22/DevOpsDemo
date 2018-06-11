@@ -39,8 +39,7 @@
 					</s:else>
 				</li>
 					<li class="ui-field">
-						<%-- <s:if test="mbo.getString('TIMERSTATUS') eq 'COMPLETE'"> --%>
-						
+
 						<label><s:property value="mbo.getMboValueInfoStatic('TASKID').getTitle()" /></label>
 						<input type="text"
 								id="TASKID"

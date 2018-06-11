@@ -91,6 +91,44 @@ public class LabTransAction extends BaseAction {
 		return SUCCESS;
 	}
 	
+	@Action(value="main2",
+			results={
+				@Result(name="success", location="main2.jsp"),
+				@Result(name="error", location="main2.jsp")
+			}
+		)
+	public String execute2() {
+		try {
+			String currentMbo = this.getSessionValueByName(EMMConstants.CURRENTMBONAME);
+			if(currentMbo == null || currentMbo.equalsIgnoreCase(""))
+				return EMMConstants.HOME;
+			mbo = (MboRemote)this.getSessionObject(currentMbo);
+			MboRemote thisMbo = null;
+			if (currentMbo.equals(OWNERMBO) && mbo.getOwner() != null){
+				thisMbo = mbo;
+				mbo = mbo.getOwner();
+				currentMbo = mbo.getName();				
+			}			
+			pagination.setPageSize(5);
+			populateMbo(currentMbo, this.getSessionValueByName(EMMConstants.CURRENTAPPNAME));
+			populateMboListByRelationship(currentMbo, "SHOWACTUALLABOR","ENTERDATE DESC");
+			if (thisMbo != null && !thisMbo.toBeDeleted())
+				thisMbo.validate();
+		} catch (RemoteException e) {
+			setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			return ERROR;
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			setMessage(new EZMessage(msg, EMMConstants.ERROR));
+			return ERROR;
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}
+	
 	@Action(value="applyLabor",results={
 			@Result(name="success", location="workhours.action", type="redirect"),
 			@Result(name="error", location="workhours.action", type="redirect")
@@ -143,9 +181,9 @@ public class LabTransAction extends BaseAction {
 				mbo = this.simpleService.findById(OWNERMBO,id);
 				setMboSession(OWNERMBO,this.mbo);
 			}
-			/*if(mbo.getString("TIMERSTATUS").equalsIgnoreCase("COMPLETE")){
-				mbo.setFieldFlag(new String[]{"TASKID"}, MboConstants.REQUIRED, true);
-			}*/
+
+			mbo.setFieldFlag(new String[]{"TASKID"}, MboConstants.REQUIRED, true);
+
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());

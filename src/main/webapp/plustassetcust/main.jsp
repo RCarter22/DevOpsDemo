@@ -36,7 +36,7 @@
 								<p><strong><s:property value="getString('PERSONID')"/></strong></p>
 								<h3><s:property value="getString('PERSON.DISPLAYNAME')"/></h3>
 								<p><s:property value="getMboValueInfoStatic('ISUSER').getTitle()"/>: <s:property value="getString('ISUSER')"/></p>
-								<p><s:property value="getMboValueInfoStatic('AEPFLEETSUPERVISOR').getTitle()"/>: <s:property value="getString('AEPFLEETSUPERVISOR')"/></p>
+								<p><s:property value="getMboValueInfoStatic('AEPFLEETSUPERVISOR').getTitle()"/>: <s:property value="getString('ISCUSTODIAN')"/></p>
 							</a>
 							<%-- <a href="delete.action?id=<s:property value='getUniqueIDValue()'/>" class="ui-trash-large"></a> --%>
 						</li>
