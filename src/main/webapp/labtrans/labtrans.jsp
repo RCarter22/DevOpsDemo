@@ -38,8 +38,8 @@
 						<input readonly="true" value="<s:property value="mbo.getString('TICKETID')"/>"/>
 					</s:else>
 				</li>
-					<li class="ui-field">
-
+	
+					<li class="ui-field">						
 						<label><s:property value="mbo.getMboValueInfoStatic('TASKID').getTitle()" /></label>
 						<input type="text"
 								id="TASKID"
