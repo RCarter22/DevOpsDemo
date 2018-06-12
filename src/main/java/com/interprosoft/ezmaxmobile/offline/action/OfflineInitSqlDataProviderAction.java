@@ -2239,7 +2239,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			SelectQuery sql = new SelectQuery()
-				.column("A.ASSETLOCUSERCUSTID", "A.ASSETNUM", "A.ISCUSTODIAN", "A.ORGID", "A.SITEID", "A.ISUSER","A.ISPRIMARY", "A.PERSONID","P.DISPLAYNAME")
+				.column("A.ASSETLOCUSERCUSTID", "A.ASSETNUM", "A.ISCUSTODIAN", "A.ORGID", "A.SITEID", "A.ISUSER", "A.AEPFLEETSUPERVISOR","A.ISPRIMARY", "A.PERSONID","P.DISPLAYNAME")
 				//.column("AD.ISUSINGDEPT","AD.ISOWNINGDEPT","TO_CHAR(AD.AEPEFFECTIVEDATE,'YYYY-MM-DD') AS AEPEFFECTIVEDATE","AD.CUSTOMER")
 				//.column("PL.NAME")
 				.from("ASSETUSERCUST A")
