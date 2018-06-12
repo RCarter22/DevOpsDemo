@@ -181,8 +181,7 @@ public class LabTransAction extends BaseAction {
 				mbo = this.simpleService.findById(OWNERMBO,id);
 				setMboSession(OWNERMBO,this.mbo);
 			}
-			/*if(mbo.getString("Start Time") != null ||  mbo.getString("TIMERSTATUS").equalsIgnoreCase("COMPLETE")){
-			}*/
+
 			mbo.setFieldFlag(new String[]{"TASKID"}, MboConstants.REQUIRED, true);
 
 		} catch (Exception e){
