@@ -11,6 +11,7 @@
 <meta name="format-detection" content="telephone=no">
 <meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport" />
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self';">
 <link href="../images/ezmaxmobile.ico" rel="shortcut icon" />
 <link href="../css/ezmaxmobile.ui-full.min.css?v=5.2.1" rel="stylesheet" type="text/css" />
 <script src="../javascript/jquery.js" type="text/javascript"></script>
