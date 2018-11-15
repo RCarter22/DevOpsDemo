@@ -1468,9 +1468,9 @@ public class PlusTWOAction  extends BaseAction {
 			//if new status is WCOMP and the primary meter has not been updated
 			if(newStatus.equalsIgnoreCase("WCOMP")){
 	            MboSetRemote assetMeterSet = mbo.getMboSet("$ASSETM","ASSETMETER","ACTIVE = 1 and PLUSTPRIMETER = 1 AND SITEID = 'CORP' AND ASSETNUM = '"+ mbo.getString("ASSETNUM")+ "'");
-	            if(mbo.getInt("PLUSTPRIENTERED") == 0 && !assetMeterSet.isEmpty() &&  mbo.getInt("ISTASK") == 0){
+	            if(mbo.getInt("PLUSTPRIENTERED") == 0 && !assetMeterSet.isEmpty() &&  mbo.getInt("ISTASK") == 0 && mbo.getString("ACTIVEASSETMETER.REMARKS") != "Telematics"){
 		            setSessionObject(mboName, null);
-					String msg = mbo.getMessage("aep", "Primary meter needs to be updated before changing status to WCOMP");
+					String msg = mbo.getMessage("aep", "Primary meter needs to be updated before changing status to WCOMP and REMARKS missing 'Telematics'");
 					this.setMessage(new EZMessage(msg, EMMConstants.ERROR));
 					return ERROR;	                             
 	            }
