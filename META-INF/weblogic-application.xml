@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<weblogic-application xmlns="http://www.bea.com/ns/weblogic/90">
+    <prefer-application-packages>
+        <package-name>org.apache.commons.pool.*</package-name>
+        <package-name>org.apache.struts2.convention.*</package-name>
+		<package-name>org.objectweb.asm.*</package-name>
+    </prefer-application-packages>
+</weblogic-application>

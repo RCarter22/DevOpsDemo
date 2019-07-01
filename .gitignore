@@ -1,15 +1,7 @@
-META-INF/
 docs/
 .settings
 target/
 .classpath
 .project
-derby
-*.log
 tools/
-seg0/
-logs/
-*.dat
-*.ctrl
-*.lck
-log/
+/bin/
