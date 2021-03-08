@@ -5,7 +5,6 @@
 package com.interprosoft.ezmaxmobile.login.action;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.rmi.RemoteException;
 import java.util.HashMap;
@@ -17,17 +16,12 @@ import net.sf.json.JsonConfig;
 import net.sf.json.util.PropertyFilter;
 import psdi.util.MXException;
 
-import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.ResultPath;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -39,7 +33,6 @@ import com.interprosoft.ezmaxmobile.common.model.EZMessage;
 import com.interprosoft.ezmaxmobile.common.util.LicenseControler;
 import com.interprosoft.ezmaxmobile.login.LoginException;
 import com.interprosoft.ezmaxmobile.login.service.LoginService;
-import com.interprosoft.ezmaxmobile.offline.model.OfflineConfig;
 import com.interprosoft.ezmaxmobile.user.UserException;
 import com.interprosoft.ezmaxmobile.user.model.User;
 import com.interprosoft.ezmaxmobile.user.service.UserServiceImpl;
@@ -105,7 +98,7 @@ public final class LoginAction extends BaseAction {
 				return ERROR;
 			}
 			User user = loginService.login(username, password);
-			
+
 			//extra user fields for offline usage 
 			Map<Object, Object> extraFields = new HashMap<Object,Object>();				
 
