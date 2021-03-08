@@ -17,6 +17,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.interprosoft.ezmaxmobile.common.EMMConstants;
+import com.interprosoft.ezmaxmobile.common.action.BaseAction;
+import com.interprosoft.ezmaxmobile.common.model.EZMessage;
+import com.interprosoft.ezmaxmobile.common.pagination.Pagination;
+import com.interprosoft.ezmaxmobile.common.service.SimpleService;
+import com.interprosoft.ezmaxmobile.common.util.MaximoExceptionUtil;
+import com.interprosoft.ezmaxmobile.common.util.PushUtil;
+import com.interprosoft.integrations.microsoft.models.EZEventPerson;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 import psdi.app.asset.AssetRemote;
 import psdi.app.workorder.AssignmentRemote;
 import psdi.app.workorder.MultiAssetLocCIRemote;
@@ -28,13 +39,6 @@ import psdi.mbo.MboSetRemote;
 import psdi.mbo.NonPersistentMboRemote;
 import psdi.mbo.NonPersistentMboSetRemote;
 import psdi.util.MXException;
-
-import com.interprosoft.ezmaxmobile.common.EMMConstants;
-import com.interprosoft.ezmaxmobile.common.action.BaseAction;
-import com.interprosoft.ezmaxmobile.common.model.EZMessage;
-import com.interprosoft.ezmaxmobile.common.service.SimpleService;
-import com.interprosoft.ezmaxmobile.common.util.MaximoExceptionUtil;
-import com.interprosoft.ezmaxmobile.common.util.PushUtil;
 
 @Component
 @Scope("prototype")
@@ -56,6 +60,11 @@ public class WOTrackAction  extends BaseAction {
 	private String[] personOptions;
 	private String groupOptions;
 	private String notificationMessage;
+	private String clearFailureFld;
+	private boolean mboPrevNextVisible = true;
+	private boolean isInspectionWO = false;
+	private long nonParentInspID;
+	private int inspCount = 0;
 	
 	@Autowired
 	public SimpleService simpleService;
@@ -69,8 +78,9 @@ public class WOTrackAction  extends BaseAction {
 		try{	
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
-			setMboAppName(APPNAME);
+			clearadvancedsearch();
+			clearMboSession("CURRENTWHERECLAUSE");
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			
 			MboSetRemote labTransSet = this.user.getSession().getMboSet("LABTRANS");
 			labTransSet.setQbe("LABOR.PERSONID", this.user.getPersonId());
@@ -102,7 +112,12 @@ public class WOTrackAction  extends BaseAction {
 	public String view() {
 		try{	
 			this.setSessionObject("DOWNTIMEREPORT", null);
+			this.setSessionObject("TASKPAGINATION", null);			
 			populateMbo(OWNERMBO, APPNAME);
+			checkWOInspections(mbo);
+			if (this.isPushEnabled()) {
+				populateEventUtil(mbo);
+			}
 		} catch (NullPointerException e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -115,38 +130,203 @@ public class WOTrackAction  extends BaseAction {
 		return SUCCESS;
 	}
 	
-	@Action(value="push",results={
+	/**
+     * setMapValue for selected map pin
+     * @return
+     */
+     @Action(value="setMapValue",results={
+                   @Result(name="success",location="view.action",type="redirect",params={"id","${id}"}),
+                             @Result(name="error",location="wotrack.jsp")
+                 }
+     )
+     public String setMapValue() {
+         try {      
+	         populateMbo(OWNERMBO, APPNAME);
+	
+	         String attrName = request.getParameter("MAPATTRNAME");
+	         String attrValue = request.getParameter("MAPATTRVAL");
+	         
+	         if (attrName != null && attrName.length() > 0 && attrValue != null && attrValue.length() > 0)
+	                     this.mbo.setValue(attrName,attrValue);
+         } 
+         catch (Exception e){
+             this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+             this.addActionError(e.getMessage());
+             return ERROR;
+         }                                   
+         return SUCCESS;
+     }
+     
+     @Action(value="push",results={
+ 			@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
+ 			@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
+ 		}
+ 	)
+ 	public String push() {
+ 		try{	
+ 			populateMbo(OWNERMBO, APPNAME);
+ 			id = mbo.getUniqueIDValue();
+ 			
+ 			String joinedPerson = "";
+ 			if (personOptions != null) {
+ 				joinedPerson = StringUtils.join(personOptions, ",");  
+ 			}
+
+ 			try{
+ 				PushUtil pushUtil = new PushUtil();
+ 				pushUtil.setPerson(joinedPerson);
+ 				pushUtil.setGroup(this.groupOptions);
+ 				pushUtil.setAlert("[" + getText("wotrack.shortwonum") + mbo.getString("WONUM") + "] " + getText("notification.messagefrom", new String[]{this.user.getSession().getUserInfo().getDisplayName()}));
+ 				pushUtil.setDetails(this.notificationMessage);
+ 				pushUtil.setOpenLink(mbo.getThisMboSet().getApp().toLowerCase() + "/view.action?id="+mbo.getUniqueIDValue());
+ 				pushUtil.setSentBy(user.getSession().getUserInfo().getDisplayName() + " " + getText("notification.fromemm"));
+ 				pushUtil.setRefNum(APPNAME + "_" + id);
+ 				pushUtil.push();
+ 			}catch(Exception e)
+ 			{
+ 				this.setMessage(new EZMessage(getText("notification.notsent"), EMMConstants.ERROR));
+ 				return ERROR;
+ 			}
+ 			this.setMessage(new EZMessage(getText("notification.sent"), EMMConstants.INFO));
+ 			
+ 		} catch (Exception e){
+ 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+ 			this.addActionError(e.getMessage());
+ 			return ERROR;
+ 		}			
+ 		return SUCCESS;
+ 	}
+ 	
+ 	@Action(value="addevent",results={
+ 			@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
+ 			@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
+ 		}
+ 	)
+ 	public String addevent() {
+ 		try{	
+ 			populateMbo(OWNERMBO, APPNAME);
+ 			id = mbo.getUniqueIDValue();
+ 			
+ 			PushUtil pushUtil = new PushUtil();
+ 			try {
+ 				pushUtil.setEventPersonArray(personOptions);
+ 				pushUtil.setGroup(this.groupOptions);
+ 				pushUtil.setAlert("[" + getText("wotrack.shortwonum") + mbo.getString("WONUM") + "] Work has been scheduled by " + this.user.getSession().getUserInfo().getDisplayName());
+ 				pushUtil.setDetails(mbo.getString("DESCRIPTION"));
+ 				pushUtil.setOpenLink(mbo.getThisMboSet().getApp().toLowerCase() + "/view.action?id="+mbo.getUniqueIDValue());
+ 				pushUtil.setSentBy(user.getSession().getUserInfo().getDisplayName() + " " + getText("notification.fromemm"));
+ 				pushUtil.setRefNum(APPNAME + "_" + id);
+ 				pushUtil.push();
+ 			}
+ 			catch(Exception e) {
+ 				if (e.getMessage() != null && !e.getMessage().equalsIgnoreCase("")) {
+ 					this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+ 				}
+ 				else {
+ 					this.setMessage(new EZMessage(getText("notification.notsent"), EMMConstants.ERROR));
+ 				}
+ 				return ERROR;
+ 			}
+ 			
+ 			//Event
+ 			//populateEventUtil(mbo) -> sets the event url session object to current view
+ 			//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
+ 			populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
+ 			eventUtil.setStartDate(mbo.getDate("SCHEDSTART"));
+ 			eventUtil.setEndDate(mbo.getDate("SCHEDFINISH"));			
+ 			eventUtil.setSubject(mbo.getString("DESCRIPTION"));
+ 			
+ 			if (mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS") != null && 
+ 				!mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS").equalsIgnoreCase("")) {
+ 				eventUtil.setLocation(mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS"));
+ 			}
+ 			else {
+ 				eventUtil.setLocation(mbo.getString("LOCATION.DESCRIPTION"));
+ 			}
+ 			
+ 			if (mbo.getString("ONBEHALFOF") != null && !mbo.getString("ONBEHALFOF").equalsIgnoreCase("")) {
+ 				eventUtil.setRequester(mbo.getString("ONBEHALFOF.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("ONBEHALFOF.PRIMARYEMAIL"));
+ 			}
+ 			else {
+ 				eventUtil.setRequester(mbo.getString("REPORTEDBY.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("REPORTEDBY.PRIMARYEMAIL"));
+ 			}
+ 			
+ 			// When using local tenant/exchange server, this is the user sent.
+ 			EZEventPerson organizer = new EZEventPerson();
+ 			organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
+ 			organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());
+ 			eventUtil.setOrganizer(organizer);
+ 			eventUtil.setEventAttendeeArray(personOptions);
+ 			eventUtil.setBody(
+ 					"<b>" + mbo.getString("WONUM") + " - " + mbo.getString("DESCRIPTION") + "</b>"
+ 			);
+
+ 			//EventMessage Status
+ 			eventUtil.setStatus("Scheduled For");
+
+ 			String msid = eventUtil.createEvent();		
+ 			//For locally use only
+ 			if (this.eventField != null && !this.eventField.equalsIgnoreCase("")) {
+ 				mbo.setValue(eventField, msid);
+ 				super.save();
+ 			}
+ 			this.setMessage(new EZMessage(getText("event.sent"), EMMConstants.INFO));
+ 		} catch (Exception e){
+ 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+ 			this.addActionError(e.getMessage());
+ 			return ERROR;
+ 		}			
+ 		return SUCCESS;
+ 	}
+ 	
+ 	@Action(value="editevent",results={
 			@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
 			@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
 		}
 	)
-	public String push() {
+	public String editevent() {
 		try{	
 			populateMbo(OWNERMBO, APPNAME);
 			id = mbo.getUniqueIDValue();
-			
-			String joinedPerson = "";
-			if (personOptions != null) {
-				joinedPerson = StringUtils.join(personOptions, ",");  
-			}
 
-			try{
-				PushUtil pushUtil = new PushUtil();
-				pushUtil.setPerson(joinedPerson);
-				pushUtil.setGroup(this.groupOptions);
-				pushUtil.setAlert("[" + getText("wotrack.shortwonum") + mbo.getString("WONUM") + "] " + getText("notification.messagefrom", new String[]{this.user.getSession().getUserInfo().getDisplayName()}));
-				pushUtil.setDetails(this.notificationMessage);
-				pushUtil.setOpenLink("wotrack/view.action?id="+mbo.getUniqueIDValue());
-				pushUtil.setSentBy(user.getSession().getUserInfo().getDisplayName() + " " + getText("notification.fromemm"));
-				pushUtil.setRefNum(APPNAME + "_" + id);
-				pushUtil.push();
-			}catch(Exception e)
-			{
-				this.setMessage(new EZMessage(getText("notification.notsent"), EMMConstants.ERROR));
-				return ERROR;
-			}
-			this.setMessage(new EZMessage(getText("notification.sent"), EMMConstants.INFO));
+			//populateEventUtil(mbo) -> sets the event url session object to current view
+ 			//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
+ 			populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
+			eventUtil.setStartDate(mbo.getDate("SCHEDSTART"));
+			eventUtil.setEndDate(mbo.getDate("SCHEDFINISH"));
+			eventUtil.setSubject(mbo.getString("DESCRIPTION"));
 			
+			if (mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS") != null && 
+ 				!mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS").equalsIgnoreCase("")) {
+ 				eventUtil.setLocation(mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS"));
+ 			}
+ 			else {
+ 				eventUtil.setLocation(mbo.getString("LOCATION.DESCRIPTION"));
+ 			}
+ 			
+ 			if (mbo.getString("ONBEHALFOF") != null && !mbo.getString("ONBEHALFOF").equalsIgnoreCase("")) {
+ 				eventUtil.setRequester(mbo.getString("ONBEHALFOF.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("ONBEHALFOF.PRIMARYEMAIL"));
+ 			}
+ 			else {
+ 				eventUtil.setRequester(mbo.getString("REPORTEDBY.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("REPORTEDBY.PRIMARYEMAIL"));
+ 			}
+			
+			EZEventPerson organizer = new EZEventPerson();
+			organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
+			organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());
+			eventUtil.setOrganizer(organizer);
+			eventUtil.setBody(
+					"<b>" + mbo.getString("WONUM") + " - " + mbo.getString("DESCRIPTION") + "</b>"
+			);			
+			//EventMessage Status
+			eventUtil.setStatus("Schedule Changed");
+			
+			eventUtil.editEvent();
+			this.setMessage(new EZMessage(getText("event.updated"), EMMConstants.INFO));
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -154,7 +334,38 @@ public class WOTrackAction  extends BaseAction {
 		}			
 		return SUCCESS;
 	}
+	
+	@Action(value="deleteevent",results={
+			@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
+			@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
+		}
+	)
+	public String deleteevent() {
+		try{	
+			populateMbo(OWNERMBO, APPNAME);
+			id = mbo.getUniqueIDValue();
 
+			//populateEventUtil(mbo) -> sets the event url session object to current view
+ 			//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
+ 			populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
+			EZEventPerson organizer = new EZEventPerson();
+			organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
+			organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());			
+			eventUtil.setOrganizer(organizer);
+			if (this.eventField != null && !this.eventField.equalsIgnoreCase("")) {
+				mbo.setValue(eventField, "");
+				super.save();
+			}
+			eventUtil.cancelEvent();
+			this.setMessage(new EZMessage(getText("event.cancelled"), EMMConstants.INFO));
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}
+ 	
 	@Action(value="nextwo",results={
 			@Result(name="success", location="view.action", type="redirect", params={"id","${id}"}),
 			@Result(name="error", location="view.action", type="redirect", params={"id","${id}"})
@@ -183,7 +394,7 @@ public class WOTrackAction  extends BaseAction {
 		}			
 		return SUCCESS;
 	}
-	
+		
 	@Action(value="prevwo",results={
 			@Result(name="success", location="view.action", type="redirect", params={"id","${id}"}),
 			@Result(name="error", location="view.action", type="redirect", params={"id","${id}"})
@@ -236,20 +447,13 @@ public class WOTrackAction  extends BaseAction {
 
 			// Safeguard comparison.  
 			// Sometimes the count using this.mbo.getThisMboSet() will return only 1 => containing only the mbo in question
-			// But the entire WOACTIVITY set is bigger than 1 so we need to use the entire mbo ACTIVITY set instead
-			if (tasksMboSetRemote != null) {
-				if (mboSetRemote.count() == 1 && tasksMboSetRemote.count() > mboSetRemote.count()) {
-					mboSetRemote = tasksMboSetRemote;
-					MboRemote mboRemote = mboSetRemote.moveTo(0);
-					while (mboRemote != null) {
-						if (mboRemote.getUniqueIDValue() == mbo.getUniqueIDValue()) {
-							break;
-						}
-						mboRemote = mboSetRemote.moveNext();
-					}
-				}
+			// But the entire WOACTIVITY set is bigger than 1 so we need to use the entire mbo ACTIVITY set instead			
+			if (tasksMboSetRemote != null && mboSetRemote.count() == 1 && tasksMboSetRemote.count() > mboSetRemote.count()) {
+				mboSetRemote = tasksMboSetRemote;
+				this.simpleService.setStartingMboInMboSet(mboSetRemote, mbo);
 			}
-			mbo = mboSetRemote.moveNext();        	
+			mbo = mboSetRemote.moveNext();
+       	
 			if (mbo == null){
 				setMessage(new EZMessage(mboSetRemote.getMessage("system", "lastrecord"), EMMConstants.INFO));
 				return ERROR;
@@ -278,7 +482,7 @@ public class WOTrackAction  extends BaseAction {
 				mbo = this.simpleService.findById(OWNERMBO, mbo.getUniqueIDValue());
 				tasksMboSetRemote = mbo.getMboSet("WOACTIVITY");
 			}
-
+			
 			// Populate the TASK mbo that was in session
 			mbo = (MboRemote)this.getSessionObject("WOACTIVITY");
 			MboSetRemote mboSetRemote = this.mbo.getThisMboSet();
@@ -286,19 +490,12 @@ public class WOTrackAction  extends BaseAction {
 			// Safeguard comparison.  
 			// Sometimes the count using this.mbo.getThisMboSet() will return only 1 => containing only the mbo in question
 			// But the entire WOACTIVITY set is bigger than 1 so we need to use the entire mbo ACTIVITY set instead			
-			if (tasksMboSetRemote != null) {
-				if (mboSetRemote.count() == 1 && tasksMboSetRemote.count() > mboSetRemote.count()) {
-					mboSetRemote = tasksMboSetRemote;
-					MboRemote mboRemote = mboSetRemote.moveTo(0);
-					while (mboRemote != null) {
-						if (mboRemote.getUniqueIDValue() == mbo.getUniqueIDValue()) {
-							break;
-						}
-						mboRemote = mboSetRemote.moveNext();
-					}
-				}
+			if (tasksMboSetRemote != null && mboSetRemote.count() == 1 && tasksMboSetRemote.count() > mboSetRemote.count()) {
+				mboSetRemote = tasksMboSetRemote;
+				this.simpleService.setStartingMboInMboSet(mboSetRemote, mbo);
 			}
-			mbo = mboSetRemote.movePrev();      
+			mbo = mboSetRemote.movePrev();
+			
 			if (mbo == null){
 				setMessage(new EZMessage(mboSetRemote.getMessage("system", "firstrecord"), EMMConstants.INFO));
 				return ERROR;
@@ -321,8 +518,16 @@ public class WOTrackAction  extends BaseAction {
 	public String nextMultiAsset() {
 		try{               
 			mbo = (MboRemote)this.getSessionObject("MULTIASSETLOCCI");
+			MboSetRemote multiMboSetRemote = (MboSetRemote)this.getSessionObject("MULTIASSETLOCCISET");
+
 			MboSetRemote mboSetRemote = this.mbo.getThisMboSet();
-        	mbo = mboSetRemote.moveNext();        	
+			
+			if (multiMboSetRemote != null && mboSetRemote.count() == 1 && multiMboSetRemote.count() > mboSetRemote.count()) {
+				mboSetRemote = multiMboSetRemote;
+				this.simpleService.setStartingMboInMboSet(mboSetRemote, mbo);
+			}
+			mbo = mboSetRemote.moveNext();
+
 			if (mbo == null){
 				setMessage(new EZMessage(mboSetRemote.getMessage("system", "lastrecord"), EMMConstants.INFO));
 				return ERROR;
@@ -345,8 +550,16 @@ public class WOTrackAction  extends BaseAction {
 	public String prevMultiAsset() {
 		try{         
 			mbo = (MboRemote)this.getSessionObject("MULTIASSETLOCCI");
+			MboSetRemote multiMboSetRemote = (MboSetRemote)this.getSessionObject("MULTIASSETLOCCISET");
+
 			MboSetRemote mboSetRemote = this.mbo.getThisMboSet();
-        	mbo = mboSetRemote.movePrev();      
+			
+			if (multiMboSetRemote != null && mboSetRemote.count() == 1 && multiMboSetRemote.count() > mboSetRemote.count()) {
+				mboSetRemote = multiMboSetRemote;
+				this.simpleService.setStartingMboInMboSet(mboSetRemote, mbo);
+			}
+			mbo = mboSetRemote.movePrev();
+			
 			if (mbo == null){
 				setMessage(new EZMessage(mboSetRemote.getMessage("system", "firstrecord"), EMMConstants.INFO));
 				return ERROR;
@@ -369,7 +582,7 @@ public class WOTrackAction  extends BaseAction {
 	public String list() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
 				mboSetRemote.reset();
@@ -393,8 +606,8 @@ public class WOTrackAction  extends BaseAction {
 	            MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 	            if(mboSetRemote != null)
 	                  mboSetRemote.resetQbe();
-	            if(mboSetRemote == null || (mboSetRemote != null && mboSetRemote.getApp() != null && !mboSetRemote.getApp().equalsIgnoreCase(APPNAME))){
-	                  mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+	            if(mboSetRemote == null || (mboSetRemote != null && mboSetRemote.getApp() != null && !mboSetRemote.getApp().equalsIgnoreCase(this.APPNAME))){
+	                  mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
 	                  mboSetRemote.setQbe("WOCLASS", "WORKORDER,ACTIVITY");
 	                  mboSetRemote.setQbe("HISTORYFLAG" , "0");
 	                  mboSetRemote.setQbe("ISTASK", "0");
@@ -428,7 +641,8 @@ public class WOTrackAction  extends BaseAction {
 	                  mbo.getThisMboSet().setQbe("WOCLASS", "WORKORDER,ACTIVITY");
 	                  mbo.getThisMboSet().setQbe("ISTASK", "0");
 	                  mbo.getThisMboSet().setQbe("HISTORYFLAG", "0");
-	                  mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());                        
+	                  if(this.user.getSiteId() != null)
+	                	  mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());                       
 	            }
 	            this.setMboSession(EMMConstants.ADVANCEDSEARCHMBO, mbo);
 	      } catch (Exception e){
@@ -445,31 +659,47 @@ public class WOTrackAction  extends BaseAction {
 		}
 	)
 	public String doadvancedsearch() {
-		try {
-			mbo = (MboRemote) this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
+		try{	
+			mbo = (MboRemote)this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
 			setMboAppName(APPNAME);
-			mboSet = (MboSetRemote) this.getSessionObject(EMMConstants.CURRENTMBOSET);
-			if (mboSet != null){
-				//mboSet.resetQbe();
-				mboSet.setWhere("");
+			mboSet = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
+			if(mboSet == null || (mboSet != null && mboSet.getApp() != null && !mboSet.getApp().equalsIgnoreCase(this.APPNAME))){
+				this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, "");
+				mboSet = this.user.getSession().getMboSet(OWNERMBO);
+				mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+			}else{
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) == null) //Get the initial where clause and save it in session for reuse
+					this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, mboSet.getCompleteWhere());
+				//Combine the initial where clause and the advanced search where clause
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE).toString().equalsIgnoreCase(""))
+					mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+				else
+					mboSet.setWhere(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) + " and " + mbo.getThisMboSet().getCompleteWhere());
 			}
-			else
-				mboSet = this.user.getSession().getMboSet(OWNERMBO);			
-			//2020 - adv search issue
-			mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
-			/*String[][] qbeSet = mbo.getThisMboSet().getQbe();
-			for (int i = 0; i < qbeSet.length; i++) {
-				mboSet.setQbe(qbeSet[i][0], qbeSet[i][1]);
-			}*/
-			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);
-		} catch (Exception e) {
+			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);	
+		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
 			return ERROR;
+		}			
+		return SUCCESS;
+	}	
+	
+	@Action(value="clearadvancedsearch",results={
+			@Result(name="success", location="advancedsearch.action", type="redirect"),
+			@Result(name="error", location="advancedsearch.action", type="redirect")
 		}
+	)
+	public String clearadvancedsearch() {
+		try{
+			this.clearAdvancedSearchSessions();
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
 		return SUCCESS;
 	}
-	
 	
 	@Action(value="create",
 			results={
@@ -478,8 +708,44 @@ public class WOTrackAction  extends BaseAction {
 			}
 		)
 	public String create() {
-		try{			
-			create(OWNERMBO, APPNAME);			
+		try{
+			this.clearMboSession(OWNERMBO);
+			create(OWNERMBO, APPNAME);
+			
+			// NOTE - For mapping - creating work orders based on a dropped pin... show x and y coordinates in description
+			if (jsonParam != null) {
+				JSONObject mapJson = JSONObject.fromObject(jsonParam);
+				if (mapJson != null) {
+					if (mapJson.has("DROPPED_PIN")) {
+						JSONArray dpJsonArray = mapJson.getJSONArray("DROPPED_PIN");
+						if (dpJsonArray != null && dpJsonArray.size() > 0)
+							mapJson = dpJsonArray.getJSONObject(0);
+							mbo.setValue("DESCRIPTION", "(" + mapJson.getString("emmmap_y") + "," + mapJson.getString("emmmap_x") + ")");
+							mbo.setValue("SERVICEADDRESS.LATITUDEY", mapJson.getString("emmmap_y"));
+							mbo.setValue("SERVICEADDRESS.LONGITUDEX", mapJson.getString("emmmap_x"));
+					}
+					else if (mapJson.has("DS_ASSETS")){
+						JSONArray dpJsonArray = mapJson.getJSONArray("DS_ASSETS");
+						if (dpJsonArray != null && dpJsonArray.size() > 0) {
+							mapJson = dpJsonArray.getJSONObject(0);
+							mbo.setValue("DESCRIPTION", "(" + mapJson.getString("LATITUDEY") + "," + mapJson.getString("LONGITUDEX") + ")");
+							mbo.setValue("SERVICEADDRESS.LATITUDEY", mapJson.getString("LATITUDEY"));
+							mbo.setValue("SERVICEADDRESS.LONGITUDEX", mapJson.getString("LONGITUDEX"));
+							mbo.setValue("ASSETNUM", mapJson.getString("ASSETNUM"));
+						}
+					}
+					else if (mapJson.has("DS_LOCATIONS")){
+						JSONArray dpJsonArray = mapJson.getJSONArray("DS_LOCATIONS");
+						if (dpJsonArray != null && dpJsonArray.size() > 0) {
+							mapJson = dpJsonArray.getJSONObject(0);
+							mbo.setValue("DESCRIPTION", "(" + mapJson.getString("LATITUDEY") + "," + mapJson.getString("LONGITUDEX") + ")");
+							mbo.setValue("SERVICEADDRESS.LATITUDEY", mapJson.getString("LATITUDEY"));
+							mbo.setValue("SERVICEADDRESS.LONGITUDEX", mapJson.getString("LONGITUDEX"));
+							mbo.setValue("LOCATION", mapJson.getString("LOCATION"));
+						}
+					}
+				}
+			}			
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -526,6 +792,7 @@ public class WOTrackAction  extends BaseAction {
 		try {
 			populateMbo(OWNERMBO, this.getSessionValueByName(EMMConstants.CURRENTAPPNAME));
 			populateMboListByRelationship(OWNERMBO,"CHILDNOTASK");
+			this.setMboPrevNextVisible(false);
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -561,7 +828,15 @@ public class WOTrackAction  extends BaseAction {
 	public String listTasks() {
 		try {
 			populateMbo(OWNERMBO, this.getSessionValueByName(EMMConstants.CURRENTAPPNAME));
-			populateMboListByRelationship(OWNERMBO,"WOACTIVITY","TASKID ASC");
+			if (request.getMethod().equalsIgnoreCase("POST")){               
+				this.setSessionObject("TASKPAGINATION", pagination);
+			} 
+			else{
+				if (this.getSessionObject("TASKPAGINATION") != null){
+					pagination = (Pagination) this.getSessionObject("TASKPAGINATION");
+				}
+			}
+			populateMboListByRelationship(OWNERMBO, "WOACTIVITY");
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -693,7 +968,7 @@ public class WOTrackAction  extends BaseAction {
 			MboSetRemote multiSetRemote = this.mbo.getMboSet("MULTIASSETLOCCI");
 			multiSetRemote.setOrderBy("SEQUENCE ASC");
 			this.mboList = this.simpleService.paginateMboSet(multiSetRemote, pagination);
-			this.setSessionObject("MULTIASSETLOCCI", multiSetRemote);
+			this.setSessionObject("MULTIASSETLOCCISET", multiSetRemote);
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -832,6 +1107,37 @@ public class WOTrackAction  extends BaseAction {
 		}
 		return SUCCESS;
 	}	
+	
+	@Action(value="savefailurereport",
+			results={
+				@Result(name="success", location="failurereporting.action",type="redirect", params={"id","${id}"}),
+				@Result(name="error", location="failurereporting.action",type="redirect", params={"id","${id}"})
+			}
+		)
+	public String saveFailureReport() {
+		try {
+			populateMbo(OWNERMBO,APPNAME);
+			if(!clearFailureFld.isEmpty()){
+				if(clearFailureFld.equalsIgnoreCase("PROBLEMCODE")){
+					mbo.setValue("PROBLEMCODE", "");;
+				}
+				else if(clearFailureFld.equalsIgnoreCase("FR1CODE")){
+					mbo.setValue("FR1CODE", "");	
+				}
+				else if(clearFailureFld.equalsIgnoreCase("FR2CODE")){
+					mbo.setValue("FR2CODE", "");	
+				}
+			}
+			mbo.getThisMboSet().save();
+			this.setMboSession(OWNERMBO, null);
+			id = mbo.getUniqueIDValue();
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}		
 	
 	@Action(value="downtime",
 			results={
@@ -1249,7 +1555,30 @@ public class WOTrackAction  extends BaseAction {
 			return ERROR;
 		}
 		return SUCCESS;
-	}		
+	}	
+	
+	@Action(value="saveassignment", results={
+			@Result(name="success",location="assignments.action",type="redirect",params={"id","${id}"}),
+			@Result(name="error",location="assignments.action",type="redirect",params={"id","${id}"})
+		})	
+	public String saveassignment(){
+		try {
+			// Fix for InterPro Issue #5049 - Assignments�at�the�task�level�do�not�function�correctly.
+			// Comment out super.save()
+			// super.save();
+			mbo = (MboRemote)this.getSessionObject(OWNERMBO);
+			// Fix for InterPro Issue #5049 - Assignments�at�the�task�level�do�not�function�correctly.  
+			// Add the following line
+			mbo.getThisMboSet().save();
+
+			id = mbo.getUniqueIDValue();
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}	
 	
 	@Action(value="availablelabor",
 			results={
@@ -1266,7 +1595,7 @@ public class WOTrackAction  extends BaseAction {
 				this.mboSet = mbo.getMboSet("SHOWASSIGNMENT.ASSIGNLABOR");
 				((NonPersistentMboSetRemote)this.mboSet).setup();			
 				this.mbo = this.mboSet.getMbo(0);
-				this.mbo.setValue("SITEID", "BEDFORD");			
+				this.mbo.setValue("SITEID", this.user.getSiteId());			
 			} else {
 				this.mbo = (NonPersistentMboRemote)this.getSessionObject("AVAILABLELABOR");				
 			}
@@ -1298,7 +1627,7 @@ public class WOTrackAction  extends BaseAction {
 				this.mboSet = mbo.getMboSet("SHOWASSIGNMENT.ASSIGNLABOR");
 				((NonPersistentMboSetRemote)this.mboSet).setup();			
 				this.mbo = this.mboSet.getMbo(0);
-				this.mbo.setValue("SITEID", "BEDFORD");
+				this.mbo.setValue("SITEID", this.user.getSiteId());
 				setMboSession("AVAILABLELABOR",this.mbo);				
 			} else {
 				this.mbo = (NonPersistentMboRemote)this.getSessionObject("AVAILABLELABOR");
@@ -1394,6 +1723,30 @@ public class WOTrackAction  extends BaseAction {
 		}	
 		return SUCCESS;
 	}
+
+	
+	/**
+     * checkWOInspections for finding any inspections associated with this work order
+	 * @throws MXException 
+	 * @throws RemoteException 
+     */
+	private void checkWOInspections(MboRemote wo) throws RemoteException, MXException {
+		if (wo!=null) {
+			this.setInspCount(wo.getMboSet("$insplist", "INSPECTIONRESULT", "PARENT=:WONUM AND ORGID=:ORGID AND SITEID=:SITEID").count());
+			if (this.inspCount > 0) {
+				setIsInspectionWO(true);
+			} else {
+				String nonParentRelationship = "REFERENCEOBJECTID =:WONUM AND REFERENCEOBJECT =:WOCLASS AND PARENT IS NULL AND ORGID=:ORGID AND SITEID=:SITEID";
+				MboSetRemote inspSet = wo.getMboSet("$insplist", "INSPECTIONRESULT", nonParentRelationship);
+				this.setInspCount(inspSet.count());
+				if (this.inspCount > 0) {
+					setIsInspectionWO(true);
+					setNonParentInspID(inspSet.getMbo(0).getUniqueIDValue());
+				}
+			}
+		}	
+		
+	}
 	
 	public String[] getPersonOptions() {
 		return personOptions;
@@ -1433,5 +1786,45 @@ public class WOTrackAction  extends BaseAction {
 
 	public void setAssetDownView(String assetDownView) {
 		this.assetDownView = assetDownView;
+	}
+
+	public String getClearFailureFld() {
+		return clearFailureFld;
+	}
+
+	public void setClearFailureFld(String clearFailureFld) {
+		this.clearFailureFld = clearFailureFld;
+	}
+	
+	public boolean isMboPrevNextVisible() {
+		return mboPrevNextVisible;
+	}
+
+	public void setMboPrevNextVisible(boolean mboPrevNextVisible) {
+		this.mboPrevNextVisible = mboPrevNextVisible;
+	}	
+	
+	public boolean getIsInspectionWO() {
+		return isInspectionWO;
+	}
+
+	public void setIsInspectionWO(boolean isInspectionWO) {
+		this.isInspectionWO = isInspectionWO;
+	}
+
+	public long getNonParentInspID() {
+		return nonParentInspID;
+	}
+
+	public void setNonParentInspID(long nonParentInspID) {
+		this.nonParentInspID = nonParentInspID;
+	}
+
+	public int getInspCount() {
+		return inspCount;
+	}
+
+	public void setInspCount(int inspCount) {
+		this.inspCount = inspCount;
 	}
 }
