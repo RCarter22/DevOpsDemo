@@ -1,7 +1,11 @@
 docs/
 .settings
+.dat
 target/
 .classpath
 .project
 tools/
 /bin/
+.lck
+.ctrl
+.log

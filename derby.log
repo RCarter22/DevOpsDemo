@@ -1,13 +1,13 @@
 ----------------------------------------------------------------
-Thu Sep 12 15:38:28 EDT 2019:
-Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-016d-26fb-f252-000013106f38 
+Mon Mar 08 16:57:22 EST 2021:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.10.1.1 - (1458268): instance a816c00e-0178-13d8-40c4-00000a3340c0 
 on database directory /Users/s281816/Desktop/Development/GitHub/EZMaxmobile-Fleet-EMA/ezmaxmobile with class loader ContextLoader@ezmaxmobile 
 Loaded from file:/Users/s281816/.m2/repository/org/apache/derby/derby/10.10.1.1/derby-10.10.1.1.jar
 java.vendor=Oracle Corporation
-java.runtime.version=1.8.0_181-b13
+java.runtime.version=11.0.6+8-LTS
 user.dir=/Users/s281816/Desktop/Development/GitHub/EZMaxmobile-Fleet-EMA
 os.name=Mac OS X
 os.arch=x86_64
-os.version=10.14.5
+os.version=10.16
 derby.system.home=null
 Database Class Loader started - derby.database.classpath=''
