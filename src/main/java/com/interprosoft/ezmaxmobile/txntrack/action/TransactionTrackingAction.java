@@ -4,11 +4,7 @@
  ******************************************************************************/
 package com.interprosoft.ezmaxmobile.txntrack.action;
 
-import com.interprosoft.ezmaxmobile.common.BaseMaximoException;
-import com.interprosoft.ezmaxmobile.common.EMMConstants;
-import com.interprosoft.ezmaxmobile.offline.action.BaseTxnTrackingAction;
-import com.interprosoft.ezmaxmobile.common.model.EZMessage;
-import com.interprosoft.ezmaxmobile.offline.model.Transaction;
+import java.util.List;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
@@ -17,7 +13,11 @@ import org.apache.struts2.convention.annotation.ResultPath;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import com.interprosoft.ezmaxmobile.common.BaseMaximoException;
+import com.interprosoft.ezmaxmobile.common.EMMConstants;
+import com.interprosoft.ezmaxmobile.common.model.EZMessage;
+import com.interprosoft.ezmaxmobile.offline.action.BaseTxnTrackingAction;
+import com.interprosoft.ezmaxmobile.offline.model.Transaction;
 
 @Component
 @Scope("prototype")
@@ -138,6 +138,21 @@ public class TransactionTrackingAction extends BaseTxnTrackingAction {
 		return SUCCESS;
 	}
 
+	@Action(value="transaction_doReprocessAllErrors", results={
+		@Result(name="success",location="${currentAction}",type="redirect"),
+		@Result(name="error",location="${currentAction}",type="redirect")
+	})
+	public String transaction_doReprocessAllErrors(){
+		try {
+			this.getTransactionService().reprocessErrorTransactions(this.user);
+		} catch(BaseMaximoException ex) {
+			this.setMessage(new EZMessage(ex.getMessage(), EMMConstants.ERROR));
+			this.addActionError(ex.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}
+	
 	@Action(value="transaction_delete", results={
 		@Result(name="success",location="delete.jsp"),
 		@Result(name="error",location="../common/systemmessage.jsp")
