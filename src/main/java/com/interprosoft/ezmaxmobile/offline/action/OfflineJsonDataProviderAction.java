@@ -1,22 +1,11 @@
 package com.interprosoft.ezmaxmobile.offline.action;
 
-import java.sql.SQLException;
-
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts2.convention.annotation.Action;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
-import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.ResultPath;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.interprosoft.ezmaxmobile.common.db.DBException;
-import com.interprosoft.ezmaxmobile.offline.OfflineException;
 
 @Component
 @Scope("prototype")
@@ -27,7 +16,7 @@ public class OfflineJsonDataProviderAction extends BaseOfflineInitAction {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineJsonDataProviderAction.class);
+	private static Logger log = Logger.getLogger(OfflineJsonDataProviderAction.class);
 	
 	
 	/** 	############################################################ 	//

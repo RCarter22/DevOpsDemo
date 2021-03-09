@@ -8,8 +8,7 @@ import java.io.ByteArrayInputStream;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -18,6 +17,7 @@ import org.apache.struts2.convention.annotation.ResultPath;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.interprosoft.ezmaxmobile.MaximoHelper;
 import com.interprosoft.ezmaxmobile.db.SelectQuery;
 import com.interprosoft.ezmaxmobile.offline.OfflineException;
 import com.interprosoft.ezmaxmobile.offline.model.EMMCacheSize;
@@ -31,7 +31,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineCachedDataProviderAction.class);
+	private static Logger log = Logger.getLogger(OfflineCachedDataProviderAction.class);
 	
 	// The Key of the CACHE object
 	private static final String CACHE_KEY_LOCATIONS = "LOCATIONS";
@@ -59,8 +59,11 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 	private static final String CACHE_KEY_MEASUREUNIT  = "MEASUREUNIT";
 	private static final String CACHE_KEY_PLUSPCUST = "PLUSPCUSTOMER";
 	private static final String CACHE_KEY_PLUSPCUSTASSOC = "PLUSPCUSTASSOC";
-
-	
+	private static final String CACHE_KEY_INSPECTIONFORM  = "INSPECTIONFORM";
+	private static final String CACHE_KEY_INSPQUESTION  = "INSPQUESTION";
+	private static final String CACHE_KEY_INSPFIELD  = "INSPFIELD";
+	private static final String CACHE_KEY_INSPFIELDOPTION  = "INSPFIELDOPTION";
+	private static final String CACHE_KEY_INSPCASCADEOPTION  = "INSPCASCADEOPTION";
 //	 The size of each page of the CACHED object
 	private static final EMMCacheSize CACHE_SIZE_LOCATIONS = EMMCacheSize.CACHE_SIZE_5000;
 	private static final EMMCacheSize CACHE_SIZE_PPCRAFTRATE = EMMCacheSize.CACHE_SIZE_5000;
@@ -87,15 +90,28 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 	private static final EMMCacheSize CACHE_SIZE_MEASUREUNIT = EMMCacheSize.CACHE_SIZE_5000;
 	private static final EMMCacheSize CACHE_SIZE_PLUSPCUST = EMMCacheSize.CACHE_SIZE_5000;
 	private static final EMMCacheSize CACHE_SIZE_PLUSPCUSTASSOC = EMMCacheSize.CACHE_SIZE_5000;
+	private static final EMMCacheSize CACHE_SIZE_INSPECTIONFORM = EMMCacheSize.CACHE_SIZE_5000;
+	private static final EMMCacheSize CACHE_SIZE_INSPQUESTION = EMMCacheSize.CACHE_SIZE_5000;
+	private static final EMMCacheSize CACHE_SIZE_INSPFIELD = EMMCacheSize.CACHE_SIZE_5000;
+	private static final EMMCacheSize CACHE_SIZE_INSPFIELDOPTION = EMMCacheSize.CACHE_SIZE_5000;
+	private static final EMMCacheSize CACHE_SIZE_INSPCASCADEOPTION = EMMCacheSize.CACHE_SIZE_5000;
 
-	
 	public void cacheLocations() throws OfflineException {
 		SelectQuery sqlCache = new SelectQuery()
 			.column("LOC.LOCATIONSID", "LOC.LOCATION", "LOC.DESCRIPTION", "LOC.TYPE", "LOC.DISABLED", "LOC.STATUS", "LOC.ORGID", "LOC.SITEID")
 			.column("LOCH.SYSTEMID", "LOCH.PARENT", "LOCH.CHILDREN AS HASCHILDREN")
-			.from("LOCATIONS LOC", "LOCHIERARCHY LOCH")
-			.where("LOC.STATUS IN (SELECT VALUE FROM SYNONYMDOMAIN WHERE DOMAINID = 'LOCASSETSTATUS' AND MAXVALUE IN ('OPERATING')) AND LOC.LOCATION = LOCH.LOCATION AND LOC.SITEID = LOCH.SITEID");
+			.from("LOCATIONS LOC")
+			.innerJoin("LOCHIERARCHY LOCH", "LOC.LOCATION = LOCH.LOCATION AND LOC.SITEID = LOCH.SITEID")
+			.where("LOC.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS'").and("MAXVALUE IN ('OPERATING')") + ")");
 
+		// If mapping is enabled, get the XY coordinates
+		if (this.isEmmMapEnabled()) {
+			// The following line is an example of using link id between Maximo and GIS instead of using Maximo Lat / Long
+			// sqlCache.column("LOC.MAXGISID");
+			sqlCache.column("S.LATITUDEY", "S.LONGITUDEX")
+					.leftJoin("SERVICEADDRESS S", "LOC.SADDRESSCODE = S.ADDRESSCODE AND LOC.ORGID = S.ORGID");
+		}
+		
 		cacheSqlResultJson(CACHE_KEY_LOCATIONS, sqlCache, CACHE_SIZE_LOCATIONS);
 	}
 	
@@ -135,7 +151,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		cacheSqlResultJson(CACHE_KEY_PERSONGROUP, sqlCache, CACHE_SIZE_PERSONGROUP);
 	}
 	
-	
+
 	public void cacheCompanies() throws OfflineException {
 		SelectQuery sqlCache = new SelectQuery()
 			.column("COMPANIESID", "COMPANY", "TYPE", "NAME", "DISABLED", "ORGID")
@@ -151,7 +167,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 			.column("P.DISPLAYNAME")
 			.from("LABOR L")
 			.innerJoin("PERSON P", "L.PERSONID = P.PERSONID")
-			.where("L.STATUS IN (SELECT VALUE FROM SYNONYMDOMAIN WHERE DOMAINID = 'LABORSTATUS' AND MAXVALUE IN ('ACTIVE'))")
+			.where("L.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LABORSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ")")
 			.orderBy("L.LABORCODE");
 		
 		cacheSqlResultJson(CACHE_KEY_LABOR, sqlCache, CACHE_SIZE_LABOR);
@@ -161,13 +177,13 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		String laborSubSelect = new SelectQuery()
 			.column("PERSONID")
 			.from("LABOR")
-			.where("STATUS IN (SELECT VALUE FROM SYNONYMDOMAIN WHERE DOMAINID = 'LABORSTATUS' AND MAXVALUE IN ('ACTIVE'))")
+			.where("STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LABORSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ")")
 			.toString();
 		
 		SelectQuery sqlCache = new SelectQuery()
 			.column("PERSONID", "DISPLAYNAME", "FIRSTNAME", "LASTNAME", "SUPERVISOR", "STATUS")
 			.from("PERSON")
-			.where("STATUS IN (SELECT VALUE FROM SYNONYMDOMAIN WHERE DOMAINID = 'PERSONSTATUS' AND MAXVALUE IN ('ACTIVE'))")
+			.where("STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'PERSONSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ")")
 			.and("PERSONID IN (" + laborSubSelect + ")")
 			.orderBy("DISPLAYNAME", "PERSONID");
 				
@@ -197,14 +213,14 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		
 		SelectQuery synonymDomain = new SelectQuery()
 			.column("DOMAINID")
-			.columnAsString("MAXVALUE")
-			.columnAsString("VALUE")
+			.column("MAXVALUE")
+			.column("VALUE")
 			.column("DESCRIPTION")
 			.column("SITEID")
 			.column("ORGID")
 			.column("PLUSPCUSTOMER")
 			.from("SYNONYMDOMAIN")
-			.where("DOMAINID IN ('WOSTATUS', 'ITEMSTATUS', 'LOGTYPE', 'CATEGORY', 'LOCASSETSTATUS', 'ASSETTYPE', 'SRSTATUS', 'LTTYPE', 'REPAIRFACILITY')");
+			.where("DOMAINID IN ('WOSTATUS', 'ITEMSTATUS', 'LOGTYPE', 'CATEGORY', 'LOCASSETSTATUS', 'ASSETTYPE', 'SRSTATUS', 'LTTYPE', 'REPAIRFACILITY' 'DISPLAYRESTYPE')");
 	    	
 		SelectQuery numericDomain = new SelectQuery()
 			.column("DOMAINID")
@@ -219,8 +235,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		
 		SelectQuery sqlCache = new SelectQuery()
 			.union(alnDomain, synonymDomain, numericDomain);
-		System.out.println(sqlCache);
-
+				
 		cacheSqlResultJson(CACHE_KEY_DOMAIN, sqlCache, CACHE_SIZE_DOMAIN);
 	}
 	public void cacheIssueUnit() throws OfflineException {
@@ -352,19 +367,18 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 			.column("TI.ITEMNUM", "TI.DESCRIPTION", "TI.ITEMSETID", "TI.ITEMTYPE", "IT.ORGID", "IT.TOOLRATE")
 			.from("TOOLITEM TI")
 			.innerJoin("ITEMORGINFO IT", "TI.ITEMNUM = IT.ITEMNUM AND TI.ITEMSETID = IT.ITEMSETID")
-			.where("TI.STATUS IN (SELECT VALUE FROM SYNONYMDOMAIN WHERE DOMAINID = 'ITEMSTATUS' AND MAXVALUE IN ('ACTIVE')) AND IT.STATUS IN (SELECT VALUE FROM SYNONYMDOMAIN WHERE DOMAINID = 'ITEMSTATUS' AND MAXVALUE IN ('ACTIVE')) AND TI.ITEMTYPE ='TOOL'");
+			.where("TI.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ") AND IT.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ") AND TI.ITEMTYPE ='TOOL'");	
 		
 		cacheSqlResultJson(CACHE_KEY_TOOLITEM, sqlCache, CACHE_SIZE_TOOLITEM);
 	}
-	
-	public void cacheMeasureUnit() throws OfflineException {
+	public void cacheMeasureunit() throws OfflineException {
 		SelectQuery sqlCache = new SelectQuery()
 			.column("MEASUREUNITUID","MEASUREUNITID","ABBREVIATION","DESCRIPTION","ORGID","SITEID")
 			.from("MEASUREUNIT");
 		
 		cacheSqlResultJson(CACHE_KEY_MEASUREUNIT, sqlCache, CACHE_SIZE_MEASUREUNIT);
 	}
-	
+
 	public void cachePlusPCustomer() throws OfflineException {
 		SelectQuery sqlCache = new SelectQuery()
 			.column("CUSTOMER,PARENT,NAME")
@@ -382,7 +396,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		
 		 cacheSqlResultJson(CACHE_KEY_PLUSPCUSTASSOC, sqlCache, CACHE_SIZE_PLUSPCUSTASSOC);
 	}
-	
+
 	// #####################################################################################################################################	//
 	// The Following Section is for Legacy Synchronization Process
 	// #####################################################################################################################################	//
@@ -400,7 +414,6 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			jsonObj = getCachedSqlResultJson(CACHE_KEY_DOMAIN, pagination);
-			System.out.println(jsonObj);
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
 		} catch(Exception ex) {
@@ -440,7 +453,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		return SUCCESS; 
 	}
 	
-	/**
+		/**
 	 * Legacy call to get cached PLUSPCUSTASSOC JSON result
 	 * @return
 	 */
@@ -672,6 +685,61 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 			log.debug("json: " + jsonObj.toString());
 		}
 		return SUCCESS; 
+	}
+
+	public void cacheInspectionForm() throws Exception {
+		SelectQuery sqlCache = new SelectQuery()
+		.column("INSPECTIONFORMID","REVISION","ORGID","SITEID","NAME","INSPFORMNUM","STATUS", "TYPE")
+		.column("LD.LDTEXT AS LONGDESCRIPTION") 
+		.from("INSPECTIONFORM")
+		.leftJoin("LONGDESCRIPTION LD", "INSPECTIONFORM.INSPECTIONFORMID = LD.LDKEY AND LD.LDOWNERTABLE='INSPECTIONFORM' AND LD.LDOWNERCOL='DESCRIPTION'");
+		
+		cacheSqlResultJson(CACHE_KEY_INSPECTIONFORM, sqlCache, CACHE_SIZE_INSPECTIONFORM);
+	}
+	
+	public void cacheInspquestion() throws Exception {
+		SelectQuery sqlCache = new SelectQuery()
+		.column("INSPQUESTIONID","INSPQUESTIONNUM","INSPFORMNUM","REVISION","ORGID","DESCRIPTION")
+		.column("SITEID", "GROUPID", "SEQUENCE","GROUPSEQ")
+		.column("LD.LDTEXT AS LONGDESCRIPTION") 
+		.from("INSPQUESTION")
+		.leftJoin("LONGDESCRIPTION LD", "INSPQUESTION.INSPQUESTIONID = LD.LDKEY AND LD.LDOWNERTABLE='INSPQUESTION' AND LD.LDOWNERCOL='DESCRIPTION'");
+
+		cacheSqlResultJson(CACHE_KEY_INSPQUESTION, sqlCache, CACHE_SIZE_INSPQUESTION);
+	}
+	
+	public void cacheInspfield() throws Exception {
+		SelectQuery sqlCache = new SelectQuery()
+			.column("INSPFIELDID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM","REVISION","ORGID")
+			.column("DESCRIPTION","FIELDTYPE","SEQUENCE","REQUIRED","METERTYPE","METERNAME","DOCTYPE")
+			.from("INSPFIELD");
+		
+		if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){
+			sqlCache.column("VISIBLE");
+		}
+		cacheSqlResultJson(CACHE_KEY_INSPFIELD, sqlCache, CACHE_SIZE_INSPFIELD);
+	}
+	
+	public void cacheInspfieldoption() throws Exception {
+		SelectQuery sqlCache = new SelectQuery()
+			.column("INSPFIELDOPTIONID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM")
+			.column("REVISION","ORGID","SEQUENCE","DESCRIPTION")
+			.from("INSPFIELDOPTION");
+			
+		cacheSqlResultJson(CACHE_KEY_INSPFIELDOPTION, sqlCache, CACHE_SIZE_INSPFIELDOPTION);		
+	}
+	public void cacheInspcascadeoption() throws Exception {
+		SelectQuery sqlCache = null;
+		if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){ 
+			sqlCache = new SelectQuery()
+			.column("INSPCASCADEOPTIONID","INSPCASCADEOPTIONNUM","INSPFORMNUM","REVISION","ORGID","SITEID")
+			.column("SRCQUESTION","TGTQUESTION","SRCFIELD","TGTFIELD","SRCTXTRESPONSE","VISIBLE","REQUIRED")
+			.from("INSPCASCADEOPTION");
+			
+			cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION, sqlCache, CACHE_SIZE_INSPCASCADEOPTION);	
+		} else{
+			cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION);
+		}		
 	}
 	
 }

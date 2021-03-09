@@ -6,8 +6,9 @@ package com.interprosoft.ezmaxmobile.offline.action;
 
 import java.io.ByteArrayInputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import net.sf.json.JSONObject;
+
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -17,11 +18,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.interprosoft.ezmaxmobile.MaximoHelper;
-import com.interprosoft.ezmaxmobile.common.pagination.Pagination;
 import com.interprosoft.ezmaxmobile.db.SelectQuery;
 import com.interprosoft.ezmaxmobile.offline.OfflineConstants;
-
-import net.sf.json.JSONObject;
 
 @Component
 @Scope("prototype")
@@ -32,9 +30,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineInitSqlDataProviderAction.class);
-	
-	protected Pagination pagination = new Pagination(1, 0, 5000);
+	private static Logger log = Logger.getLogger(OfflineInitSqlDataProviderAction.class);
 	
 	/** 	############################################################ 	//
 	 * 		Use SQL Query to get Data from MAXIMO to populate Offline Tables
@@ -63,7 +59,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			.distinct()
 			.column("WORKORDERID")
 			.from("WORKORDER")
-			.where("WOCLASS = 'WORKORDER' AND ISTASK = 0 AND HISTORYFLAG = 0 AND STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+			.where("WOCLASS = 'WORKORDER' AND ISTASK = 0 AND HISTORYFLAG = 0 AND STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 			.and(OfflineConstants.WO_LEAD_FIELD_NAME + " = '" + this.user.getPersonId() + "'")
 			.toString()
 		;
@@ -85,7 +81,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			.distinct()
 			.column("WORKORDERID")
 			.from("WMASSIGNMENT")
-			.where("WOCLASS = 'WORKORDER' AND ISTASK = 0 AND HISTORYFLAG = 0 AND STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+			.where("WOCLASS = 'WORKORDER' AND ISTASK = 0 AND HISTORYFLAG = 0 AND STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 			.and("LABORCODE IN (" + laborSubSelect + ")")
 			.toString()
 		;
@@ -102,8 +98,8 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			.column("WFA.OWNERID")
 			.from("WFASSIGNMENT WFA")
 			.innerJoin("WORKORDER WO1", "WO1.WORKORDERID = WFA.OWNERID")
-			.where("WO1.WOCLASS = 'WORKORDER' AND WO1.ISTASK = 0 AND WO1.HISTORYFLAG = 0 AND WO1.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
-			.and("WFA.ASSIGNSTATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WFASGNSTATUS' AND MAXVALUE IN ('ACTIVE')").toString() + ")")
+			.where("WO1.WOCLASS = 'WORKORDER' AND WO1.ISTASK = 0 AND WO1.HISTORYFLAG = 0 AND WO1.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
+			.and("WFA.ASSIGNSTATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WFASGNSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ")")
 			.and("WFA.OWNERTABLE = 'WORKORDER'")
 			.and("WFA.ASSIGNCODE = '" + this.user.getPersonId() + "'")
 			.and("WFA.APP = '" + appName + "'")
@@ -136,7 +132,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			.distinct()
 			.column("TICKETUID")
 			.from("TICKET")
-			.where("CLASS = 'SR' AND HISTORYFLAG = 0 AND STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'SRSTATUS' AND MAXVALUE IN ('CLOSED','RESOLVED','CAN')").toString() + ")")
+			.where("CLASS = 'SR' AND HISTORYFLAG = 0 AND STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'SRSTATUS'").and("MAXVALUE IN ('CAN','CLOSED','RESOLVED')") + ")")			
 			.and("(OWNERGROUP IN (" + personGroupSubSelect + ") OR OWNER = '" + this.user.getPersonId() + "')")
 			.toString()
 		;			
@@ -154,7 +150,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			.from("WFASSIGNMENT WFA")
 			.innerJoin("TICKET SR1", "SR1.TICKETUID = WFA.OWNERID")
 			.where("SR1.CLASS = 'SR' AND SR1.HISTORYFLAG = 0")
-			.and("WFA.ASSIGNSTATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WFASGNSTATUS' AND MAXVALUE IN ('ACTIVE')").toString() + ")")
+			.and("WFA.ASSIGNSTATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WFASGNSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ")")
 			.and("WFA.OWNERTABLE = 'SR'")
 			.and("WFA.ASSIGNCODE = '" + this.user.getPersonId() + "'")
 			.and("WFA.APP = '" + appName + "'")
@@ -173,13 +169,13 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			String laborSubSelect = new SelectQuery()
 				.column("PERSONID")
 				.from("LABOR")
-				.where("STATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LABORSTATUS' AND MAXVALUE IN ('ACTIVE')").toString() + ") AND ORGID = '" + this.user.getOrgId() + "'")
+				.where("STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LABORSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ") AND ORGID = '" + this.user.getOrgId() + "'")
 				.toString();
 				
 			SelectQuery sql = new SelectQuery()
 				.column("PERSONID", "DISPLAYNAME", "FIRSTNAME", "LASTNAME", "SUPERVISOR", "STATUS")
 				.from("PERSON")
-				.where("STATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'PERSONSTATUS' AND MAXVALUE IN ('ACTIVE')").toString() + ")")
+				.where("STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'PERSONSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ")")
 				.and("PERSONID IN (" + laborSubSelect + ")")
 				.orderBy("DISPLAYNAME", "PERSONID");	
 			
@@ -298,7 +294,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("P.DISPLAYNAME")
 				.from("LABOR L")
 				.innerJoin("PERSON P", "L.PERSONID = P.PERSONID")
-				.where("L.STATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LABORSTATUS' AND MAXVALUE IN ('ACTIVE')").toString() + ") AND L.ORGID = '" + this.user.getOrgId() + "'")
+				.where("L.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LABORSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ") AND  L.ORGID= '" + this.user.getOrgId() + "'")
 				.orderBy("L.LABORCODE")
 			;	
 			
@@ -338,7 +334,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			.innerJoin("TOOLTRANS TT", "W.WONUM = TT.REFWO AND W.SITEID = TT.SITEID")
 			//.innerJoin("TOOLITEM T", "TT.ITEMNUM = T.ITEMNUM")
 			.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-			.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+			.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 			.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 			.orderBy("W.WORKORDERID", "TT.TOOLTRANSID");	
 			
@@ -367,21 +363,26 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {	
 			SelectQuery sql = new SelectQuery()
-				.distinct()
 				.column("SR.TICKETID", "SR.TICKETUID", "SR.DESCRIPTION", "SR.LOCATION", "SR.CLASS")
 				.column("SR.REPORTEDBY", "SR.REPORTEDPHONE", "SR.REPORTEDEMAIL")
 				.column("SR.STATUS", "SR.REPORTEDPRIORITY", "SR.FAILURECODE", "SR.PROBLEMCODE")
-				.column("SR.SITEID", "SR.ORGID", "SR.OWNER", "SR.OWNERGROUP", "SR.STATUSDATE", "SR.REPORTDATE", "SR.ASSETSITEID", "SR.GLACCOUNT", "SR.ASSETNUM", "SR.AFFECTEDPERSON", "SR.CHANGEDATE")
+				.column("SR.SITEID", "SR.ORGID", "SR.OWNER", "SR.OWNERGROUP", "SR.STATUSDATE", "SR.REPORTDATE", "SR.ASSETORGID", "SR.ASSETSITEID", "SR.GLACCOUNT", "SR.ASSETNUM", "SR.AFFECTEDPERSON", "SR.CHANGEDATE")
 				.column("SR.CLASSSTRUCTUREID")
-				// *IMPORTANT* TO USE .columnAsString FOR LONGDESCRIPTION TABLE
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("LD.LDTEXT AS LONGDESCRIPTION") 
 				.from("TICKET SR")
 				.leftJoin("LONGDESCRIPTION LD", "SR.TICKETUID = LD.LDKEY AND LD.LDOWNERTABLE='TICKET' AND LD.LDOWNERCOL='DESCRIPTION'")
 				.where("SR.CLASS = 'SR'")
 				.and("SR.HISTORYFLAG = 0")
 				.and("SR.TICKETUID IN " + this.getSRCompleteWhere("SR"))
 				.orderBy("SR.TICKETID");			
-			
+
+			// If mapping is enabled, get the XY coordinates
+			if (this.isEmmMapEnabled()) {
+				sql
+					.column("TKSERVICEADDRESS.LATITUDEY", "TKSERVICEADDRESS.LONGITUDEX")
+					.leftJoin("TKSERVICEADDRESS", "SR.TICKETID = TKSERVICEADDRESS.TICKETID AND SR.CLASS = TKSERVICEADDRESS.CLASS");
+			}
+
 			jsonObj = getSqlResultJson("SR", sql, pagination);
 
 			// Insert PAGINATION
@@ -425,7 +426,8 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("W.AEPUSINGDEPARTMENT")
 				.column("CASE WHEN WM.METERNAME IS NOT NULL THEN '1' ELSE '0' END AS PLUSTPRIENTERED")
 				//IMPORTANT TO USE .columnAsString FOR LONGDESCRIPTION TABLE
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION") 
+				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION")	
+				.column("W.INSPFORMNUM", "NULL AS INSPECTIONRESULTID")
 				.from("WORKORDER W")
 				//.innerJoin("INVOICELINE I", "I.PONUM = ST.PONUM and I.POLINENUM = ST.POLINENUM")
 				.leftJoin("LONGDESCRIPTION LD", "W.WORKORDERID = LD.LDKEY AND LD.LDOWNERTABLE='WORKORDER' AND LD.LDOWNERCOL='DESCRIPTION'")
@@ -440,8 +442,14 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				
 				//.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID");
+
+			// If mapping is enabled, get the XY coordinates
+			if (this.isEmmMapEnabled()) {
+				sql
+					.column("WOSERVICEADDRESS.LATITUDEY", "WOSERVICEADDRESS.LONGITUDEX")
+					.leftJoin("WOSERVICEADDRESS", "W.WONUM = WOSERVICEADDRESS.WONUM AND W.SITEID = WOSERVICEADDRESS.SITEID");
+			}
 			
-			System.out.println(sql);
 			jsonObj = getSqlResultJson("WORKORDER", sql, pagination);
 
 			// Insert PAGINATION
@@ -477,6 +485,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("WOTASK.PLUSTCOMP", "WOTASK.PLUSTACCOMP","WOTASK.PLUSTREASON")
 				// IMPORTANT TO USE .columnAsString FOR LONGDESCRIPTION TABLE
 				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("WOTASK.INSPFORMNUM")
 				.from("WORKORDER W")
 				.innerJoin("WORKORDER WOTASK", "W.WONUM = WOTASK.PARENT AND W.SITEID = WOTASK.SITEID AND WOTASK.ISTASK = 1")
 				.leftJoin("LONGDESCRIPTION LD", "WOTASK.WORKORDERID = LD.LDKEY AND LD.LDOWNERTABLE='WORKORDER' AND LD.LDOWNERCOL='DESCRIPTION'")
@@ -485,10 +494,9 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.and(" W.STATUSDATE > SYSDATE-90")
 				.and("W.REPAIRFACILITY  = (SELECT DEFAULTREPFAC FROM MAXIMO.MAXUSER WHERE USERID = '" + this.user.getUserId() + "' AND DEFSITE = DEFAULTREPFACSITEID )")
 				.orderBy("W.WORKORDERID", "WOTASK.WORKORDERID");			
-			System.out.println(sql);
-			jsonObj = getSqlResultJson("WORKORDER", sql, pagination);
 			
-			System.out.println(sql);
+			jsonObj = getSqlResultJson("WORKORDER", sql, pagination);
+
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
 		} catch(Exception ex) {
@@ -511,12 +519,10 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			SelectQuery sql = new SelectQuery()
-				.distinct()
 				.column("SR.TICKETID", "SR.TICKETUID")
 				.column("WL.WORKLOGID", "WL.RECORDKEY", "WL.DESCRIPTION", "WL.CLASS", "WL.CREATEBY")
 				.column("WL.LOGTYPE", "WL.CREATEDATE", "WL.SITEID", "WL.ORGID")
-				// IMPORTANT TO USE .columnAsString FOR LONGDESCRIPTION TABLE
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("LD.LDTEXT AS LONGDESCRIPTION") 
 				.from("TICKET SR")
 				.innerJoin("WORKLOG WL", "SR.TICKETID = WL.RECORDKEY AND SR.CLASS = WL.CLASS")
 				.leftJoin("LONGDESCRIPTION LD", "WL.WORKLOGID = LD.LDKEY AND LD.LDOWNERTABLE='WORKLOG' AND LD.LDOWNERCOL='DESCRIPTION'")
@@ -557,7 +563,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.leftJoin("LABOR L", "WPL.LABORCODE = L.LABORCODE")
 				.leftJoin("PERSON P", "L.PERSONID = P.PERSONID")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID", "WPL.WPLABORID");
 			
@@ -593,7 +599,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.from("WORKORDER W")
 				.innerJoin("WPMATERIAL WPL", "W.WONUM = WPL.WONUM AND W.SITEID = WPL.SITEID")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("WPL.WPITEMID");
 			
@@ -621,17 +627,15 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			SelectQuery sql = new SelectQuery()
-				.distinct()
 				.column("W.WONUM", "W.WORKORDERID")
 				.column("WL.WORKLOGID", "WL.RECORDKEY", "WL.DESCRIPTION", "WL.CLASS", "WL.CREATEBY")
 				.column("WL.LOGTYPE", "WL.CREATEDATE", "WL.SITEID", "WL.ORGID")
-				// IMPORTANT TO USE .columnAsString FOR LONGDESCRIPTION TABLE
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("LD.LDTEXT AS LONGDESCRIPTION") 
 				.from("WORKORDER W")
 				.innerJoin("WORKLOG WL", "W.WONUM = WL.RECORDKEY AND W.WOCLASS = WL.CLASS AND W.SITEID = WL.SITEID")
 				.leftJoin("LONGDESCRIPTION LD", "WL.WORKLOGID = LD.LDKEY AND LD.LDOWNERTABLE='WORKLOG' AND LD.LDOWNERCOL='DESCRIPTION'")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID", "WL.WORKLOGID");
 			
@@ -649,6 +653,125 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		}
 		return SUCCESS; 
 	}
+	
+	private String getLTCompleteWhere(){
+		String sql = " (SELECT DISTINCT * FROM ("
+				+ this.getSqlLtByLabor()
+				+ " UNION "
+				+ this.getSqlLtByLaborOnWo()
+				+ " UNION "
+				+ this.getSqlLtByLaborOnSr()
+				+ " UNION "
+				+ this.getSqlLtWithWOCompleteWhere()
+				+ " UNION "
+				+ this.getSqlLtWithSRCompleteWhere()
+				+ ") S )";
+		return sql;
+	}	
+	
+	private String getSqlLtByLabor() {
+		String laborSubSelect = new SelectQuery()
+			.distinct()
+			.column("LABORCODE")
+			.from("LABOR")
+			.where("PERSONID = '" + this.user.getPersonId() + "'")
+			.toString();
+		
+		// All LabTrans Submitted with Signed In User's Laborcode
+		// 1> Condition 1 - LabTrans is not against a work order and not against a SR; 
+		// LT.REFWO IS NULL AND LT.TICKETID IS NULL
+		return new SelectQuery()
+			.distinct()
+			.column("LT.LABTRANSID")
+			.from("LABTRANS LT")
+			.where("LT.LABORCODE = (" + laborSubSelect +")")
+			.and("LT.REFWO IS NULL")
+			.and("LT.TICKETID IS NULL")
+			.toString()
+		;
+	}
+	
+	private String getSqlLtByLaborOnWo() {
+		String laborSubSelect = new SelectQuery()
+			.distinct()
+			.column("LABORCODE")
+			.from("LABOR")
+			.where("PERSONID = '" + this.user.getPersonId() + "'")
+			.toString();
+		
+		// 2> Condition 2 - LabTrans is against a work order but not against a SR
+		// LT.REFWO IS NOT NULL AND LT.TICKETID IS NULL
+		return new SelectQuery()
+			.distinct()
+			.column("LT.LABTRANSID")
+			.from("LABTRANS LT")
+			.leftJoin("WORKORDER W", "LT.REFWO = W.WONUM AND LT.SITEID = W.SITEID")
+			.where("LT.LABORCODE = (" + laborSubSelect +")")
+			.and("LT.REFWO IS NOT NULL")
+			.and("LT.TICKETID IS NULL")
+			.and("(W.WOCLASS = 'WORKORDER' OR W.WOCLASS = 'ACTIVITY')")
+			.and("W.ISTASK = 0")
+			.and("W.HISTORYFLAG = 0")
+			.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") +")")
+			.toString()
+		;
+	}
+	
+	private String getSqlLtByLaborOnSr() {
+		String laborSubSelect = new SelectQuery()
+			.distinct()
+			.column("LABORCODE")
+			.from("LABOR")
+			.where("PERSONID = '" + this.user.getPersonId() + "'")
+			.toString();
+
+		// 3> Condition 3 - LabTrans is not against a work order but against a SR 
+		// LT.REFWO IS NULL AND LT.TICKETID IS NOT NULL
+		return new SelectQuery()
+			.distinct()
+			.column("LT.LABTRANSID")
+			.from("LABTRANS LT")
+			.leftJoin("TICKET SR", "LT.TICKETID = SR.TICKETID")
+			.where("LT.LABORCODE = (" + laborSubSelect +")")
+			.and("LT.REFWO IS NULL")
+			.and("LT.TICKETID IS NOT NULL")
+			.and("SR.CLASS = 'SR'")
+			.and("SR.HISTORYFLAG = 0")
+			.and("SR.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'SRSTATUS'").and(" MAXVALUE IN ('CAN','CLOSED','RESOLVED')") +")")
+			.toString()
+		;
+	}
+	
+	private String getSqlLtWithWOCompleteWhere() {
+		// LabTrans on the downloaded WOs
+		return new SelectQuery()
+			.distinct()
+			.column("LT.LABTRANSID")
+			.from("LABTRANS LT")
+			.leftJoin("WORKORDER W", "LT.REFWO = W.WONUM AND LT.SITEID = W.SITEID")
+			.where("(W.WOCLASS = 'WORKORDER' OR W.WOCLASS = 'ACTIVITY')")
+			.and("W.HISTORYFLAG = 0")
+			.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") +")")
+			.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
+			.toString()
+		;
+	}
+	
+	private String getSqlLtWithSRCompleteWhere() {
+        // LabTrans on the downloaded SRs
+		return new SelectQuery()
+			.distinct()
+			.column("LT.LABTRANSID")
+			.from("LABTRANS LT")
+			// .leftJoin("TICKET SR", "LT.TICKETID = SR.TICKETID")
+			// Fix to include checking of Ticket Class
+			.leftJoin("TICKET SR", "LT.TICKETID = SR.TICKETID AND SR.CLASS= LT.TICKETCLASS")
+			.where("SR.CLASS = 'SR'")
+			.and("SR.HISTORYFLAG = 0")
+			.and("SR.TICKETUID IN " + this.getSRCompleteWhere("SR"))
+			.toString()
+		;
+	}	
 
 	@Action(value="getMySRLabTransJson",
 			results={
@@ -690,7 +813,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			results={
 				@Result(name="success", type="stream", params={"inputName", "jsonResult"})
 			}
-		)
+		)	
 	public String getMyLabTransJson() {
 		JSONObject jsonObj = new JSONObject();
 		try {
@@ -733,31 +856,24 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
             .column("PERSONID")
             .from("MAXUSER")
             .where("DEFAULTREPFAC = (SELECT DEFAULTREPFAC FROM MAXIMO.MAXUSER WHERE USERID = '" + this.user.getPersonId() + "')");
-            
-            
             SelectQuery sql = new SelectQuery()
-			.distinct()
-			.column("W.WORKORDERID","W.ISTASK"/*, "SR.TICKETUID"*/)
-			.column("LT.LABTRANSID", "LT.REFWO AS WONUM", "LT.TICKETID", "LT.TICKETCLASS")
-			.column("LT.LABORCODE", "LT.CRAFT", "LT.PREMIUMPAYCODE", "LT.GENAPPRSERVRECEIPT", "LT.SKILLLEVEL")
-			.column("LT.REGULARHRS", "LT.PREMIUMPAYHOURS","LT.PREMIUMPAYRATE", "LT.STARTDATE", "LT.STARTTIME", "LT.FINISHDATE", "LT.FINISHTIME", "LT.TIMERSTATUS")
-			.column("LT.PAYRATE","LT.LOCATION","LT.ASSETNUM","LT.GLDEBITACCT","LT.GLCREDITACCT")
-			.column("LT.TRANSTYPE", "LT.ORGID", "LT.SITEID") 
-			.column("NULL AS SCHEDSTARTTO", "NULL AS SCHEDSTARTFROM")
-			.column("W.PARENT")
-			.from("LABTRANS LT")
-			.leftJoin("WORKORDER W", "LT.REFWO = W.WONUM AND LT.SITEID = W.SITEID")
-			.innerJoin(sql2, "LTMAXUSER", "LT.LABORCODE = LTMAXUSER.PERSONID")
-			
-			/*.leftJoin("TICKET SR", "LT.TICKETID = SR.TICKETID")*/
-			/*.where("(" + sWhereLtOnSr + ")")
-*/		/*	.or("(" +sWhereLtByLaborOnWo + ")")
-			.or("(" +sWhereLtByLaborOnSr + ")")
-			.or("(" +sWhereLtOnWo + ")")
-			.or("(" +sWhereLtOnSr + ")")*/
-			.orderBy("LT.LABTRANSID", "W.WORKORDERID"/*, "SR.TICKETUID"*/);
+				.distinct()
+				.column("W.WORKORDERID","W.ISTASK"/*, "SR.TICKETUID"*/)
+				.column("LT.LABTRANSID", "LT.REFWO AS WONUM", "LT.TICKETID", "LT.TICKETCLASS")
+				.column("LT.LABORCODE", "LT.CRAFT", "LT.PREMIUMPAYCODE", "LT.GENAPPRSERVRECEIPT", "LT.SKILLLEVEL")
+				.column("LT.REGULARHRS", "LT.PREMIUMPAYHOURS","LT.PREMIUMPAYRATE", "LT.STARTDATE", "LT.STARTTIME", "LT.FINISHDATE", "LT.FINISHTIME", "LT.TIMERSTATUS")
+				.column("LT.PAYRATE","LT.LOCATION","LT.ASSETNUM","LT.GLDEBITACCT","LT.GLCREDITACCT")
+				.column("LT.TRANSTYPE", "LT.ORGID", "LT.SITEID") 
+				.column("NULL AS SCHEDSTARTTO", "NULL AS SCHEDSTARTFROM")
+				.column("W.PARENT")
+				.from("LABTRANS LT")
+				.leftJoin("WORKORDER W", "LT.REFWO = W.WONUM AND LT.SITEID = W.SITEID")
+				// .leftJoin("TICKET SR", "LT.TICKETID = SR.TICKETID")
+				// Fix to include ticket class
+				.innerJoin(sql2, "LTMAXUSER", "LT.LABORCODE = LTMAXUSER.PERSONID")
+				// .where("LT.LABTRANSID IN " + this.getLTCompleteWhere())
+				.orderBy("LT.LABTRANSID", "W.WORKORDERID"/*, "SR.TICKETUID"*/);
 		
-            	System.out.println(sql);
             jsonObj = getSqlResultJson("LABTRANS", sql, pagination);
 
 			// Insert PAGINATION
@@ -796,7 +912,6 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.and(" W.STATUSDATE > SYSDATE-90")
 				.orderBy("LT.REFWO", "WOTASK.WORKORDERID");
 			
-			System.out.println(sql);
 			jsonObj = getSqlResultJson("LABTRANS", sql, pagination);
 			
 			// Insert PAGINATION
@@ -836,7 +951,6 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			
 			jsonObj = getSqlResultJson("MATUSETRANS", sql, pagination);
 			
-			System.out.println(sql);
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
 		} catch(Exception ex) {
@@ -849,7 +963,6 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		}
 		return SUCCESS; 
 	}
-	
 	@Action(value="getMyTaskMatUseTransJson",
 			results={
 				@Result(name="success", type="stream", params={"inputName", "jsonResult"})
@@ -967,7 +1080,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				)		 
 				.from("WORKORDER W")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID", "W.FAILURECODE");
 			
@@ -999,13 +1112,14 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("W.WORKORDERID")
 				.column("MUL.MULTIID", "MUL.SEQUENCE", "MUL.RECORDKEY", "MUL.ASSETNUM", "MUL.LOCATION")
 				.column("MUL.ROUTE", "MUL.ROUTESTOP", "MUL.TARGETDESC", "MUL.COMMENTS", "MUL.PROGRESS", "MUL.SITEID", "MUL.ORGID") 
+				.column("MUL.INSPFORMNUM")
 				.from("WORKORDER W")
 				.innerJoin("MULTIASSETLOCCI MUL", "W.WONUM = MUL.RECORDKEY AND W.WOCLASS = MUL.RECORDCLASS AND W.SITEID = MUL.SITEID AND MUL.ISPRIMARY = 0")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID", "MUL.MULTIID");
-			
+
 			jsonObj = getSqlResultJson("MULTIASSETLOCCI", sql, pagination);
 
 			// Insert PAGINATION
@@ -1032,7 +1146,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		    	SelectQuery sql = new SelectQuery()
 					.distinct()
 					.column("AM.ASSETMETERID","A.ASSETUID","A.ASSETID","AM.ASSETNUM","AM.METERNAME","M.DESCRIPTION","M.METERTYPE","AM.LASTREADING","AM.LASTREADINGDATE", "AM.READINGTYPE")
-					.column("AM.MEASUREUNITID","M.DOMAINID","AM.SINCEINSTALL","AM.SINCELASTINSPECT","AM.SINCELASTOVERHAUL","AM.SINCELASTREPAIR","AM.LASTREADINGINSPCTR","AM.SITEID")
+					.column("AM.MEASUREUNITID","M.DOMAINID","AM.SINCEINSTALL","AM.SINCELASTINSPECT","AM.SINCELASTOVERHAUL","AM.SINCELASTREPAIR","AM.LASTREADINGINSPCTR","AM.SITEID", "AM.ROLLOVER")
 					.column("NULL as NEWREADING","NULL as NEWREADINGDATE","NULL as READINGDATE","NULL as READING", "AM.PLUSTPRIMETER")
 					.from("ASSET A")
 					.innerJoin("ASSETMETER AM", "A.ASSETNUM = AM.ASSETNUM AND A.SITEID = AM.SITEID")
@@ -1067,14 +1181,14 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		    	SelectQuery sql = new SelectQuery()
 		    		.distinct()
 					.column("LM.LOCATIONMETERID","L.LOCATIONSID","LM.LOCATION","LM.METERNAME","M.DESCRIPTION","M.METERTYPE","LM.LASTREADING","LM.LASTREADINGDATE", "LM.READINGTYPE")
-					.column("LM.MEASUREUNITID","M.DOMAINID","LM.SINCEINSTALL","LM.SINCELASTINSPECT","LM.SINCELASTOVERHAUL","LM.SINCELASTREPAIR","LM.LASTREADINGINSPCTR","LM.SITEID")
+					.column("LM.MEASUREUNITID","M.DOMAINID","LM.SINCEINSTALL","LM.SINCELASTINSPECT","LM.SINCELASTOVERHAUL","LM.SINCELASTREPAIR","LM.LASTREADINGINSPCTR","LM.SITEID", "LM.ROLLOVER")
 					.column("NULL as NEWREADING","NULL as NEWREADINGDATE","NULL as READINGDATE","NULL as READING")
 					.from("LOCATIONS L")
 					.innerJoin("LOCATIONMETER LM", "L.LOCATION = LM.LOCATION AND L.SITEID = LM.SITEID")
 					.innerJoin("METER M", "LM.METERNAME = M.METERNAME")
 					.where("LM.ACTIVE = '1'")
 					// .and("L.SITEID = '" + this.user.getSession().getProfile().getDefaultSite() + "'");
-					.and("L.SITEID = '" + this.user.getSiteId() + "'");
+					.and("L.SITEID IN " + this.user.getSitesString());
 		    	
 				jsonObj = getSqlResultJson("LOCATIONMETER", sql, pagination);
 			    // Insert PAGINATION
@@ -1126,12 +1240,11 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {		
 			SelectQuery sql = new SelectQuery()
-				.distinct()
 				.column("W.WONUM","W.WORKORDERID","WS.WOSAFETYLINKID","WS.WOSAFETYDATASOURCE")
 				.column("WT.ASSETNUM","WT.LOCATION","WT.REQUIREDSTATE","WS.HAZARDID","WS.TAGOUTID","WS.SITEID","WH.DESCRIPTION AS WHDESCRIPTION","WT.DESCRIPTION AS WTDESCRIPTION")
 				.column("WS.ASSETNUM AS ASSET","WS.LOCATION AS LOC")
-				.columnAsString("LD.LDTEXT AS WHLONGDESCRIPTION")
-				.columnAsString("LDD.LDTEXT AS WTLONGDESCRIPTION")
+				.column("LD.LDTEXT AS WHLONGDESCRIPTION")
+				.column("LDD.LDTEXT AS WTLONGDESCRIPTION")
 				.from("WORKORDER W")
 				.innerJoin("WOSAFETYLINK WS", "W.WONUM = WS.WONUM AND W.SITEID = WS.SITEID")
 				.leftJoin("WOHAZARD WH", "WH.WONUM = WS.WONUM AND WH.HAZARDID = WS.HAZARDID AND WH.SITEID = WS.SITEID AND WH.WOSAFETYDATASOURCE = WS.WOSAFETYDATASOURCE")
@@ -1139,7 +1252,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.leftJoin("WOTAGOUT WT", "WT.TAGOUTID = WS.TAGOUTID AND WT.WONUM = WS.WONUM AND WT.SITEID = WS.SITEID")
 				.leftJoin("LONGDESCRIPTION LDD", "WT.WOTAGOUTID= LDD.LDKEY AND LDD.LDOWNERTABLE='WOTAGOUT' AND LDD.LDOWNERCOL='DESCRIPTION'")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID", "WS.WOSAFETYLINKID");
 			
@@ -1168,16 +1281,15 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			SelectQuery sql = new SelectQuery()
-				.distinct()
 				.column("W.WONUM","W.WORKORDERID","HP.WOSAFETYDATASOURCE")
 				.column("HP.HAZARDID","HP.PRECAUTIONID","HP.WOHAZARDPRECID","HP.SITEID","WP.DESCRIPTION AS WPDESCRIPTION")
-				.columnAsString("LDD.LDTEXT AS WPLONGDESCRIPTION")
+				.column("LDD.LDTEXT AS WPLONGDESCRIPTION")
 				.from("WORKORDER W")
 				.innerJoin("WOHAZARDPREC HP", "W.WONUM = HP.WONUM AND W.SITEID = HP.SITEID")
 				.leftJoin("WOPRECAUTION WP", "WP.WONUM = HP.WONUM AND WP.PRECAUTIONID= HP.PRECAUTIONID AND WP.SITEID = HP.SITEID AND WP.WOSAFETYDATASOURCE = HP.WOSAFETYDATASOURCE")
 				.leftJoin("LONGDESCRIPTION LDD", "WP.WOPRECAUTIONID = LDD.LDKEY AND LDD.LDOWNERTABLE='WOPRECAUTION' AND LDD.LDOWNERCOL='DESCRIPTION'")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID");
 			
@@ -1206,18 +1318,17 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {		
 			SelectQuery sql = new SelectQuery()
-				.distinct()
 				.column("W.WONUM","W.WORKORDERID")
 				.column("TG.TAGOUTID","TG.LOCKOUTID","TG.TAGLOCKID","TG.SITEID")
 				.column("WL.DEVICEDESCRIPTION AS WLDESCRIPTION")
 				.column("WL.LOCATION","WL.ASSETNUM","WL.REQUIREDSTATE")
-				.columnAsString("LDD.LDTEXT AS WLLONGDESCRIPTION")
+				.column("LDD.LDTEXT AS WLLONGDESCRIPTION")
 				.from("WORKORDER W")
 				.innerJoin("WOTAGLOCK TG", "W.WONUM = TG.WONUM AND W.SITEID = TG.SITEID")
 				.leftJoin("WOLOCKOUT WL", "WL.LOCKOUTID = TG.LOCKOUTID AND WL.WONUM = TG.WONUM AND WL.SITEID = TG.SITEID")
 				.leftJoin("LONGDESCRIPTION LDD", "WL.WOLOCKOUTID= LDD.LDKEY AND LDD.LDOWNERTABLE='WOLOCKOUT' AND LDD.LDOWNERCOL='DEVICEDESCRIPTION'")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID");
 			
@@ -1252,7 +1363,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.from("WORKORDER W")
 				.innerJoin("WOHAZARD WH", "W.WONUM = WH.WONUM AND W.SITEID = WH.SITEID")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID");
 			
@@ -1286,7 +1397,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.from("WORKORDER W")
 				.innerJoin("WOPRECAUTION WP", "W.WONUM = WP.WONUM AND W.SITEID = WP.SITEID")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID");
 			
@@ -1320,7 +1431,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.from("WORKORDER W")
 				.innerJoin("WOTAGOUT WT", "W.WONUM = WT.WONUM AND W.SITEID = WT.SITEID")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID");
 			
@@ -1354,7 +1465,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.from("WORKORDER W")
 				.innerJoin("WOLOCKOUT WL", "W.WONUM = WL.WONUM AND W.SITEID = WL.SITEID")
 				.where("W.WOCLASS = 'WORKORDER' AND W.ISTASK = 0 AND W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"))
 				.orderBy("W.WORKORDERID");
 			
@@ -1382,16 +1493,14 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		JSONObject jsonObj = new JSONObject();
 		try {		
 			SelectQuery sql = new SelectQuery()
-				.distinct()
 				.column("M.MRID", "M.MRNUM", "M.DESCRIPTION", "M.STATUS", "M.SITEID", "M.ORGID")
 				.column("M.STATUSDATE", "M.REQUIREDDATE", "M.PRIORITY", "M.WONUM" , "M.LOCATION", "M.ENTERDATE")
-				// IMPORTANT TO USE .columnAsString FOR LONGDESCRIPTION TABLE
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("LD.LDTEXT AS LONGDESCRIPTION") 
 				.from("MR M")
 				.leftJoin("LONGDESCRIPTION LD", "M.MRID = LD.LDKEY AND LD.LDOWNERTABLE='MR' AND LD.LDOWNERCOL='DESCRIPTION'")
 				.where("M.SITEID = '" + user.getSiteId() + "'")
 				.and("M.REQUESTEDBY = '" + user.getUserId() +"'")
-				.and("M.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'MRSTATUS' AND MAXVALUE IN ('CLOSE','CAN')").toString() + ")")
+				.and("M.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'MRSTATUS'").and("MAXVALUE IN ('CAN','CLOSE')") + ")")
 				.orderBy("M.MRID");
 			jsonObj = getSqlResultJson("MR", sql, pagination);
 
@@ -1424,7 +1533,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.innerJoin("MRLINE ML", "ML.MRNUM = M.MRNUM AND ML.SITEID = M.SITEID")
 				.where("M.SITEID = '" + user.getSiteId() + "'")
 				.and("M.REQUESTEDBY = '" + user.getUserId() +"'")
-				.and("M.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'MRSTATUS' AND MAXVALUE IN ('CLOSE','CAN')").toString() + ")")
+				.and("M.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'MRSTATUS'").and("MAXVALUE IN ('CAN','CLOSE')") + ")")
 				.orderBy("M.MRID, ML.MRLINEID");
 			jsonObj = getSqlResultJson("MRLINES", sql, pagination);
 
@@ -1482,7 +1591,6 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
         	SelectQuery sql = new SelectQuery()
         		.union(alnDomain, synonymDomain, numericDomain);
 
-        	System.out.println(sql);
             jsonObj = getSqlResultJson("DOMAIN", sql, pagination);
 
             // Insert PAGINATION
@@ -1542,7 +1650,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.from("LOCATIONS LOC")
 				.where("LOC.SITEID = 'CORP'")
 				.and("LOC.TYPE IN ( 'COURIER' ,  'HOLDING' ,  'LABOR' ,  'OPERATING' ,  'REPAIR' ,  'SALVAGE' ,  'VENDOR' )");
-				System.out.println(sql);
+				
 			jsonObj = getSqlResultJson("LOCATIONS", sql, pagination);
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
@@ -1590,10 +1698,16 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.leftJoin("PLUSTASSETALIAS PA", "A.ASSETNUM = PA.ASSETNUM AND A.SITEID = PA.SITEID AND PA.ISDEFAULT = 1")
 				.where("A.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS' AND MAXVALUE IN ('INACTIVE','DECOMMISSIONED')").toString() + ")")
 				.and("A.SITEID = '" + this.user.getSiteId() + "'");
-		
+
+			// If mapping is enabled, get the XY coordinates
+			if (this.isEmmMapEnabled()) {
+				// The following line is an example of using link id between Maximo and GIS instead of using Maximo Lat / Long
+				// sql.column("A.MAXGISID");
+				sql
+					.column("SERVICEADDRESS.LATITUDEY","SERVICEADDRESS.LONGITUDEX")
+					.leftJoin("SERVICEADDRESS", "A.SADDRESSCODE = SERVICEADDRESS.ADDRESSCODE AND A.ORGID = SERVICEADDRESS.ORGID");
+			}
 			
-				
-			System.out.println(sql);
 			jsonObj = getSqlResultJson("ASSET", sql, pagination);
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
@@ -1618,15 +1732,14 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		try {
 			SelectQuery sql = new SelectQuery()
 				.distinct()
-				.column("INV.INVENTORYID, INV.ITEMNUM, INV.ITEMSETID, INV.LOCATION, ITEM.DESCRIPTION, INV.CATEGORY, INV.MANUFACTURER")
+				.column("INV.INVENTORYID, INV.ITEMNUM, INV.ITEMSETID, INV.LOCATION, ITEM.DESCRIPTION, ITEM.ROTATING, ITEM.ITEMTYPE, INV.CATEGORY, INV.MANUFACTURER")
 				.column("INV.MODELNUM, INV.SITEID, INV.STATUS, INV.STATUSDATE")
 				.column("INV.BINNUM, INV.ISSUEUNIT, INV.ISSUEYTD, INV.ISSUE1YRAGO, INV.LASTISSUEDATE")
 				.from("INVENTORY INV")
 				.innerJoin("ITEM", "INV.ITEMNUM = ITEM.ITEMNUM AND INV.ITEMSETID = ITEM.ITEMSETID AND ITEM.ITEMTYPE IN ('ITEM', 'TOOL')")
-				.where("INV.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS' AND MAXVALUE IN ('OBSOLETE')").toString() + ") ")
+				.where("INV.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS'").and("MAXVALUE IN ('OBSOLETE')") + ")")
 				.orderBy("INV.SITEID", "INV.ITEMNUM");
-			
-			System.out.println(sql);
+				
 			jsonObj = getSqlResultJson("INVENTORY", sql, pagination);
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
@@ -1761,7 +1874,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			SelectQuery invBalanceSubSelect = new SelectQuery()
 				.column("INV.ITEMNUM")
 				.from("INVENTORY INV")
-				.where("INVB.ITEMSETID = INV.ITEMSETID AND INVB.SITEID = INV.SITEID AND INV.STATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS' AND MAXVALUE IN ('ACTIVE','PENDOBS')").toString() + ")");
+				.where("INVB.ITEMSETID = INV.ITEMSETID AND INVB.SITEID = INV.SITEID AND INV.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS'").and("MAXVALUE NOT IN ('OBSOLETE')") + ")");
 			
 			SelectQuery sql = new SelectQuery()
 				.column("INVB.INVBALANCESID, ITEM.ITEMNUM, ITEM.ITEMSETID, ITEM.DESCRIPTION, ITEM.LOTTYPE, ITEM.ITEMTYPE, ITEM.STATUS")
@@ -1769,7 +1882,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("ITEM.ROTATING")
 				.from("INVBALANCES INVB")
 				.innerJoin("ITEM", "INVB.ITEMNUM = ITEM.ITEMNUM AND INVB.ITEMSETID = ITEM.ITEMSETID AND ITEM.ITEMTYPE IN ('ITEM', 'TOOL')")
-				.where("ITEM.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS' AND MAXVALUE IN ('OBSOLETE')").toString() + ")")
+				.where("ITEM.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS'").and("MAXVALUE IN ('OBSOLETE')") + ")")
 				.and("ITEM.ITEMNUM IN (" + invBalanceSubSelect + ")")
 				.orderBy("ITEM.ITEMNUM");
 		
@@ -1825,7 +1938,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		    	SelectQuery sql = new SelectQuery()
 			    	.column("SITEUID", "DESCRIPTION", "SITEID", "ORGID")
 					.from("SITE")
-					.where("ACTIVE = '1' AND SITEID = '" + this.user.getSiteId() + "'");
+					.where("ACTIVE = '1' AND SITEID IN " + this.user.getSitesString());
 		
 			jsonObj = getSqlResultJson("SITE", sql, pagination);
 		    // Insert PAGINATION
@@ -1853,9 +1966,12 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			    	.column("SP.SPAREPARTID", "SP.DESCRIPTION AS REMARKS", "SP.SITEID", "SP.ORGID", "SP.QUANTITY", "SP.ISSUEDQTY", "SP.ASSETNUM", "SP.ITEMNUM", "SP.ITEMSETID", "ITEM.DESCRIPTION AS ITEMDESCRIPTION")
 					.from("SPAREPART SP")
 					.leftJoin("ITEM", "SP.ITEMNUM = ITEM.ITEMNUM ")
-					.where("ASSETNUM IN (" + new SelectQuery().column("ASSETNUM").from("ASSET").where("STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS' AND MAXVALUE IN ('INACTIVE','DECOMMISSIONED')").toString() + ")").toString() + " AND SITEID = '" + this.user.getSiteId() + "'" + ")"); 
-
-			jsonObj = getSqlResultJson("SPAREPART", sql, pagination); System.out.println(sql);
+					.where("ASSETNUM IN (" + 
+							new SelectQuery().column("ASSETNUM")
+							.from("ASSET")
+							.where("STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS'").and("MAXVALUE IN ('INACTIVE','DECOMMISSIONED')") + ")").toString() 
+							+ " AND SITEID IN " + this.user.getSitesString() + ")"); 
+			jsonObj = getSqlResultJson("SPAREPART", sql, pagination);
 		    // Insert PAGINATION
 		    jsonObj.element("PAGINATION", pagination);
 		} catch(Exception ex) {
@@ -1910,7 +2026,6 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
                     @Result(name="success", type="stream", params={"inputName", "jsonResult"})
             }
     )
-	
 	public String getMyAssetSpecJson(){		
 		 JSONObject jsonObj = new JSONObject();
 		    try {
@@ -1928,10 +2043,9 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 						new SelectQuery()
 						.column("A2.ASSETNUM")
 						.from("ASSET A2")
-						.where("A2.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS' AND MAXVALUE IN ('INACTIVE','DECOMMISSIONED')").toString() + ") AND A2.SITEID = '" + this.user.getSiteId() + "'").toString() + " )")
-				.and("ASP.ASSETATTRID IN ('ENGMFG','ENGMOD','ENGSER','HYDMFG','HYDMOD','HYDSER','RADIO#')");
+						.where("A2.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS'").and("MAXVALUE IN ('INACTIVE','DECOMMISSIONED')") + ") AND A2.SITEID IN " + this.user.getSitesString()).toString() + " )")
+						.and("ASP.ASSETATTRID IN ('ENGMFG','ENGMOD','ENGSER','HYDMFG','HYDMOD','HYDSER','RADIO#')");
 		    	
-	    	System.out.println(sql);
 			jsonObj = getSqlResultJson("ASSETSPEC", sql, pagination);
 		    // Insert PAGINATION
 		    jsonObj.element("PAGINATION", pagination);
@@ -1963,7 +2077,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.leftJoin("ASSETATTRIBUTE ATR", "ATR.ASSETATTRID = WSP.ASSETATTRID")
 		    	.where("W.WOCLASS = 'WORKORDER'")
 				.and("W.HISTORYFLAG = 0")
-				.and("W.STATUS NOT IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS' AND MAXVALUE IN ('CLOSE','COMP','CAN')").toString() + ")")
+				.and("W.STATUS NOT IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'WOSTATUS'").and("MAXVALUE IN ('CLOSE','COMP','CAN')") + ")")
 				.and("W.WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"));	
 			jsonObj = getSqlResultJson("WORKORDERSPEC", sql, pagination);
 		    // Insert PAGINATION
@@ -2026,7 +2140,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("TI.ITEMNUM", "TI.DESCRIPTION", "TI.ITEMSETID", "TI.ITEMTYPE", "IT.ORGID", "IT.TOOLRATE")
 				.from("TOOLITEM TI")
 				.innerJoin("ITEMORGINFO IT", "TI.ITEMNUM = IT.ITEMNUM AND TI.ITEMSETID = IT.ITEMSETID")
-				.where("TI.STATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS' AND MAXVALUE IN ('ACTIVE')").toString() + ") AND IT.STATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS' AND MAXVALUE IN ('ACTIVE')").toString() + ") AND TI.ITEMTYPE ='TOOL'");		    	
+				.where("TI.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ") AND IT.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'ITEMSTATUS'").and("MAXVALUE IN ('ACTIVE')") + ") AND TI.ITEMTYPE ='TOOL'");	
 			jsonObj = getSqlResultJson("TOOLITEM", sql, pagination);
 		    // Insert PAGINATION
 		    jsonObj.element("PAGINATION", pagination);
@@ -2083,14 +2197,13 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		 JSONObject jsonObj = new JSONObject();
 		    try {		    	
 		    	SelectQuery sql = new SelectQuery()
-				.column("WORKORDERID", "NULL AS DOWNTIMEID", "NULL AS ASSETNUM", "NULL AS DOWNTIME", "NULL AS STATUSCHANGEDATE", "NULL AS SITEID", "NULL AS ORGID")
+				.column("NULL AS WORKORDERID", "NULL AS DOWNTIMEID", "NULL AS ASSETNUM", "NULL AS DOWNTIME", "NULL AS STATUSCHANGEDATE", "NULL AS SITEID", "NULL AS ORGID")
 				.column("NULL AS STATUSCHANGECODE", "0 AS OPERATIONAL", "0 AS ISRUNNING","NULL as STARTDATESOURCE","NULL as STARTDATE", "NULL as ENDDATE","NULL AS ENDOPERATIONAL","NULL AS STARTOPERATIONAL")
 		    	.column("NULL as ASSETUID")
 				.from("WORKORDER")
 		    	.where("1=2")
 		    	.orderBy("DOWNTIMEID");
 		    	
-		    System.out.println(sql);
 			jsonObj = getSqlResultJson("DOWNTIME", sql, pagination);
 		    // Insert PAGINATION
 		    jsonObj.element("PAGINATION", pagination);
@@ -2117,12 +2230,9 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("AST.ASSETNUM","AST.WONUM", "A.DEFAULTREPFAC","AST.ISRUNNING", "AST.CHANGEDATE", "AST.CHANGEBY", "AST.DOWNTIME", "AST.CALNUM", "AST.CODE", "AST.OPERATIONAL", "AST.LOCATION", "AST.SITEID", "AST.ORGID", "AST.ASSETSTATUSID")
 				.from("ASSET A")	
 				.innerJoin("ASSETSTATUS AST", "A.ASSETNUM = AST.ASSETNUM AND A.SITEID = AST.SITEID")
-				.where("A.STATUS IN (" + new SelectQuery().distinct().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS' AND MAXVALUE IN ('OPERATING')").toString() + ")")
-				.and("A.SITEID = '" + this.user.getSiteId() + "'")
-				.innerJoin("MAXUSER M", "A.DEFAULTREPFAC = M.DEFAULTREPFAC AND M.USERID =  '" + this.user.getUserId() + "'");
-				//.and("(select substr(AST.LOCATION,1,2) from ASSETSTATUS) = (select substr(A.DEFAULTREPFAC,1,2) from ASSET)  ");
+				.where("A.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS'").and("MAXVALUE IN ('OPERATING')") + ")")
+				.and("A.SITEID = '" + this.user.getSiteId() + "'");
 				
-			System.out.println(sql);
 			jsonObj = getSqlResultJson("ASSETSTATUS", sql, pagination);
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
@@ -2480,5 +2590,207 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
   public void setPagination(Pagination pagination) {
         this.pagination = pagination;
   }
+	/**
+	 * Creates the InspectionResult Table: Values for all InspectionResult
+	 */
+	@Action(value="getMyInspectionResultJson",
+            results={
+                    @Result(name="success", type="stream", params={"inputName", "jsonResult"})
+            }
+    )
+	public String getMyInspectionResultJson(){		
+		JSONObject jsonObj = new JSONObject();
+	 	SelectQuery insresultSql = new SelectQuery().column("MAX(I.INSPRESULTSTATUSID)").from("INSPRESULTSTATUS I").where("I.RESULTNUM = R.RESULTNUM AND I.ORGID = R.ORGID AND I.SITEID = R.SITEID");
+	 	String statusJoin = "R.RESULTNUM = S.RESULTNUM AND R.ORGID = S.ORGID AND R.SITEID = S.SITEID AND S.INSPRESULTSTATUSID = (" + insresultSql + ")";
+	
+	    try {
+    		SelectQuery sql =  new SelectQuery()
+		 	.column("R.INSPECTIONRESULTID", "R.RESULTNUM", "R.REVISION", "R.ORGID", "R.SITEID")
+		 	.column("R.INSPFORMNUM", "R.ASSET", "R.LOCATION", "R.STATUS", "R.REFERENCEOBJECT")
+		 	.column("R.CREATEDBY", "R.CREATEDATE", "R.DUEDATE", "S.CHANGEDATE AS STATUSDATE", "R.REFERENCEOBJECTID")
+		 	.column("R.PARENT", "R.FUPOBJECT", "R.FUPOBJECTID", "R.DISPLAYMESSAGE", "NULL AS DEFICIENCYLIST")
+		 	.column("F.NAME")
+			.from("INSPECTIONRESULT R")
+			.leftJoin("INSPECTIONFORM F", "R.INSPFORMNUM = F.INSPFORMNUM AND R.REVISION = F.REVISION AND R.ORGID = F.ORGID")
+			.leftJoin("INSPRESULTSTATUS S", statusJoin)
+			.where("R.INSPECTIONRESULTID IN " + this.getIRCompleteWhere());	
+    		
+    		pagination.setReturnPageAll(true);
+	    	jsonObj = getSqlResultJson("INSPECTIONRESULT", sql, pagination);
+	    	
+		    // Insert PAGINATION
+		    jsonObj.element("PAGINATION", pagination);
+		} catch(Exception ex) {
+		    jsonObj.element("errMsg", ex.getMessage());
+		}
+	 
+		jsonResult = new ByteArrayInputStream(jsonObj.toString().getBytes());
+	
+		if (log.isDebugEnabled() && !MaximoHelper.getInstance().isSqliteEnabled()) {
+		    log.debug("json: " + jsonObj.toString());
+		}
+		return SUCCESS;
+	}
+	
+	private String getIRCompleteWhere(){
+		String sql = " (SELECT DISTINCT * FROM ("
+				+ this.getSqlIRParentandChildPrevious()
+				+ " UNION "
+				+ this.getSqlChildCurrent()
+				+ ") IR )";
+		return sql;
+	}
+	
+	private String getSqlIRParentandChildPrevious() {
+		SelectQuery woSql = new SelectQuery().column("WONUM")
+ 				.from("WORKORDER")
+ 				.where("WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"));
+		return new SelectQuery()
+			.distinct()
+			.column("INSPECTIONRESULTID")
+			.from("INSPECTIONRESULT")
+			.where("(REFERENCEOBJECT IN ('PARENTWO')  OR (REFERENCEOBJECT ='WORKORDER' AND PARENT IS NULL ) ) AND REFERENCEOBJECTID IN (" + woSql + ")")
+			.toString();
+	}
+	
+	private String getSqlChildCurrent() {
+		SelectQuery woSql = new SelectQuery().column("WONUM")
+ 				.from("WORKORDER")
+ 				.where("WORKORDERID IN " + this.getWOCompleteWhere("PLUSTWO"));
+		
+		return new SelectQuery()
+			.distinct()
+			.column("INSPECTIONRESULTID")
+			.from("INSPECTIONRESULT")
+			.where("REFERENCEOBJECT IN ('WORKORDER', 'WOACTIVITY', 'MULTIASSETLOCCI') AND PARENT IN (" + woSql + ")")
+			.toString();
+	}
+	
+	/**
+	 * Creates the InspFieldResult Table: Values for all InspFieldResult
+	 */
+	@Action(value="getMyInspFieldResultJson",
+            results={
+                    @Result(name="success", type="stream", params={"inputName", "jsonResult"})
+            }
+    )
+	public String getMyInspFieldResultJson(){		
+		JSONObject jsonObj = new JSONObject();
+	    try {
+    		SelectQuery sql = new SelectQuery()
+	    	.column("R.INSPECTIONRESULTID", "FR.INSPFIELDRESULTID", "FR.INSPFIELDRESULTNUM", "FR.INSPFIELDNUM", "FR.INSPQUESTIONNUM")
+			.column("FR.INSPFORMNUM", "FR.RESULTNUM", "FR.REVISION", "FR.ORGID", "FR.SITEID", "FR.ENTEREDBY", "FR.ENTEREDDATE")
+			.column("FR.TXTRESPONSE", "FR.NUMRESPONSE", "FR.ERRORFLAG", "FR.ERRORMESSAGE", "FR.ROLLOVERFLAG", "FR.METERNAME")
+			.column("IMG.IMAGE AS SIGNATURE", "IMG.IMAGENAME AS SIGNEDDATE", "FR.DATERESPONSE", "FR.TIMERESPONSE")
+			.column("FR.FUPOBJECT", "FR.FUPOBJECTID", "FR.DISPLAYMESSAGE")
+			.from("INSPFIELDRESULT FR")
+			.leftJoin("INSPECTIONRESULT R", "FR.RESULTNUM = R.RESULTNUM AND FR.INSPFORMNUM = R.INSPFORMNUM AND FR.REVISION = R.REVISION")
+			.leftJoin("IMGLIB IMG", "FR.INSPFIELDRESULTID = IMG.REFOBJECTID AND IMG.REFOBJECT = 'INSPFIELDRESULT'")
+			.where("R.INSPECTIONRESULTID IN " + getIRCompleteWhere());	
+    		
+    		pagination.setReturnPageAll(true);
+	    	jsonObj = getSqlResultJson("INSPFIELDRESULT", sql, pagination);	
 
+		    // Insert PAGINATION
+		    jsonObj.element("PAGINATION", pagination);
+		} catch(Exception ex) {
+		    jsonObj.element("errMsg", ex.getMessage());
+		}
+
+		jsonResult = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		if (log.isDebugEnabled() && !MaximoHelper.getInstance().isSqliteEnabled()) {
+		    log.debug("json: " + jsonObj.toString());
+		}
+		return SUCCESS;
+	}
+		
+	@Action(value="getMeasurementJson",
+            results={
+                    @Result(name="success", type="stream", params={"inputName", "jsonResult"})
+            }
+    )
+	public String getMeasurementJson(){		
+		JSONObject jsonObj = new JSONObject();
+	 	SelectQuery sql = null;
+	    try {
+	    	sql= new SelectQuery()
+	    	.column("MEASUREMENTID, METERNAME, ASSETNUM, LOCATION, ORGID, SITEID, MEASUREMENTVALUE")
+			.column("OBSERVATION, MEASUREDATE, INSPECTOR")
+			.from("MEASUREMENT")
+			.where("SITEID = '" + this.user.getSiteId()+ "'");
+	    	
+	    	jsonObj = getSqlResultJson("MEASUREMENT", sql, pagination);			
+		
+		    // Insert PAGINATION
+		    jsonObj.element("PAGINATION", pagination);
+		} catch(Exception ex) {
+		    jsonObj.element("errMsg", ex.getMessage());
+		}
+
+		jsonResult = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		if (log.isDebugEnabled() && !MaximoHelper.getInstance().isSqliteEnabled()) {
+		    log.debug("json: " + jsonObj.toString());
+		}
+		return SUCCESS;
+	}
+	
+	@Action(value="getMeterReadingJson",
+            results={
+                    @Result(name="success", type="stream", params={"inputName", "jsonResult"})
+            }
+    )
+	public String getMeterReadingJson(){		
+		JSONObject jsonObj = new JSONObject();
+		SelectQuery sql = null;
+		try {
+	    	sql= new SelectQuery()
+	    	.column("METERREADINGID, METERNAME, ASSETNUM, ORGID, SITEID, READINGTYPE")
+			.column("DELTA, READING, READINGDATE, INSPECTOR, DIDROLLOVER")
+			.from("METERREADING")
+			.where("SITEID = '" + this.user.getSiteId()+ "'");
+	    	
+	    	jsonObj = getSqlResultJson("METERREADING", sql, pagination);
+	
+		    // Insert PAGINATION
+		    jsonObj.element("PAGINATION", pagination);
+		} catch(Exception ex) {
+		    jsonObj.element("errMsg", ex.getMessage());
+		}
+
+		jsonResult = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		if (log.isDebugEnabled() && !MaximoHelper.getInstance().isSqliteEnabled()) {
+		    log.debug("json: " + jsonObj.toString());
+		}
+		return SUCCESS;
+	}
+
+	@Action(value="getLocMeterReadingJson",
+            results={
+                    @Result(name="success", type="stream", params={"inputName", "jsonResult"})
+            }
+    )
+	public String getLocMeterReadingJson(){		
+		JSONObject jsonObj = new JSONObject();
+		SelectQuery sql = null;
+		try {
+	    	sql= new SelectQuery()
+	    	.column("METERREADINGID, METERNAME, LOCATION, ORGID, SITEID, READINGTYPE")
+			.column("DELTA, READING, READINGDATE, INSPECTOR, DIDROLLOVER")
+			.from("LOCMETERREADING")
+			.where("SITEID = '" + this.user.getSiteId()+ "'");
+	    	
+	    	jsonObj = getSqlResultJson("LOCMETERREADING", sql, pagination);	
+		
+		    // Insert PAGINATION
+		    jsonObj.element("PAGINATION", pagination);
+		} catch(Exception ex) {
+		    jsonObj.element("errMsg", ex.getMessage());
+		}
+
+		jsonResult = new ByteArrayInputStream(jsonObj.toString().getBytes());
+		if (log.isDebugEnabled() && !MaximoHelper.getInstance().isSqliteEnabled()) {
+		    log.debug("json: " + jsonObj.toString());
+		}
+		return SUCCESS;
+	}
 }

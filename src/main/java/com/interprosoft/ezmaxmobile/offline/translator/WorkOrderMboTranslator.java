@@ -6,8 +6,7 @@ package com.interprosoft.ezmaxmobile.offline.translator;
 
 import java.rmi.RemoteException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 
 import psdi.mbo.MboRemote;
 import psdi.util.MXException;
@@ -18,7 +17,7 @@ import com.interprosoft.ezmaxmobile.offline.model.WorkOrder;
 
 public class WorkOrderMboTranslator implements MboTranslator {
 
-	private static Log log = LogFactory.getLog(WorkOrderMboTranslator.class);
+	private static Logger log = Logger.getLogger(WorkOrderMboTranslator.class);
 	
 	public Object translate(MboRemote mbo) throws MXException, RemoteException {
 		return translate(mbo,false);

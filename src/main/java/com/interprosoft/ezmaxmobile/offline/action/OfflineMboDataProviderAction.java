@@ -4,23 +4,12 @@
  ******************************************************************************/
 package com.interprosoft.ezmaxmobile.offline.action;
 
-import java.io.ByteArrayInputStream;
-import java.util.List;
-
-import net.sf.json.JSONObject;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts2.convention.annotation.Action;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
-import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.ResultPath;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.interprosoft.ezmaxmobile.offline.model.Craft;
-import com.interprosoft.ezmaxmobile.offline.translator.CraftMboTranslator;
 
 @Component
 @Scope("prototype")
@@ -31,7 +20,7 @@ public class OfflineMboDataProviderAction extends BaseOfflineInitAction {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineMboDataProviderAction.class);
+	private static Logger log = Logger.getLogger(OfflineMboDataProviderAction.class);
 	
 //	@Action(value="getWorkTypeJson",
 //			results={

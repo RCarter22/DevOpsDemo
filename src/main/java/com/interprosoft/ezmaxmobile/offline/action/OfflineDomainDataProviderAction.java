@@ -8,8 +8,7 @@ import java.io.ByteArrayInputStream;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -27,7 +26,7 @@ public class OfflineDomainDataProviderAction extends BaseOfflineInitAction {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineDomainDataProviderAction.class);
+	private static Logger log = Logger.getLogger(OfflineDomainDataProviderAction.class);
 	
 	@Action(value="getWOStatusListJson",
 			results={

@@ -7,15 +7,18 @@ package com.interprosoft.ezmaxmobile.offline.action;
 import java.rmi.RemoteException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.TimeZone;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.axis.encoding.Base64;
+import org.apache.log4j.Logger;
 
 import psdi.app.asset.AssetMeterRemote;
 import psdi.app.asset.AssetRemote;
 import psdi.app.asset.AssetSetRemote;
+import psdi.app.inspection.InspectionResultRemote;
 import psdi.app.inventory.InvBalancesRemote;
 import psdi.app.inventory.InventoryRemote;
 import psdi.app.labor.LabTransRemote;
@@ -24,16 +27,19 @@ import psdi.app.location.LocationMeterRemote;
 import psdi.app.location.LocationRemote;
 import psdi.app.location.LocationSetRemote;
 import psdi.app.ticket.SRRemote;
-import psdi.app.workorder.AssignmentRemote;
 import psdi.app.workorder.WORemote;
 import psdi.mbo.MboConstants;
 import psdi.mbo.MboRemote;
 import psdi.mbo.MboSetRemote;
 import psdi.mbo.NonPersistentMboSetRemote;
+import psdi.mbo.StatefulMboRemote;
 import psdi.util.MXException;
+import psdi.util.MXSession;
 
 import com.ibm.icu.text.NumberFormat;
+import com.interprosoft.ezmaxmobile.common.BaseMaximoException;
 import com.interprosoft.ezmaxmobile.common.util.MaximoExceptionUtil;
+import com.interprosoft.ezmaxmobile.db.DatabaseException;
 import com.interprosoft.ezmaxmobile.offline.OfflineException;
 import com.interprosoft.ezmaxmobile.offline.util.DateTimeFormatter;
 import com.interprosoft.ezmaxmobile.offline.util.DateTimeParser;
@@ -47,7 +53,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineDataSyncAction.class);
+	private static Logger log = Logger.getLogger(OfflineDataSyncAction.class);
 	
 	public void addWorkOrder() throws Exception {
 		try {
@@ -172,6 +178,9 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 				setValue(mboRemote, jsonOfflineEntity, "ACTSTART", Date.class, MboConstants.DELAYVALIDATION);
 				setValue(mboRemote, jsonOfflineEntity, "ACTFINISH", Date.class, MboConstants.DELAYVALIDATION);				
 				setValue(mboRemote, jsonOfflineEntity, "CLASSSTRUCTUREID");
+				// Mapping - Tracking XY Coordinates
+				setValue(mboRemote, "SERVICEADDRESS.LATITUDEY", jsonOfflineEntity, "LATITUDEY");
+				setValue(mboRemote, "SERVICEADDRESS.LONGITUDEX", jsonOfflineEntity, "LONGITUDEX");
 			}
 			
 			// Save the MBO Set
@@ -297,9 +306,6 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 		}
 	}
 	
-	public void noActionWorkOrder() throws Exception {
-	}
-	
 	public void addSR() throws Exception {
 		try {
 			// Get the Offline Entity that was posted here to be processed
@@ -318,7 +324,10 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			setValue(srRemote, jsonOfflineEntity, "DESCRIPTION");
 			setValue(srRemote, "DESCRIPTION_LONGDESCRIPTION", jsonOfflineEntity, "LONGDESCRIPTION");
 			setValue(srRemote, jsonOfflineEntity, "LOCATION");
-			setValue(srRemote, jsonOfflineEntity, "CLASSSTRUCTUREID");		
+			setValue(srRemote, jsonOfflineEntity, "CLASSSTRUCTUREID");
+			// Mapping - Tracking XY Coordinates
+			setValue(srRemote, "SERVICEADDRESS.LATITUDEY", jsonOfflineEntity, "LATITUDEY");
+			setValue(srRemote, "SERVICEADDRESS.LONGITUDEX", jsonOfflineEntity, "LONGITUDEX");			
 			// Save the MBO Set
 			srRemote.getThisMboSet().save();	
 			
@@ -426,9 +435,6 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			log.error("moveAsset:", e);
 			throw new OfflineException(e.getMessage(), e);
 		}
-	}
-	
-	public void noActionAsset() throws Exception {
 	}
 	
 	public void updateAssetMeter() throws Exception {
@@ -569,6 +575,9 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 				taskMboRemote.setValue("TASKID", iTaskSeq);
 
 				setValue(taskMboRemote, jsonOfflineEntity, "DESCRIPTION");
+				setValue(taskMboRemote, "DESCRIPTION_LONGDESCRIPTION", jsonOfflineEntity, "LONGDESCRIPTION");
+				setValue(taskMboRemote, jsonOfflineEntity, "OBSERVATION");
+				setValue(taskMboRemote, jsonOfflineEntity, "MEASUREMENTVALUE");
 				setValue(taskMboRemote, jsonOfflineEntity, "PLUSTACCOMP");
 				setValue(taskMboRemote, jsonOfflineEntity, "PLUSTCOMP");
 				setValue(taskMboRemote, jsonOfflineEntity, "PLUSTREASON");
@@ -695,6 +704,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			
 			if (woRemote != null && !woRemote.isFlagSet(MboConstants.READONLY)) {
 				
+				setValue(woRemote, "DESCRIPTION_LONGDESCRIPTION", jsonOfflineEntity, "LONGDESCRIPTION");
 				setValue(woRemote, jsonOfflineEntity, "OBSERVATION");
 				setValue(woRemote, jsonOfflineEntity, "MEASUREMENTVALUE");
 
@@ -814,7 +824,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			throw new OfflineException(e.getMessage(), e);
 		}
 	}
-	
+
 	public void addLabTrans() throws Exception {
 		try {
 			// Get the Offline Entity that was posted here to be processed
@@ -938,8 +948,8 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			//grabs the specific work order that we are working on based off the unique workorder id
 			mboSetRemote.setQbe("WORKORDERID",  getAutoKeyMap(jsonOfflineEntity, "WORKORDERID"));
 			mboSetRemote.setQbeExactMatch(true);
-			WORemote woremote = (WORemote) mboSetRemote.moveFirst();
-			if(woremote != null)
+			WORemote woRemote = (WORemote) mboSetRemote.moveFirst();
+			if(woRemote != null)
 			{
 				MboSetRemote labTransMboSet = woremote.getMboSet("LABTRANS");
 				labTransMboSet.setQbe("LABORCODE", jsonOfflineEntity.optString("LABORCODE"));
@@ -993,7 +1003,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			WORemote woRemote = (WORemote)mboSetRemote.getMbo(0);
 			
 			if (woRemote != null) {
-				MboSetRemote labTransMboSet = woRemote.getMboSet("LABTRANS");
+                MboSetRemote labTransMboSet = woRemote.getMboSet("LABTRANS");
 				// Filter labtrans set to that specific user and most recent start time/date
 				labTransMboSet.setQbe("LABORCODE", jsonOfflineEntity.optString("LABORCODE"));
 				labTransMboSet.setQbe("TIMERSTATUS", "ACTIVE");
@@ -1008,6 +1018,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 				labTransMboSet.save();
 				
 				this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, labTransMbo);
+
 			} else {
 				// Need to throw exception, otherwise this will be considered a successful transaction
 				throw new Exception("Cannot stop timer, record not found");				
@@ -1024,7 +1035,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			throw new OfflineException(e.getMessage(), e);
 		}		
 	}
-	
+
 	public void approveLabTrans() throws Exception {
 		try {
 			// Get the Offline Entity that was posted here to be processed
@@ -1662,55 +1673,6 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 		}
 	}
 	
-	/*public void addDowntimeRpt() throws Exception {
-		try {
-			// Get the Offline Entity that was posted here to be processed
-			String offlineEntityName = "DOWNTIMEREPORT";
-			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
-		
-			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("WORKORDER");
-			// To prevent referencing the local generated IDs (i.e.: LOCAL_1 or OFFLN_1)
-			// If a field is using an autokey, then we need to get the mapped value
-			mboSetRemote.setQbe("WORKORDERID", getAutoKeyMap(jsonOfflineEntity, "WORKORDERID"));
-			mboSetRemote.setQbeExactMatch(true);
-			WORemote woRemote = (WORemote)mboSetRemote.moveFirst();
-			
-			if (woRemote != null) {
-				woRemote.canReportDowntime();
-				NonPersistentMboSetRemote downTimeSet = (NonPersistentMboSetRemote)woRemote.getMboSet("DOWNTIMEREPORT");
-				downTimeSet.setDefaultValue("ISDOWNTIMEREPORT", "1");
-				MboRemote downTimeMboRemote = downTimeSet.addAtEnd();
-
-				setValue(downTimeMboRemote, jsonOfflineEntity, "ASSETNUM");
-				setValue(downTimeMboRemote, jsonOfflineEntity, "SITEID");
-				setValue(downTimeMboRemote, jsonOfflineEntity, "ORGID");
-				setValue(downTimeMboRemote, jsonOfflineEntity, "STARTDATE", Date.class, MboConstants.DELAYVALIDATION);				
-				setValue(downTimeMboRemote, jsonOfflineEntity, "ENDDATE", Date.class, MboConstants.DELAYVALIDATION);				
-				setValue(downTimeMboRemote, jsonOfflineEntity, "DOWNTIME");
-				setValue(downTimeMboRemote, jsonOfflineEntity, "OPERATIONAL");
-				
-				downTimeSet.execute();
-				// Save the MBO Set
-				mboSetRemote.save();
-				
-				this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, downTimeMboRemote);
-			} else {
-				// Need to throw exception, otherwise this will be considered a successful transaction
-				throw new Exception("Cannot report downtime, record not found");				
-			}
-		} catch (MXException e) {
-			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-			log.error("addDowntimeRpt:", new Exception(e));
-			throw new OfflineException(msg, e);
-		} catch (RemoteException e) {
-			log.error("addDowntimeRpt:", e);
-			throw new OfflineException(e.getMessage(), e);
-		} catch (Exception e) {
-			log.error("addDowntimeRpt:", e);
-			throw new OfflineException(e.getMessage(), e);
-		}
-	}*/
-	
 	public void editMultiProgress() throws Exception {
 		try {
 			// Get the Offline Entity that was posted here to be processed
@@ -1890,6 +1852,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			
 			if (invbRemote != null && !invbRemote.isFlagSet(MboConstants.READONLY)) {
 				setValue(invbRemote, "ADJUSTEDPHYSCNT", jsonOfflineEntity, "PHYSCNT");
+				setValue(invbRemote, "ADJUSTEDPHYSCNTDATE", jsonOfflineEntity, "PHYSCNTDATE", Date.class);
 				mboSetRemote.save();
 			} else {
 				// Need to throw exception, otherwise this will be considered a successful transaction
@@ -1928,6 +1891,8 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 				setValue(srRemote, jsonOfflineEntity, "AFFECTEDPERSON");
 				setValue(srRemote, jsonOfflineEntity, "LOCATION");
 				setValue(srRemote, jsonOfflineEntity, "ASSETNUM");
+				// Fix for version 5.4.4.  Sync back Asset Site ID changes
+				setValue(srRemote, jsonOfflineEntity, "ASSETSITEID");
 				setValue(srRemote, jsonOfflineEntity, "SITEID");
 				setValue(srRemote, jsonOfflineEntity, "CLASSSTRUCTUREID");
 				// Need to have a NOACTION parameter here because Maximo automatically changes the status of a NEW SR to QUEUED when an owner or ownergroup
@@ -2258,7 +2223,8 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 				if(jsonOfflineEntity.getString("STARTDATE") != null && !jsonOfflineEntity.getString("STARTDATE").isEmpty()){
 					downTimeSet.setDefaultValue("ISDOWNTIMEREPORT", "1");
 					MboRemote dtRemote = downTimeSet.addAtEnd();
-					dtRemote.validate();
+					// For 7.6.1, calling the below validate() method will throw error and validate required fields prior to actually setting the field values.
+					// dtRemote.validate();
 					
 					setValue(dtRemote, jsonOfflineEntity, "STARTDATE", Date.class, MboConstants.DELAYVALIDATION);				
 					setValue(dtRemote, jsonOfflineEntity, "ENDDATE", Date.class, MboConstants.DELAYVALIDATION);				
@@ -2713,7 +2679,7 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			throw new OfflineException(e.getMessage(), e);
 		}
 	}	
-	
+
 	
 	private void futureDateExceptionHandler(JSONObject jsonOfflineEntity, String attribute) throws ParseException{
 		if (attribute == null || attribute.length() == 0)
@@ -2722,7 +2688,6 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 		// Future Date Exception Handler
 		// Get Regular Hours and Premium Hours
 		NumberFormat nf = NumberFormat.getInstance(this.user.getSession().getUserInfo().getLocale());
-		// TODO: check for null
 
 		float floatRegHrs = 0;
 		float floatPremiumHrs = 0; 
@@ -2744,4 +2709,461 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 			jsonOfflineEntity.put(attribute, DateTimeFormatter.formatToTimeZone(startDateTime));
 		}		
 	}
+	
+	public void updateInspResultStatus() throws Exception {
+		try {
+			// Get the Offline Entity that was posted here to be processed
+			String offlineEntityName = "INSPECTIONRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+			
+			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+			// To prevent referencing the local generated IDs (i.e.: LOCAL_1 or OFFLN_1)
+			// If a field is using an autokey, then we need to get the mapped value
+			mboSetRemote.setQbe("INSPECTIONRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPECTIONRESULTID"));
+			mboSetRemote.setQbeExactMatch(true);
+			InspectionResultRemote irRemote = (InspectionResultRemote)mboSetRemote.moveFirst();
+			
+			if (irRemote != null) {
+				if (!irRemote.getString("STATUS").equalsIgnoreCase(jsonOfflineEntity.optString("STATUS"))) {
+					((InspectionResultRemote)irRemote).changeResultStatus(jsonOfflineEntity.optString("STATUS"));
+					irRemote.getThisMboSet().save();
+					
+					if (jsonOfflineEntity.optString("STATUS").equals("INPROG")) {
+						addFUInspFieldResult(irRemote);
+					}
+				}
+			} else {
+				// Need to throw exception, otherwise this will be considered a successful transaction
+				throw new Exception("Cannot change inspectionresult status, record not found");				
+			}
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("updateInspResultStatus:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("updateInspResultStatus:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("updateInspResultStatus:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
+	
+	public void editInspFieldResult() throws Exception {
+		try {
+			String offlineEntityName = "INSPFIELDRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+			
+			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPFIELDRESULT");
+			mboSetRemote.setQbe("INSPFIELDRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPFIELDRESULTID"));
+			mboSetRemote.setQbeExactMatch(true);
+			MboRemote ifrRemote = mboSetRemote.moveFirst();
+			
+			if (ifrRemote != null) {
+				ifrRemote.setValue("ENTEREDBY", this.user.getUserId());
+				setValue(ifrRemote, jsonOfflineEntity, "ENTEREDDATE", Date.class);
+				
+				if(!isNull(jsonOfflineEntity.opt("TXTRESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "TXTRESPONSE");
+				} else {
+					ifrRemote.setValueNull("TXTRESPONSE"); 
+				}
+				
+				if(!isNull(jsonOfflineEntity.opt("NUMRESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "NUMRESPONSE");
+				} else {
+					ifrRemote.setValueNull("NUMRESPONSE"); 
+				}
+						
+				if(!isNull(jsonOfflineEntity.opt("ROLLOVERFLAG"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "ROLLOVERFLAG"); 
+				}
+				if(!isNull(jsonOfflineEntity.opt("DATERESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "DATERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+				}
+				if(!isNull(jsonOfflineEntity.opt("TIMERESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "TIMERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+				}
+				
+				ifrRemote.getThisMboSet().save();
+			} else {
+				// Need to throw exception, otherwise this will be considered a successful transaction
+				throw new Exception("Cannot edit inspfieldresult, record not found");				
+			}
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("editInspFieldResult:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("editInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("editInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
+	
+	public void addInspFieldResult() throws Exception {
+		try {
+			String offlineEntityName = "INSPFIELDRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+			
+			MboRemote ifrRemote = user.getSession().getMboSet("INSPFIELDRESULT").addAtEnd();
+			setValue(ifrRemote, jsonOfflineEntity, "INSPFIELDNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "INSPQUESTIONNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "INSPFORMNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "RESULTNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "REVISION");
+			setValue(ifrRemote, jsonOfflineEntity, "ORGID");
+			setValue(ifrRemote, jsonOfflineEntity, "SITEID");
+			setValue(ifrRemote, jsonOfflineEntity, "ENTEREDDATE", Date.class);
+			ifrRemote.setValue("ENTEREDBY", this.user.getUserId());
+			
+			if(!isNull(jsonOfflineEntity.opt("TXTRESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "TXTRESPONSE"); 
+			}
+			if(!isNull(jsonOfflineEntity.opt("NUMRESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "NUMRESPONSE");
+			}
+			if(!isNull(jsonOfflineEntity.opt("METERNAME"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "METERNAME");
+			}
+			if(!isNull(jsonOfflineEntity.opt("ROLLOVERFLAG"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "ROLLOVERFLAG"); 
+			}
+			if(!isNull(jsonOfflineEntity.opt("DATERESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "DATERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+			}
+			if(!isNull(jsonOfflineEntity.opt("TIMERESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "TIMERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+			}
+		
+			ifrRemote.getThisMboSet().save();
+			this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, ifrRemote);
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("addInspFieldResult:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("addInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("addInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
+	
+	public void completeInspection() throws Exception {
+		try {
+			// Get the Offline Entity that was posted here to be processed
+			String offlineEntityName = "INSPECTIONRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+			
+			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+			// To prevent referencing the local generated IDs (i.e.: LOCAL_1 or OFFLN_1)
+			// If a field is using an autokey, then we need to get the mapped value
+			mboSetRemote.setQbe("INSPECTIONRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPECTIONRESULTID"));
+			mboSetRemote.setQbeExactMatch(true);
+			MboRemote irRemote = mboSetRemote.moveFirst();
+			
+			if (irRemote != null) {
+				irRemote.getThisMboSet().save();
+				irRemote.getThisMboSet().reset();
+				updateMeterReading(irRemote);
+
+				Long id = irRemote.getUniqueIDValue();
+				
+				MboSetRemote fieldresults = this.user.getSession().getMboSet("INSPFIELDRESULT");
+				String where = "siteid= '" + irRemote.getString("SITEID") + "' and orgid= '"
+								+ irRemote.getString("ORGID") + "' and inspformnum= '" 
+								+ irRemote.getString("INSPFORMNUM") + "' and resultnum= '"
+								+ irRemote.getString("RESULTNUM") + "' and METERNAME IS NOT NULL "
+								+ "AND (TXTRESPONSE IS NOT NULL OR NUMRESPONSE IS NOT NULL) AND (ERRORFLAG IS NULL OR ERRORFLAG < 2)";
+				fieldresults.setWhere(where);
+				fieldresults.reset();
+				
+				if (fieldresults == null || fieldresults.count() == 0) {
+					String newStatus = "COMPLETED";
+					mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+					irRemote = mboSetRemote.getMboForUniqueId(id);
+	
+					String currentStatus = irRemote.getString("STATUS");
+					if (!currentStatus.equalsIgnoreCase(newStatus)) {
+						Date newStatusDate = DateTimeParser.parseDateTime(jsonOfflineEntity.optString("ENTEREDDATE"));
+						((StatefulMboRemote) irRemote).changeStatus(newStatus, newStatusDate, "");
+						irRemote.getThisMboSet().save();
+					}
+				}
+			} else {
+				// Need to throw exception, otherwise this will be considered a successful transaction
+				throw new Exception("Cannot change inspectionresult status, record not found");				
+			}
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("completeInspection:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("completeInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("completeInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
+	
+	
+	public void updateMeterReading(MboRemote inspResultMbo) throws RemoteException, MXException {
+		String referenceObj = null;
+		String asset = null;
+		String location = null;
+		String siteid = inspResultMbo.getString("SITEID");
+		String orgid = inspResultMbo.getString("ORGID");
+		String inspformnum = inspResultMbo.getString("INSPFORMNUM");
+		String inspresultnum = inspResultMbo.getString("RESULTNUM");
+	
+		 if(!inspResultMbo.getString("ASSET").equals("")){
+			 referenceObj = "ASSET";  
+			 asset = inspResultMbo.getString("ASSET");
+		 }
+		 else if(!inspResultMbo.getString("LOCATION").equals("")){
+			 referenceObj = "LOCATION"; 
+			 location = inspResultMbo.getString("LOCATION");
+		 } 
+		
+		((InspectionResultRemote)inspResultMbo).updateAssetLocMeter(referenceObj, null, asset, location, siteid, orgid, inspformnum, inspresultnum);
+		 inspResultMbo.getThisMboSet().save();
+		 inspResultMbo.getThisMboSet().reset();
+	}	
+	
+	public void createInspWorkOrder() throws Exception {
+		try{
+			// Get the Offline Entity that was posted here to be processed
+			String offlineEntityName = "INSPECTIONRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+			String inspectionresultid = jsonOfflineEntity.optString("INSPECTIONRESULTID");
+			String inspDeficiencyList = jsonOfflineEntity.optString("DEFICIENCYLIST");
+			
+			MboSetRemote inspectionResultRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+			inspectionResultRemote.setQbe("INSPECTIONRESULTID", inspectionresultid);
+			inspectionResultRemote.setQbeExactMatch(true);
+			MboRemote irRemote = inspectionResultRemote.moveFirst();
+			
+			if (irRemote != null && irRemote.getString("STATUS").equals("COMPLETED") && inspDeficiencyList != null) {
+				JSONArray selectedList  = JSONArray.fromObject(inspDeficiencyList);
+				if (irRemote.getString("REFERENCEOBJECT").equalsIgnoreCase("WORKORDER") ||  irRemote.getString("REFERENCEOBJECT").equalsIgnoreCase("WOACTIVITY"))
+				{	
+					createdeficiencyfollowups(irRemote, selectedList);
+				} else {
+					createfollowupwithtasks(irRemote, selectedList);
+				}
+				
+			} else {
+				throw new Exception("Cannot create workorder for inspectionresult, status not completed or no deficiencies selected");	
+			}
+		
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("createWOInspection:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("createWOInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("createWOInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
+	
+	public void createdeficiencyfollowups(MboRemote mbo, JSONArray selectedList) throws RemoteException, MXException {	
+		MboSetRemote woSet = null;
+		if (!mbo.getString("PARENT").isEmpty())
+			woSet = mbo.getMboSet("PARENTWO");
+	    else
+	    	woSet = mbo.getMboSet("WORKORDER");
+		
+		MboRemote wo = woSet.getMbo(0);
+		MboSetRemote resultSet = mbo.getMboSet("INSPFIELDRESULT");
+				for(int i = 0; i < selectedList.size(); i++){
+			JSONObject deficiency = (JSONObject) selectedList.get(i);
+			MboRemote newWO = ((WORemote) wo).createWorkorder();
+
+			String desc = deficiency.getString("INSPQUESTION") + " = " + deficiency.getString("RESPONSE");
+			MboSetRemote newWOSet = mbo.getMboSet("$NewWO", "WORKORDER" ,"wonum='" + newWO.getString("WONUM") + "' and siteid= '" + newWO.getString("SITEID") + "'");
+			int fieldLength = newWOSet.getMbo(0).getMboValueData("DESCRIPTION").getLength();
+			if (desc.length() > fieldLength) {
+				newWOSet.getMbo(0).setValue("DESCRIPTION_LONGDESCRIPTION", desc.substring(fieldLength));
+				desc = desc.substring(0, fieldLength);
+			}
+			newWOSet.getMbo(0).setValue("DESCRIPTION", desc);
+			newWOSet.getMbo(0).setValue("LOCATION", mbo.getString("LOCATION"));
+			newWOSet.getMbo(0).setValue("ASSETNUM", mbo.getString("ASSET"));
+			
+			resultSet.setQbe("INSPFIELDRESULTID", deficiency.getString("INSPFIELDRESULTID"));
+			resultSet.setQbeExactMatch(true);
+			MboRemote currentResult = resultSet.getMbo(0);
+			if (currentResult != null) {
+				currentResult.setValue("FUPOBJECT", "WORKORDER");
+				currentResult.setValue("FUPOBJECTID", newWO.getString("WONUM"));
+				currentResult.setValue("DISPLAYMESSAGE", "Workorder " + newWO.getString("WONUM") + " created");
+			}
+			  
+			newWOSet.save();   
+		}
+
+	}
+		   
+	public void createfollowupwithtasks(MboRemote mbo, JSONArray selectedList) throws RemoteException, MXException, BaseMaximoException {
+		MboSetRemote woSet = mbo.getMboSet("WORKORDER");
+		MboRemote newWO = null;
+		MboSetRemote resultSet = mbo.getMboSet("INSPFIELDRESULT");
+		
+		if (mbo.getString("FUPOBJECT").isEmpty()) {
+		    newWO = woSet.add();
+		    newWO.setValue("DESCRIPTION", "Follow Up Work Order for Inspection " + mbo.getString("RESULTNUM"));
+		    newWO.setValue("LOCATION", mbo.getString("LOCATION"));
+		    newWO.setValue("ASSETNUM", mbo.getString("ASSET"));
+		    mbo.setValue("FUPOBJECT", "WORKORDER");
+		    mbo.setValue("FUPOBJECTID", newWO.getString("WONUM"));
+		    mbo.setValue("DISPLAYMESSAGE", "Workorder " + newWO.getString("WONUM") + " created");
+		    System.out.println("Created WO " + newWO.getString("WONUM"));
+		    woSet.save();
+		}
+
+	   woSet = mbo.getMboSet("FUPWORKORDER");
+	   if (woSet.getMbo(0) != null) {
+		   id = woSet.getMbo(0).getUniqueIDValue();
+		   for(int i = 0; i < selectedList.size(); i++){
+			   JSONObject deficiency = (JSONObject) selectedList.get(i);
+			   String desc = deficiency.getString("INSPQUESTION") + " = " + deficiency.getString("RESPONSE");
+			   
+			   MboRemote newTask = woSet.getMbo(0).getMboSet("WOACTIVITY").add();
+			   newTask.setValue("PARENT", mbo.getString("FUPOBJECTID"));
+			   int fieldLength = newTask.getMboValueData("DESCRIPTION").getLength();
+			   if (desc.length() > fieldLength) {
+				   newTask.setValue("DESCRIPTION_LONGDESCRIPTION", desc.substring(fieldLength));
+				   desc = desc.substring(0, fieldLength);
+			   } 
+			   newTask.setValue("DESCRIPTION", desc);
+
+			   MboRemote currentResult = resultSet.getMboForUniqueId(deficiency.getLong("INSPFIELDRESULTID"));
+			   if (currentResult != null) {
+				   currentResult.setValue("FUPOBJECT","WORKORDER");
+				   currentResult.setValue("FUPOBJECTID", newTask.getString("WONUM"));
+				   currentResult.setValue("DISPLAYMESSAGE","Work Order " + mbo.getString("FUPOBJECTID") + " Task " + newTask.getString("TASKID") + " created"); 
+			   }
+			   woSet.save();
+		   }
+	   }
+	}
+	
+	public void addInspFieldResultSignature() throws Exception{
+        try {
+              // Get the Offline Entity that was posted here to be processed     
+          	String offlineEntityName = "INSPFIELDRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+			
+			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPFIELDRESULT");
+			mboSetRemote.setQbe("INSPFIELDRESULTID", jsonOfflineEntity.getString("INSPFIELDRESULTID"));
+            mboSetRemote.setQbeExactMatch(true);
+            MboRemote ifrRemote = (WORemote) mboSetRemote.moveFirst();
+
+            if (ifrRemote == null) {                  	
+            	ifrRemote = user.getSession().getMboSet("INSPFIELDRESULT").addAtEnd();
+    			setValue(ifrRemote, jsonOfflineEntity, "INSPFIELDNUM");
+    			setValue(ifrRemote, jsonOfflineEntity, "INSPQUESTIONNUM");
+    			setValue(ifrRemote, jsonOfflineEntity, "INSPFORMNUM");
+    			setValue(ifrRemote, jsonOfflineEntity, "RESULTNUM");
+    			setValue(ifrRemote, jsonOfflineEntity, "REVISION");
+    			setValue(ifrRemote, jsonOfflineEntity, "ORGID");
+    			setValue(ifrRemote, jsonOfflineEntity, "SITEID");
+    			setValue(ifrRemote, jsonOfflineEntity, "ENTEREDDATE", Date.class);
+    			ifrRemote.setValue("ENTEREDBY", this.user.getUserId());
+            }
+
+            String signature = jsonOfflineEntity.getString("SIGNATURE");
+            signature = signature.replaceFirst("^data:image/[^;]*;base64,?","");
+            saveImageToLibrary(ifrRemote, Base64.decode(signature), jsonOfflineEntity);                    
+            
+			ifrRemote.getThisMboSet().save();
+              
+        } catch (MXException e) {
+              String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+              log.error("addSignature:", e);
+              throw new OfflineException(msg, e);
+        } catch (RemoteException e) {
+              log.error("addSignature:", e);
+              throw new OfflineException(e.getMessage(), e);
+        } catch (Exception e) {
+              log.error("addSignature:", e);
+              throw new OfflineException(e.getMessage(), e);
+        }
+	}
+	
+	private void saveImageToLibrary(MboRemote mbo, byte[] encodedfile, JSONObject jsonOfflineEntity) throws MXException, RemoteException, ParseException {
+		Date signedDateTime = DateTimeParser.parseDateTime(jsonOfflineEntity.optString("SIGNEDDATE"));		
+        
+		if(mbo != null) {
+			MboSetRemote imglibSet = (MboSetRemote)mbo.getMboSet("$EMMIMGLIB", "IMGLIB", "REFOBJECT = \'INSPFIELDRESULT\' AND REFOBJECTID = :INSPFIELDRESULTID");
+			MboRemote imglib = (MboRemote)imglibSet.add();
+			imglib.setValue("imagename", signedDateTime.toString(), MboConstants.NOACCESSCHECK);
+			imglib.setValue("image", encodedfile, MboConstants.NOACCESSCHECK);
+			imglib.setValue("mimetype", "image/png", MboConstants.NOACCESSCHECK);
+			// Update the ID in inspfieldresult  
+			mbo.setValue("TXTRESPONSE", String.valueOf(imglib.getUniqueIDValue()));
+       }
+	}
+	
+	public void addFUInspFieldResult(MboRemote mbo) throws RemoteException, DatabaseException, MXException {
+		//Check if any attachment field, then create the inspfieldresult for the field
+		MboSetRemote fields = this.user.getSession().getMboSet("INSPFIELD");
+		fields.setQbe("INSPFORMNUM", mbo.getString("INSPFORMNUM"));
+		fields.setQbe("ORGID", mbo.getString("ORGID"));
+		fields.setQbe("REVISION", mbo.getString("REVISION"));
+		fields.setQbe("FIELDTYPE", "FU");
+		fields.reset();
+		
+		if (fields != null) {
+			MboSetRemote fieldresults = this.user.getSession().getMboSet("INSPFIELDRESULT");
+			for (MboRemote field=fields.moveFirst(); field!= null; field=fields.moveNext()) {
+				MboSetRemote relatedresults = field.getMboSet("INSPFIELDRESULT");
+				relatedresults.setQbe("RESULTNUM", mbo.getString("RESULTNUM"));
+				relatedresults.setQbeExactMatch(true);
+				relatedresults.reset();
+				
+				if (relatedresults == null || relatedresults.count() == 0) {
+					MboRemote resultMbo = fieldresults.add();
+					resultMbo.setValue("INSPFIELDNUM", field.getString("INSPFIELDNUM"));
+					resultMbo.setValue("INSPQUESTIONNUM",  field.getString("INSPQUESTIONNUM"));
+					resultMbo.setValue("INSPFORMNUM", field.getString("INSPFORMNUM"));
+					resultMbo.setValue("RESULTNUM", mbo.getString("RESULTNUM"));
+					resultMbo.setValue("REVISION", mbo.getString("REVISION"));
+					resultMbo.setValue("ORGID",  mbo.getString("ORGID"));
+					resultMbo.setValue("SITEID",  mbo.getString("SITEID"));
+					resultMbo.setValue("ENTEREDBY", this.user.getUserId());
+					resultMbo.setValue("ENTEREDDATE", this.user.getSession().getMXServerRemote().getDate());
+				}
+			}
+			fieldresults.save();
+		}
+		
+	}
+	
+	private long getUserTimeZoneDiff(String subtractServerTZ) {
+		if (subtractServerTZ == null || subtractServerTZ.length() == 0)
+			subtractServerTZ = MXSession.getSession().getTimeZone().getID();
+		
+        // Check if this user is got time zone set in Maximo
+		String userTZ = subtractServerTZ;
+		if (this.user.getTimezone() != null && this.user.getTimezone().length() > 0) {
+            userTZ = this.user.getTimezone();
+        }
+        
+		// Check the difference of server and user time zones
+		long now = System.currentTimeMillis();
+		long timeZoneDiff = TimeZone.getTimeZone(userTZ).getOffset(now) - TimeZone.getTimeZone(subtractServerTZ).getOffset(now); 
+
+		return timeZoneDiff;
+	}
+	
+	
 }

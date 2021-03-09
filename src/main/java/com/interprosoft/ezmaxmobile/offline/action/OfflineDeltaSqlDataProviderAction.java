@@ -8,8 +8,7 @@ import java.io.ByteArrayInputStream;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -31,7 +30,7 @@ public class OfflineDeltaSqlDataProviderAction extends BaseOfflineInitAction {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineDeltaSqlDataProviderAction.class);
+	private static Logger log = Logger.getLogger(OfflineDeltaSqlDataProviderAction.class);
 	
 	/** 	############################################################ 	//
 	 * 		Use SQL Query to get Data from MAXIMO to populate Offline Tables
@@ -182,7 +181,7 @@ public class OfflineDeltaSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("SR.TICKETID", "SR.TICKETUID", "SR.DESCRIPTION", "SR.LOCATION")
 				.column("SR.REPORTEDBY", "SR.REPORTEDPHONE", "SR.REPORTEDEMAIL")
 				.column("SR.STATUS", "SR.REPORTEDPRIORITY", "SR.FAILURECODE", "SR.PROBLEMCODE")
-				.column("SR.SITEID", "SR.ORGID", "SR.OWNER", "SR.OWNERGROUP", "SR.STATUSDATE", "SR.REPORTDATE", "SR.ASSETSITEID", "SR.GLACCOUNT", "SR.ASSETNUM", "SR.AFFECTEDPERSON")
+				.column("SR.SITEID", "SR.ORGID", "SR.OWNER", "SR.OWNERGROUP", "SR.STATUSDATE", "SR.REPORTDATE", "SR.ASSETORGID", "SR.ASSETSITEID", "SR.GLACCOUNT", "SR.ASSETNUM", "SR.AFFECTEDPERSON")
 	    		.columnAsString("LD.LDTEXT AS LONGDESCRIPTION")
 	    		.from("TICKET SR")
 	    		.leftJoin("LONGDESCRIPTION LD", "SR.TICKETUID = LD.LDKEY AND LD.LDOWNERTABLE='TICKET' AND LD.LDOWNERCOL='DESCRIPTION'")
@@ -860,7 +859,7 @@ public class OfflineDeltaSqlDataProviderAction extends BaseOfflineInitAction {
 	      try {
 	        	SelectQuery sqlToReplace = new SelectQuery()
 		    		.distinct()
-					.column("INV.INVENTORYID", "INV.ITEMNUM", "INV.ITEMSETID", "INV.LOCATION", "ITEM.DESCRIPTION", "INV.CATEGORY", "INV.MANUFACTURER")
+					.column("INV.INVENTORYID", "INV.ITEMNUM", "INV.ITEMSETID", "INV.LOCATION", "ITEM.DESCRIPTION", "ITEM.ROTATING", "ITEM.ITEMTYPE", "INV.CATEGORY", "INV.MANUFACTURER")
 					.column("INV.MODELNUM", "INV.SITEID", "INV.STATUS", "INV.STATUSDATE")
 					.column("INV.BINNUM", "INV.ISSUEUNIT", "INV.ISSUEYTD", "INV.ISSUE1YRAGO", "INV.LASTISSUEDATE")
 		    		.from("INVENTORY INV")
@@ -871,7 +870,7 @@ public class OfflineDeltaSqlDataProviderAction extends BaseOfflineInitAction {
 	        	
 	        	SelectQuery sqlToDelete = new SelectQuery()
 		    		.distinct()
-					.column("INV.INVENTORYID", "INV.ITEMNUM", "INV.ITEMSETID", "INV.LOCATION", "ITEM.DESCRIPTION", "INV.CATEGORY", "INV.MANUFACTURER")
+					.column("INV.INVENTORYID", "INV.ITEMNUM", "INV.ITEMSETID", "INV.LOCATION", "ITEM.DESCRIPTION", "ITEM.ROTATING", "ITEM.ITEMTYPE", "INV.CATEGORY", "INV.MANUFACTURER")
 					.column("INV.MODELNUM", "INV.SITEID", "INV.STATUS", "INV.STATUSDATE")
 					.column("INV.BINNUM", "INV.ISSUEUNIT", "INV.ISSUEYTD", "INV.ISSUE1YRAGO", "INV.LASTISSUEDATE")
 		    		.from("INVENTORY INV")

@@ -4,8 +4,7 @@
  ******************************************************************************/
 package com.interprosoft.ezmaxmobile.offline.action;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.ResultPath;
@@ -21,5 +20,5 @@ public class OfflineDatabaseAction extends BaseOfflineDatabaseAction {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(OfflineDatabaseAction.class);
+	private static Logger log = Logger.getLogger(OfflineDatabaseAction.class);
 }
