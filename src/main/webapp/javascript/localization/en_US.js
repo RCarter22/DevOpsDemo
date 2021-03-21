@@ -190,7 +190,8 @@ emm.l10n[lang.toUpperCase()] = {
 	EMMES1003I : 'Please enter a password and reason',
 	EMMES1004I : 'User',
 	EMMES1005I : 'Password',
-	EMMES1006I : 'Reason',		
+	EMMES1006I : 'Reason',	
+	EMMES1007I : 'Signature Added Successfully',
 	// [GB]
 	EMMGB1001I : 'Email',
 	EMMGB1002I : 'Facetime',
@@ -206,8 +207,8 @@ emm.l10n[lang.toUpperCase()] = {
 	EMMGB1012I : '{0} must occur before {1}',
 	EMMGB1013I : '{0} must occur after {1}',
 	EMMGB1014I : '{0} must occur in the past',
-	// [AEP]
-	EMMAEP1001E : 'You should not change directly to WCOMP or COMP.  Actual flow of a workorder must be WSCH --> SCH or INPRG --> WCOMP --> COMP',	
+	// [IP]		
+	EMMIP1000I : 'Inspection has been completed',
 	// General	
 	OFFLINEMODE : 'Offline Mode',
 	SYNCNEEDED : ' - Modified, Sync Needed',
@@ -246,6 +247,7 @@ emm.l10n[lang.toUpperCase()] = {
 	RESET : 'Reset',
 	SELECTVALUE : 'Select Value',
 	CANCEL : 'Cancel',
+	CLEAR : 'Clear',
 	OK : 'OK',
 	YES : 'Yes',
 	NO : 'No',	
@@ -261,6 +263,7 @@ emm.l10n[lang.toUpperCase()] = {
 	MULTIASSETS : 'Multiple Assets, Locations', 
 	ADDNEW : 'Add New',
 	CLASSIFICATION : 'Classification',
+	SPECIFICATION : 'Specifications',
 	NORECORDS : 'No Record(s) Found',
 	NORECORDEXIST : 'No record found or no longer exist',
 	NORECORDSADJ : 'No records to adjust physical counts',
@@ -312,9 +315,12 @@ emm.l10n[lang.toUpperCase()] = {
 	GOTO : 'Go To',
 	APPS : 'Apps',
 	STARTCENTER : 'Start Center',
-	LICENSES : 'Licenses',
-	ALIASES : 'Aliases',
-	ASSIGNMENTS: 'Assignments',	
+	TAKEPHOTO : 'Take Photo',
+	DETAILS : 'Details',
+	SELECTFOLDER : 'Select Folder',
+	OPENMAP : 'Open Map',
+	DROPPEDPIN : 'Dropped Pin',	
+	ROTATEDEVICE : 'Please Rotate Your Device',
 	PAGINATION : {
 		TITLE : 'Page {{from}} of {{to}} - {{total}} Records',
 		PREV : 'Prev',
@@ -324,21 +330,15 @@ emm.l10n[lang.toUpperCase()] = {
 	EZMAXMOBILE : {
 		LOCATION : 'Location',
 		ASSET : 'Asset',
-		PLUSTASSET : 'Asset (Tr)',
+		INSPECTION : 'Inspection',
 		WOTRACK : 'Work Order Tracking',	
-		PLUSTWO: 'Work Order Tracking (Tr)',
 		SR : 'Service Requests',
 		INVENTOR: 'Inventory',
-		PLUSTINV: 'Inventory (Tr)',
-		INVISSUE: 'Issues and Tranfers',
+		INVISSUE: 'Issues and Transfers',
 		MOC : 'MOC (Oil)',
 		CREATEDR : 'Create Requisition',
 		VIEWDR : 'View Requisitions',
 		LABREP: 'Labor Reporting',
-		PLUSPWO : 'Work Order Tracking (SP)',
-		PLUSPSR : 'Service Request (SP)',
-		PLUSPASSET : 'Asset (SP)',
-		PLUSTLRP : 'Labor Reporting (Tr)',
 		TXNTRACK : 'Sync Resolution'
 	},
 	// Objects
@@ -370,9 +370,44 @@ emm.l10n[lang.toUpperCase()] = {
 		NEWSITE: 'To Site',
 		NEWLOCATION : 'To Location',
 		MOVEMODIFYBINNUM: 'Bin',
-		MOVE: 'Move',
-		ALIAS : 'Alias',
-		WOHISTORY : 'Work Order History'
+		MOVE: 'Move'
+	},
+	INSPECTION : {
+		CONDUCTINSPECTION : 'Conduct an Inspection',
+		SPECIFYASSETLOCATION : 'Specify the asset or location',
+		PENDING : 'Pending',
+		INPROG : 'In Progress',
+		COMPLETED : 'Completed',
+		STATUS : 'Status',
+		DESCRIPTION : 'Description',
+		CREATEDATE : 'Create Date',
+		DUEDATE : 'Due Date',
+		NAME : 'Name',
+		INSPECTIONFORM : 'Inspection Form',
+		RESULTNUM : 'Result Number',
+		CREATEWORKORDER : 'Create a Work Order',
+		VIEWASSETDETAILS : 'View Asset Details',
+		WITHINSPRESULTS : 'With Inspection Results',
+		NOINSPRESULTS : 'Without Inspection Results',
+		INSPINPROGRESS : 'Inspection In Progress',
+		INSPCOMPLETED : 'Inspection Completed',
+		STARTINSPECTION : 'Start an Inspection',
+		INSPINSTRUCTION : 'Inspection Instruction',
+		SELECTVALUE : 'Select Value',
+		ADDATTACHMENT : 'Add Attachment',
+		METERHISTORY : 'Meter History',
+		ADDSIGNATURE : 'Add Signature',
+		READING : 'Reading',
+		READINGDATE : 'Reading Date',
+		RELATEDINSPECTIONS : 'Related Inspections',
+		RELATEDRECORDS : 'Related Records',
+		REFERENCEOBJECT : 'Reference Object',
+		OBSERVATION : 'Observation',
+		INSPECTOR : 'Inspector',
+		INSPFOLLOWUP : 'Inspection Followup',
+		METERNOTAVAILABLE : 'The meter {{metername}} is not available in the selected asset or location',
+		SELECTHELP : 'Select each Inspection Result that requires a follow-up or deficiency notes',
+		SELECTEDINSPRESULT: 'Selected Inspection Results from Inspection# '
 	},
 	WORKORDER : {
 		WONUM : 'Work Order',
@@ -420,20 +455,8 @@ emm.l10n[lang.toUpperCase()] = {
 		REACTIVITY: 'Reactivity',
 		CONTACT: 'Contact',
 		REQSTATE: 'Required State',
-		ALIAS : 'Alias'
+		INSPFORMNUM: 'Inspection Form'
 	},
-	ASSIGNMENT : {
-		ASSIGNMENT : 'Assignment',
-		ASSIGNMENTS : 'Assignments',
-		LABORCODE : 'Labor',
-		DESCRIPTION : 'Description',
-		CRAFT : 'Craft',
-		SKILLLEVEL : 'Skill Level',
-		STARTDATE : 'Start Date',
-		LABORHRS : 'Hours',
-		STATUS: 'Status',
-		COMPLETE: 'Complete'
-	},	
 	MATUSETRANS : {
 		DESCRIPTION : 'Description',
 		ITEM : 'Item',
@@ -570,7 +593,8 @@ emm.l10n[lang.toUpperCase()] = {
 		LASTREADINGDATE : 'Last Reading Date',
 		LASTREADINGINSPECTOR : 'Last Reading Inspector',
 		READING : 'New Reading',
-		NEWREADINGDATE : 'New Reading Date'
+		NEWREADINGDATE : 'New Reading Date',
+		ROLLOVER : 'Rollover'
 	},
 	WPLABOR : {
 		NAME : 'Planned Labor',
@@ -631,8 +655,7 @@ emm.l10n[lang.toUpperCase()] = {
 		PREMIUMPAYRATE: 'Premium Pay Rate',
 		PREMIUMPAYCODE : 'Premium Pay Code',
 		TICKETID: 'Ticket',
-		TICKETCLASS: 'Ticket Class',
-		ALREADYAPPR: 'Transaction has already been approved'
+		TICKETCLASS: 'Ticket Class'
 	},
 	PERSON : {
 		PERSONID: 'Person',
@@ -708,16 +731,12 @@ emm.l10n[lang.toUpperCase()] = {
 		CLASSIFICATION : 'Classification',
 		DRILLDOWN : 'Classification Drilldown'
 	},
-	ASSETALIAS : {
-		ALIAS : 'Alias',
-		DESCRIPTION: 'Description',
-		ISDEFAULT: 'Default',
-		ISACTIVE : 'Active'
-	},	
-	ASSETLICENSE : {
-		LICENSENUM : 'License Number',
-		DESCRIPTION: 'Description',
-		STARTDATE: 'Start Date',
-		ENDDATE : 'End Date'
-	}
+	LOCATION : {
+		LOCATION : 'Location',
+		DESCRIPTION : 'Description',
+		STATUS : 'Status',
+		SITEID : 'Site',
+		PARENT : 'Parent',
+		TYPE : 'Type'
+	}	
 };

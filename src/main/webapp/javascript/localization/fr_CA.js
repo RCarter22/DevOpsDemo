@@ -159,7 +159,7 @@ emm.i18n[locale] = {
 /***
  * Language: FR
  */
-/***
+
 var lang = 'FR'; // Set Language
 emm.l10n[lang.toUpperCase()] = {
 	// ** DO NOT MODIFY KEY NAMES BEGINNING WITH 'EMM' BECAUSE THEY ARE USED INTERNALLY, ONLY MODIFY THE TEXT ** //
@@ -682,4 +682,3 @@ emm.l10n[lang.toUpperCase()] = {
 		CLASSIFICATION : 'Classification'
 	}
 };
-*/

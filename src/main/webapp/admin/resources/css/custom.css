@@ -1,0 +1,109 @@
+/* Override */
+#emm_loader_container{
+	display:none;
+}
+body.mini-navbar .navbar-default .nav > li > .nav-second-level span.nav-label {
+    display: block !important;
+}
+.form-control {
+	font-size: inherit;
+	height: auto;
+}
+.form-control[disabled]{
+	background-color: #FFFFFF;
+}
+.skin-1 .btn-primary,
+.skin-1 .btn-success {
+	background:#195EA8;
+	border-color:#195EA8;
+}
+.input-group-btn{
+	font-size: inherit;
+}
+.btn-group-sm > .btn, .btn-sm {
+	font-size: inherit;
+}
+@media (max-width: 768px) {
+  .input-group-addon:first-child{
+  	display: inline-block;
+  	width: 100%;
+  }
+}
+/* Date range picker */
+.daterangepicker td.active, 
+.daterangepicker td.active:hover{
+	background-color: #195EA8;
+}
+/* Pagination */
+.pagination>.active>a, 
+.pagination>.active>span, 
+.pagination>.active>a:hover, 
+.pagination>.active>span:hover, 
+.pagination>.active>a:focus, 
+.pagination>.active>span:focus {
+	background-color: #195EA8;
+}
+/* UI.Checkbox */
+[ng-style='stylebtn']{
+	border: 1px solid #ddd;
+	background-color: #fff;
+	font-size: 12px;
+	padding: 1px 4px;
+}
+/* Bootstrap Callout */
+.bs-callout {
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #eee;
+    border-left-width: 5px;
+    border-radius: 3px;
+}
+.bs-callout h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+.bs-callout p:last-child {
+    margin-bottom: 0;
+}
+.bs-callout code {
+    border-radius: 3px;
+}
+.bs-callout+.bs-callout {
+    margin-top: -5px;
+}
+.bs-callout-default {
+    border-left-color: #777;
+}
+.bs-callout-default h4 {
+    color: #777;
+}
+.bs-callout-primary {
+    border-left-color: #195EA8;
+}
+.bs-callout-primary h4 {
+    color: #195EA8;
+}
+.bs-callout-success {
+    border-left-color: #5cb85c;
+}
+.bs-callout-success h4 {
+    color: #5cb85c;
+}
+.bs-callout-danger {
+    border-left-color: #d9534f;
+}
+.bs-callout-danger h4 {
+    color: #d9534f;
+}
+.bs-callout-warning {
+    border-left-color: #f0ad4e;
+}
+.bs-callout-warning h4 {
+    color: #f0ad4e;
+}
+.bs-callout-info {
+    border-left-color: #5bc0de;
+}
+.bs-callout-info h4 {
+    color: #5bc0de;
+}

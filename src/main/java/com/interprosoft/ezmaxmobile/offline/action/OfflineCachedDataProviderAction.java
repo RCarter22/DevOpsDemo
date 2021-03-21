@@ -105,12 +105,12 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 			.where("LOC.STATUS IN (" + new SelectQuery().column("VALUE").from("SYNONYMDOMAIN").where("DOMAINID = 'LOCASSETSTATUS'").and("MAXVALUE IN ('OPERATING')") + ")");
 
 		// If mapping is enabled, get the XY coordinates
-		if (this.isEmmMapEnabled()) {
-			// The following line is an example of using link id between Maximo and GIS instead of using Maximo Lat / Long
-			// sqlCache.column("LOC.MAXGISID");
-			sqlCache.column("S.LATITUDEY", "S.LONGITUDEX")
-					.leftJoin("SERVICEADDRESS S", "LOC.SADDRESSCODE = S.ADDRESSCODE AND LOC.ORGID = S.ORGID");
-		}
+		// if (this.isEmmMapEnabled()) {
+		// 	// The following line is an example of using link id between Maximo and GIS instead of using Maximo Lat / Long
+		// 	// sqlCache.column("LOC.MAXGISID");
+		// 	sqlCache.column("S.LATITUDEY", "S.LONGITUDEX")
+		// 			.leftJoin("SERVICEADDRESS S", "LOC.SADDRESSCODE = S.ADDRESSCODE AND LOC.ORGID = S.ORGID");
+		// }
 		
 		cacheSqlResultJson(CACHE_KEY_LOCATIONS, sqlCache, CACHE_SIZE_LOCATIONS);
 	}
@@ -708,38 +708,38 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		cacheSqlResultJson(CACHE_KEY_INSPQUESTION, sqlCache, CACHE_SIZE_INSPQUESTION);
 	}
 	
-	public void cacheInspfield() throws Exception {
-		SelectQuery sqlCache = new SelectQuery()
-			.column("INSPFIELDID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM","REVISION","ORGID")
-			.column("DESCRIPTION","FIELDTYPE","SEQUENCE","REQUIRED","METERTYPE","METERNAME","DOCTYPE")
-			.from("INSPFIELD");
+	// public void cacheInspfield() throws Exception {
+	// 	SelectQuery sqlCache = new SelectQuery()
+	// 		.column("INSPFIELDID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM","REVISION","ORGID")
+	// 		.column("DESCRIPTION","FIELDTYPE","SEQUENCE","REQUIRED","METERTYPE","METERNAME","DOCTYPE")
+	// 		.from("INSPFIELD");
 		
-		if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){
-			sqlCache.column("VISIBLE");
-		}
-		cacheSqlResultJson(CACHE_KEY_INSPFIELD, sqlCache, CACHE_SIZE_INSPFIELD);
-	}
+	// 	if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){
+	// 		sqlCache.column("VISIBLE");
+	// 	}
+	// 	cacheSqlResultJson(CACHE_KEY_INSPFIELD, sqlCache, CACHE_SIZE_INSPFIELD);
+	// }
 	
-	public void cacheInspfieldoption() throws Exception {
-		SelectQuery sqlCache = new SelectQuery()
-			.column("INSPFIELDOPTIONID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM")
-			.column("REVISION","ORGID","SEQUENCE","DESCRIPTION")
-			.from("INSPFIELDOPTION");
+	// public void cacheInspfieldoption() throws Exception {
+	// 	SelectQuery sqlCache = new SelectQuery()
+	// 		.column("INSPFIELDOPTIONID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM")
+	// 		.column("REVISION","ORGID","SEQUENCE","DESCRIPTION")
+	// 		.from("INSPFIELDOPTION");
 			
-		cacheSqlResultJson(CACHE_KEY_INSPFIELDOPTION, sqlCache, CACHE_SIZE_INSPFIELDOPTION);		
-	}
-	public void cacheInspcascadeoption() throws Exception {
-		SelectQuery sqlCache = null;
-		if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){ 
-			sqlCache = new SelectQuery()
-			.column("INSPCASCADEOPTIONID","INSPCASCADEOPTIONNUM","INSPFORMNUM","REVISION","ORGID","SITEID")
-			.column("SRCQUESTION","TGTQUESTION","SRCFIELD","TGTFIELD","SRCTXTRESPONSE","VISIBLE","REQUIRED")
-			.from("INSPCASCADEOPTION");
+	// 	cacheSqlResultJson(CACHE_KEY_INSPFIELDOPTION, sqlCache, CACHE_SIZE_INSPFIELDOPTION);		
+	// }
+	// public void cacheInspcascadeoption() throws Exception {
+	// 	SelectQuery sqlCache = null;
+	// 	if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){ 
+	// 		sqlCache = new SelectQuery()
+	// 		.column("INSPCASCADEOPTIONID","INSPCASCADEOPTIONNUM","INSPFORMNUM","REVISION","ORGID","SITEID")
+	// 		.column("SRCQUESTION","TGTQUESTION","SRCFIELD","TGTFIELD","SRCTXTRESPONSE","VISIBLE","REQUIRED")
+	// 		.from("INSPCASCADEOPTION");
 			
-			cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION, sqlCache, CACHE_SIZE_INSPCASCADEOPTION);	
-		} else{
-			cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION);
-		}		
-	}
+	// 		cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION, sqlCache, CACHE_SIZE_INSPCASCADEOPTION);	
+	// 	} else{
+	// 		cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION);
+	// 	}		
+	// }
 	
 }

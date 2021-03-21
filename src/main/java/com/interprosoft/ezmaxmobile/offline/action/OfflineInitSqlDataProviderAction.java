@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.interprosoft.ezmaxmobile.MaximoHelper;
+import com.interprosoft.ezmaxmobile.common.pagination.Pagination;
 import com.interprosoft.ezmaxmobile.db.SelectQuery;
 import com.interprosoft.ezmaxmobile.offline.OfflineConstants;
 
@@ -377,11 +378,11 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.orderBy("SR.TICKETID");			
 
 			// If mapping is enabled, get the XY coordinates
-			if (this.isEmmMapEnabled()) {
-				sql
-					.column("TKSERVICEADDRESS.LATITUDEY", "TKSERVICEADDRESS.LONGITUDEX")
-					.leftJoin("TKSERVICEADDRESS", "SR.TICKETID = TKSERVICEADDRESS.TICKETID AND SR.CLASS = TKSERVICEADDRESS.CLASS");
-			}
+			// if (this.isEmmMapEnabled()) {
+			// 	sql
+			// 		.column("TKSERVICEADDRESS.LATITUDEY", "TKSERVICEADDRESS.LONGITUDEX")
+			// 		.leftJoin("TKSERVICEADDRESS", "SR.TICKETID = TKSERVICEADDRESS.TICKETID AND SR.CLASS = TKSERVICEADDRESS.CLASS");
+			// }
 
 			jsonObj = getSqlResultJson("SR", sql, pagination);
 
@@ -444,11 +445,11 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.orderBy("W.WORKORDERID");
 
 			// If mapping is enabled, get the XY coordinates
-			if (this.isEmmMapEnabled()) {
-				sql
-					.column("WOSERVICEADDRESS.LATITUDEY", "WOSERVICEADDRESS.LONGITUDEX")
-					.leftJoin("WOSERVICEADDRESS", "W.WONUM = WOSERVICEADDRESS.WONUM AND W.SITEID = WOSERVICEADDRESS.SITEID");
-			}
+			// if (this.isEmmMapEnabled()) {
+			// 	sql
+			// 		.column("WOSERVICEADDRESS.LATITUDEY", "WOSERVICEADDRESS.LONGITUDEX")
+			// 		.leftJoin("WOSERVICEADDRESS", "W.WONUM = WOSERVICEADDRESS.WONUM AND W.SITEID = WOSERVICEADDRESS.SITEID");
+			// }
 			
 			jsonObj = getSqlResultJson("WORKORDER", sql, pagination);
 
@@ -1700,13 +1701,13 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.and("A.SITEID = '" + this.user.getSiteId() + "'");
 
 			// If mapping is enabled, get the XY coordinates
-			if (this.isEmmMapEnabled()) {
-				// The following line is an example of using link id between Maximo and GIS instead of using Maximo Lat / Long
-				// sql.column("A.MAXGISID");
-				sql
-					.column("SERVICEADDRESS.LATITUDEY","SERVICEADDRESS.LONGITUDEX")
-					.leftJoin("SERVICEADDRESS", "A.SADDRESSCODE = SERVICEADDRESS.ADDRESSCODE AND A.ORGID = SERVICEADDRESS.ORGID");
-			}
+			// if (this.isEmmMapEnabled()) {
+			// 	// The following line is an example of using link id between Maximo and GIS instead of using Maximo Lat / Long
+			// 	// sql.column("A.MAXGISID");
+			// 	sql
+			// 		.column("SERVICEADDRESS.LATITUDEY","SERVICEADDRESS.LONGITUDEX")
+			// 		.leftJoin("SERVICEADDRESS", "A.SADDRESSCODE = SERVICEADDRESS.ADDRESSCODE AND A.ORGID = SERVICEADDRESS.ORGID");
+			// }
 			
 			jsonObj = getSqlResultJson("ASSET", sql, pagination);
 			// Insert PAGINATION

@@ -5,6 +5,7 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 
 <!DOCTYPE html>
 <html>
@@ -30,7 +31,7 @@
 <!-- 					</li> -->
 <!--                 </ul> -->
 				<div class="ui-btn-container">
-					<a class="ui-btn-b" href="<s:property value="currentAction"/>"><s:text name="global.cancel"/></a>
+					<a class="ui-btn-b" href="gotourl.action?currentAction=<e:forUriComponent value="${currentAction}" />"><s:text name="global.cancel"/></a>
 					<input data-esig="STATUS" class="ui-btn-a" type="submit" value="<s:text name="global.ok"/>">
 				</div>
 			</div>

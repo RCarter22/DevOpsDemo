@@ -16,7 +16,7 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title">Database Requests</h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -48,7 +48,7 @@
 				</li>
 			</ul>
 
-			<div class="ui-sidebar">
+			<div id="ACTIONS" class="ui-sidebar">
 				<p class="ui-section"><s:text name="global.actions"/></p>
 				<ul class="ui-listview ui-inset">
 					<li>

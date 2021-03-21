@@ -4,16 +4,31 @@
 
 	<groupId>com.interprosoft.ezmaxmobile</groupId>
 	<artifactId>ezmaxmobile-app</artifactId>
-	<version>5.2.1b-7.6</version>
+	<version>5.4.4-7.6.1</version>
 	<packaging>war</packaging>
-	<name>ezmaxmobile-app-52-76</name>
+	<name>ezmaxmobile-app-544-761</name>
 	<url>http://maven.apache.org</url>
 	
 	<properties>
+		<ezmaxmobile-core-version>5.4.4-7.6.1</ezmaxmobile-core-version>
+		<maximo-businessobjects-version>7.6.1</maximo-businessobjects-version>
+		<maximo-mbojars-version>7.6.1</maximo-mbojars-version>
+		<struts-version>2.5.17</struts-version>
 		<spring-version>4.3.13.RELEASE</spring-version>
+		<!-- For oracle 12.2 and above, use 2.0 -->
+		<oracle-version>2.0</oracle-version>
 	</properties>
 	
 	<repositories>
+		<repository>
+			<id>central</id>
+			<name>Central Repository</name>
+			<url>https://repo1.maven.org/maven2</url>
+			<layout>default</layout>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
 	    <repository>
 		    <id>repo</id>
 		    <releases>
@@ -30,25 +45,35 @@
 		<dependency>
 			<groupId>com.interprosoft.ezmaxmobile</groupId>
 			<artifactId>ezmaxmobile-core</artifactId>
-			<version>5.2.2-7.6-AEPFLEET</version>
+			<version>${ezmaxmobile-core-version}</version>
 			<exclusions>
                 <exclusion>
-                        <groupId>ibm.maximo</groupId>
-			<artifactId>businessobjects</artifactId>
+					<groupId>ibm.maximo</groupId>
+					<artifactId>businessobjects</artifactId>
                 </exclusion>
                 <exclusion>
-                        <groupId>emmcore.maximo</groupId>
-			<artifactId>mboejb</artifactId>
+					<groupId>emmcore.maximo</groupId>
+					<artifactId>mboejb</artifactId>
                 </exclusion>
                 <exclusion>
-                        <groupId>emmcore.maximo</groupId>
-			<artifactId>mboejbclient</artifactId>
+					<groupId>emmcore.maximo</groupId>
+					<artifactId>mboejbclient</artifactId>
                 </exclusion>
                 <exclusion>
-                        <groupId>emmcore.maximo</groupId>
-			<artifactId>mbojava</artifactId>
+					<groupId>emmcore.maximo</groupId>
+					<artifactId>mbojava</artifactId>
                 </exclusion>
         	</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.microsoft.graph</groupId>
+			<artifactId>microsoft-graph</artifactId>
+			<version>1.4.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.interprosoft.integrations.microsoft</groupId>
+			<artifactId>interprosoft-microsoft</artifactId>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-pool</groupId>
@@ -73,32 +98,57 @@
 		<dependency>
 			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-spring-plugin</artifactId>
-			<version>2.5.17</version>
+			<version>${struts-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-convention-plugin</artifactId>
-			<version>2.5.17</version>
+			<version>${struts-version}</version>
+		</dependency>
+		<!-- <dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-lang3</artifactId>
+		    <version>3.4</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<version>${spring-version}</version>
+		    <groupId>org.ow2.asm</groupId>
+		    <artifactId>asm</artifactId>
+		    <version>5.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-			<version>${spring-version}</version>
+		    <groupId>org.ow2.asm</groupId>
+		    <artifactId>asm-commons</artifactId>
+		    <version>5.1</version>
+		</dependency> -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-core</artifactId>
+		    <version>${spring-version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-			<version>${spring-version}</version>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-beans</artifactId>
+		    <version>${spring-version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-context</artifactId>
+		    <version>${spring-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
 			<version>${spring-version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-test</artifactId>
+		    <version>${spring-version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-web</artifactId>
+		    <version>${spring-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -108,11 +158,6 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-tx</artifactId>
-			<version>${spring-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-web</artifactId>
 			<version>${spring-version}</version>
 		</dependency>
 		<dependency>
@@ -133,8 +178,8 @@
 		<dependency>
 			<groupId>oracle</groupId>
 			<artifactId>oraclethin</artifactId>
-			<version>1.0</version>
-		</dependency>	
+			<version>${oracle-version}</version>
+		</dependency>
 		<dependency>
 			<groupId>ibm.db2</groupId>
 			<artifactId>db2jcc</artifactId>
@@ -145,25 +190,22 @@
 			<artifactId>db2jcc-lic</artifactId>
 			<version>9.7</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
 			<version>2.4</version>
 			<classifier>jdk15</classifier>
 		</dependency>
-		
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.1</version>
+    		<groupId>ch.hsr</groupId>
+    		<artifactId>geohash</artifactId>
+    		<version>1.3.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.ibm.json.java</groupId>
-			<artifactId>JSON4J</artifactId>
-			<version>2.1</version>
-		</dependency>	
-		
+		    <groupId>org.osgeo</groupId>
+		    <artifactId>proj4j</artifactId>
+		    <version>0.1.0</version>
+		</dependency>		
 		<dependency>
 			<groupId>jaxen</groupId>
 			<artifactId>jaxen</artifactId>
@@ -234,6 +276,17 @@
 			<version>2.0</version>
 		</dependency>
 		<dependency>
+			<groupId>ibm</groupId>
+			<artifactId>json4j</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<!-- Only Needed for Maximo 7.6.1 and up -->
+		<dependency>
+			<groupId>ibm</groupId>
+			<artifactId>rcl_ibmratl</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.2.1</version>
@@ -268,17 +321,28 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.8.7</version>
 		</dependency>
-		<!-- <dependency>
-			<groupId>com.ibm.json.java</groupId>
-			<artifactId>JSON4J</artifactId>
-			<version>2.1</version>
-		</dependency>	 -->
 		<dependency>
-			<groupId>oracle</groupId>
-			<artifactId>wlclient</artifactId>
-			<version>1.0</version>
-		</dependency>						
+		   <groupId>org.owasp.encoder</groupId>
+		   <artifactId>encoder</artifactId>
+		   <version>1.2.1</version>
+		</dependency>		
+		<dependency>
+		   <groupId>org.owasp.encoder</groupId>
+		   <artifactId>encoder-jsp</artifactId>
+		   <version>1.2.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-httpclient</groupId>
+			<artifactId>commons-httpclient</artifactId>
+			<version>3.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>1.10</version>
+		</dependency>
 	</dependencies>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -286,12 +350,6 @@
 				<artifactId>maven-jetty-plugin</artifactId>
 				<version>6.1.24</version>
 				<configuration>
-					<systemProperties>
-						<systemProperty>
-							<name>org.eclipse.jetty.server.Request.maxFormContentSize</name>
-							<value>1</value> <!-- or any other value -1 is for max -->
-						</systemProperty>
-					</systemProperties>
 					<contextPath>/ezmaxmobile</contextPath>
 					<connectors>
 						<connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
@@ -308,6 +366,73 @@
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<configuration>
+							<target if="maximo">
+								<property name="ezmaxmobile.war" value="${basedir}/target/ezmaxmobile.war"/>
+								<property name="maximo.original.ear" value="${basedir}/maximo.ear"/>
+								<property name="maximo.ear" value="${basedir}/target/maximoemm.ear"/>
+								<property name="maximo.appxmlfile" value="${basedir}/application.xml"/>
+								<property name="maximo.deploydir" value="${basedir}/target/default"/>
+								<property name="maximo.deploydir.temp" value="${maximo.deploydir}/temp"/>
+								
+								<mkdir dir="${maximo.deploydir}"/>
+								<mkdir dir="${maximo.deploydir.temp}"/>
+								
+								<unzip src="${maximo.original.ear}" dest="${maximo.deploydir.temp}/maximo">
+									<patternset>
+										<exclude name="META-INF/application.xml"/>
+										<exclude name="lib/api-dep.jar"/>
+									</patternset>
+								</unzip>
+								
+								<unzip src="${ezmaxmobile.war}" dest="${maximo.deploydir.temp}/ezmaxmobile">
+									<patternset>
+										<exclude name="WEB-INF/lib/businessobjects-*.jar"/>
+										<exclude name="WEB-INF/lib/icu4j-*.jar"/>
+										<exclude name="WEB-INF/lib/mboejb-*.jar"/>
+										<exclude name="WEB-INF/lib/mbojava-*.jar"/>
+										<exclude name="WEB-INF/lib/mboejbclient-*.jar"/>
+										<exclude name="WEB-INF/lib/json4j*.jar"/>
+										<exclude name="WEB-INF/lib/rcl*.jar"/>
+									</patternset>
+								</unzip>
+								<war destfile="${maximo.deploydir}/ezmaxmobile.war">
+									<fileset dir="${maximo.deploydir.temp}/ezmaxmobile"/>
+								</war>
+								<copy todir="${maximo.deploydir.temp}/maximo/lib" >
+									<fileset dir="${maximo.deploydir.temp}/ezmaxmobile/WEB-INF/lib/">
+										<include name="asm-5.2.jar"/>
+										<include name="asm-commons-5.2.jar"/>
+										<include name="asm-tree-5.2.jar"/>
+										<include name="cglib-nodep-2.1_3.jar"/>
+										<include name="commons-lang-2.4.jar"/>
+									</fileset>
+								</copy>
+								<delete dir="${maximo.deploydir.temp}/ezmaxmobile"/>
+
+								<copy file="${maximo.deploydir}/ezmaxmobile.war" todir="${maximo.deploydir.temp}/maximo" />
+								
+								<ear destfile="${maximo.ear}" appxml="${maximo.appxmlfile}"
+									manifest="${maximo.deploydir.temp}/maximo/META-INF/MANIFEST.MF" >
+									<fileset dir="${maximo.deploydir.temp}/maximo">
+										<include name="**/*.*"/>
+									</fileset>
+								</ear>
+								<delete dir="${maximo.deploydir.temp}"/>
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 		<finalName>ezmaxmobile</finalName>

@@ -29,7 +29,7 @@
 	<div class="ui-page">
 		<s:include value="../common/menu.jsp"/>		
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.util.confirm({title:'<s:text name="ezmaxmobile.startcenter"/>',message:'<s:text name="global.updatestartcenter"/>',yes:function(){window.location='update.action?id=<s:property value="id"/>'}});"><s:text name="global.update"/></a>
+			<a class="ui-btn-left" onclick="emm.util.confirm({title:'<s:text name="ezmaxmobile.startcenter"/>',message:'<s:text name="global.updatestartcenter"/>',yes:function(){window.location='update.action?id=<s:property value="id"/>'}});"><span class="emm-refresh"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.startcenter"/></h3>
 		</div>
 		<ul class="ui-navbar">
@@ -53,8 +53,19 @@
 				<li id="startCenterTemplatePlaceholder"></li>
 								
 			</ul>
-			<div class="ui-sidebar">
+			<div id="ACTIONS" class="ui-sidebar">
 				<ul class="ui-listview">
+					<s:if test="isEmmMapEnabled() and isEmmMapScEnabled()">
+						<li data-native="true" class="ui-divider ui-divider-b"><s:text name="global.map"/></li>
+						<li data-native="true">
+							<a id="mapButton" data-control="map" data-modules="">
+								<span class="emm-map-location"></span>
+								<h3><s:text name="global.openmap"/></h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+					</s:if>
+			
 					<li id="favoriteAppsTemplatePlaceholder"></li>
 					<li id="quickInsertTemplatePlaceholder"></li>
 				</ul>
@@ -64,17 +75,21 @@
 	
 	<script type="text/javascript">
 		var html = [], 
-			userApps = [];
+			userApps = [],
+			moduleIds = [];
 			
 		<s:iterator value="portlets">userApps.push({appName:'<s:property value="appName"/>',portletType:'<s:property value="portletType"/>',title:'<s:property value="title"/>',id:'<s:property value="id"/>',recordCount:'<s:property value="recordCount"/>'});</s:iterator>
-
+		
 		html[0] = emm.core.generateStartCenterHtml(userApps);
 		html[1] = emm.core.generateFavoriteAppsHtml(userApps);
 		html[2] = emm.core.generateQuickInsertHtml(userApps);
 		
 		$('#startCenterTemplatePlaceholder').replaceWith(html[0]);
 		$('#favoriteAppsTemplatePlaceholder').replaceWith(html[1]);
-		$('#quickInsertTemplatePlaceholder').replaceWith(html[2]);		
+		$('#quickInsertTemplatePlaceholder').replaceWith(html[2]);	
+
+		<s:iterator value="portlets"><s:if test="portletType eq 'RSCONFIG'">moduleIds.push('EMMSC_<s:property value="id"/>');</s:if></s:iterator>
+		$("#mapButton").attr("data-modules", JSON.stringify(moduleIds));
 	</script>
 </body>
 </html>

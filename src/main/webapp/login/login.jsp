@@ -17,35 +17,29 @@
 		<div class="ui-header">
 			<h3 class="ui-title">EZMaxMobile <s:text name="global.login"/></h3>
 		</div>
-		<div class="ui-content ui-content-narrow" style="margin-top:10px">
-			<img src="../images/logo.png" class="ui-content-image" width="151px" height="54px" style="display:block; margin:auto;"/>
-		</div>			
+		
 		<div class="ui-content ui-content-narrow">
 			<s:include value="../common/loginmessage.jsp"/>
-			<s:form id="myform" action="doLogin" method="post">
+			<s:form id="myform" action="doLogin" method="post" autocomplete="false">
 				<s:token />
 				<ul class="ui-listview">
 					<li class="ui-field">
 						<label><s:text name="global.username"/></label>
-						<input type="text" name="username" id="doLogin_username" placeholder="<s:text name="global.username"/>" value=""/>
+						<input type="text" name="username" id="doLogin_username" placeholder="<s:text name="global.username"/>" autocapitalize="none" value=""/>
 					</li>
 					<li class="ui-field">
 						<label><s:text name="global.password"/></label>
-						<input type="password" name="password" id="doLogin_password" placeholder="<s:text name="global.password"/>" value=""/>
+						<input type="password" name="password" id="doLogin_password" placeholder="<s:text name="global.password"/>" value="" autocomplete="false" />
 					</li>
 				</ul>
-				<ul class="ui-listview">
+				<ul class="ui-listview" data-touchid>
 					<li class="ui-field">
-						<label><s:text name="global.rememberme"/></label>
-						<input type="checkbox" id="rememberme"/>
-					</li>				
-					<li class="ui-field" data-touchid>
 						<label><s:text name="global.usetouchid"/></label>
 						<input type="checkbox" id="touchid"/>
 					</li>			
 					<li id="logintouchid" data-visible="false">
 						<a onclick="emm.core.fingerPrintLogin();">
-							<img src="../images/touchid.png"/>
+							<span class="emm-touchid"></span>
 							<h3><s:text name="global.logintouchid"/></h3>
 						</a>
 					</li>					
@@ -53,7 +47,7 @@
 				<div class="ui-btn-container">
 					<input class="ui-btn-a" type="button" name="Submit" onclick="emm.core.mainLogin()" value="<s:text name="global.login"/>" />					
 				</div>
-				<%-- <s:include value="../common/languages.jsp"/> --%>
+<%-- 				<s:include value="../common/languages.jsp"/> --%>
 			</s:form>
 		</div>
 		

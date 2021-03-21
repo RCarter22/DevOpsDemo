@@ -6,6 +6,7 @@ package com.interprosoft.ezmaxmobile.login.action;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,57 +41,42 @@ import com.interprosoft.ezmaxmobile.user.service.UserServiceImpl;
 @Component
 @Scope("prototype")
 @Namespace("/login")
-@ResultPath(value="/")
-@ParentPackage(value="mydefault")
+@ResultPath(value = "/")
+@ParentPackage(value = "mydefault")
 public final class LoginAction extends BaseAction {
 
 	private static final long serialVersionUID = 1L;
 
 	@Autowired
 	private LoginService loginService;
-	
+
 	private String username;
 
 	private String password;
-	
-	private String licenseInfo; 
-	
+
+	private String licenseInfo;
+
 	private String deviceType;
-	
+
 	protected InputStream jsonResult;
 
-	@Action(value="toLogin",
-			results={
-				@Result(name="success", location="login.jsp")
-			}
-		)
+	@Action(value = "toLogin", results = { @Result(name = "success", location = "login.jsp") })
 	public String toLogin() {
 		LicenseControler lc = new LicenseControler();
 		licenseInfo = lc.getTrialLicenseInfo();
 		return SUCCESS;
 	}
-	
-	@Action(value="locale",
-			results={
-				@Result(name="success", location="login.jsp")
-			}
-		)
+
+	@Action(value = "locale", results = { @Result(name = "success", location = "login.jsp") })
 	public String toLocale() {
 		return SUCCESS;
 	}
 
-	@Action(value="doLogin",
-			results={
-				@Result(name="success", location="/main.action", type="redirect"),
-				@Result(name="selfservice", location="../viewsr/selfsrstart.action", type="redirect"),
-				@Result(name="error", location="toLogin.action", type="redirect"),
-				@Result(name="invalid.token", location="toLogin.action", type="redirect")
-			},
-			interceptorRefs={
-				@InterceptorRef("token"),
-				@InterceptorRef("basicStack")
-			}			
-		)
+	@Action(value = "doLogin", results = { @Result(name = "success", location = "/main.action", type = "redirect"),
+			@Result(name = "selfservice", location = "../viewsr/selfsrstart.action", type = "redirect"),
+			@Result(name = "error", location = "toLogin.action", type = "redirect"),
+			@Result(name = "invalid.token", location = "toLogin.action", type = "redirect") }, interceptorRefs = {
+					@InterceptorRef("token"), @InterceptorRef("basicStack") })
 	public String doLogin() {
 		try {
 			if (username.equals("") || password.equals("")) {
@@ -99,16 +85,39 @@ public final class LoginAction extends BaseAction {
 			}
 			User user = loginService.login(username, password);
 
-			//extra user fields for offline usage 
-			Map<Object, Object> extraFields = new HashMap<Object,Object>();				
+			// extra user fields for offline usage
+			Map<Object, Object> extraFields = new HashMap<Object, Object>();
 
-			try{
-				//set the user's REPAIRFACILITY value so it can be referenced offline
+			try {
+				// set the user's REPAIRFACILITY value so it can be referenced offline
 				extraFields.put("REPAIRFACILITY", user.getSession().getProfile().getDefaultRepairFacility());
 				extraFields.put("DEFSTOREROOM", user.getSession().getProfile().getDefaultStoreroom());
 
-				user.setExtFields(extraFields);	
-				user.buildUserInfo();			
+				user.setExtFields(extraFields);
+				try {
+					user.buildUserInfo();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InstantiationException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				
 			}catch (MXException e) {
 				e.printStackTrace();

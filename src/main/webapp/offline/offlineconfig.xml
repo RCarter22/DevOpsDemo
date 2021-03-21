@@ -1,71 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- 
-	#######################################################################################################################
-	1. Replace the existing offlineconfig.xml with this file - offlineconfig.bak (rename back to offlineconfig.xml)
-	2. Set default-lazy-init="false" in spring-emm.xml
-	3. Set default-lazy-init="false" in spring-schedule.xml
-	4. Add a new property of ezmaxmobile.offline.sqlite.enabled=false in the mobile.properties file
-	#######################################################################################################################
-!-->
-
 <EZMAXMOBILE_OFFLINE_PROPERTIES synctime="">
 
 	<ENTITY_DEFS>
-		<ENTITY name="ASSET">
-			<INDEXES>			
-				<INDEX name="IDX_AST_1">ASSETNUM, SITEID</INDEX>
-				<INDEX name="IDX_AST_2">ASSETNUM, SITEID, PARENT, LOCATION</INDEX>
-				<INDEX name="IDX_AST_3">ASSETNUM</INDEX>
-				<INDEX name="IDX_AST_4">LOCATION,SITEID</INDEX>
-			</INDEXES>
-			<COLUMNS>
-				<COLUMN autokey="Y" autokeyprefix="LOCAL" uniquekey="Y">ASSETUID</COLUMN>
-				<COLUMN autokey="Y">ASSETID</COLUMN>
-				<COLUMN displaykey="Y" autokey="Y" autokeyprefix="OFFLN">ASSETNUM</COLUMN>
-				<COLUMN>PARENT</COLUMN>
-				<COLUMN>CHILDREN</COLUMN>				
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>SERIALNUM</COLUMN>
-				<COLUMN>VENDOR</COLUMN>
-				<COLUMN>MANUFACTURER</COLUMN>
-				<COLUMN>FAILURECODE</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>ISRUNNING</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>PLUSTMODEL</COLUMN>
-				<COLUMN>DEFAULTREPFAC</COLUMN>
-				<COLUMN>PLUSTYEAR</COLUMN>
-				<COLUMN>AEPMAKE</COLUMN>
-				<COLUMN>LICENSENUM</COLUMN>
-				<COLUMN>AEPFLEETSUPERVISOR</COLUMN>
-				<!-- These columns do not exist in the Delta function because of classfication -->
-				<COLUMN>ASSETTYPE</COLUMN>
-				<COLUMN>GROUPNAME</COLUMN>
-				<COLUMN>PURCHASEPRICE</COLUMN>
-				<COLUMN>STATUSDATE</COLUMN>
-				<COLUMN>INSTALLDATE</COLUMN>
-				<COLUMN>TOTDOWNTIME</COLUMN>
-				<COLUMN>CLASSSTRUCTUREID</COLUMN>
-				<COLUMN>LONGDESCRIPTION</COLUMN>
-				<COLUMN>ITEMNUM</COLUMN>
-				<COLUMN>AEPASSETDEPT</COLUMN>
-				<COLUMN>CUSTOMER</COLUMN>
-				<COLUMN>CHANGEDATE</COLUMN>
-				<COLUMN>NEWSITE</COLUMN>
-				<COLUMN>NEWLOCATION</COLUMN>	
-				<COLUMN>PLUSPCUSTOMER</COLUMN>
-				<COLUMN>ALIAS</COLUMN>								
-			</COLUMNS>
-			<INIT_ACTION>offline/getMyAssetsJson.action</INIT_ACTION>
-<!-- 			<DELTA_ACTION>offline/getDeltaMyAssetsJson.action</DELTA_ACTION>
- -->			<SYNC_ACTIONS transentityname="ASSET" transentitykey="ASSETUID">			
-				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editAsset"/>
-				<ACTION name="EMM_FILE_UPLOAD"/>
-			</SYNC_ACTIONS>
-		</ENTITY>
 		<ENTITY name="WORKORDER">
 			<INDEXES>			
 				<INDEX name="IDX_WO_1">WORKORDERID</INDEX>
@@ -76,303 +13,200 @@
 			<COLUMNS>
 				<COLUMN autokey="Y" autokeyprefix="LOCAL" parentkeycol="PARENTID" uniquekey="Y">WORKORDERID</COLUMN>
 				<COLUMN autokey="Y" parentkeycol="PARENT" autokeyprefix="OFFLN">WONUM</COLUMN>
-				<COLUMN>ORIGRECORDID</COLUMN>
-				<COLUMN>CLASSSTRUCTUREID</COLUMN>
-				<COLUMN>PARENT</COLUMN>
-				<COLUMN>PARENTID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>ALIAS</COLUMN>
-				<COLUMN>PERSONGROUP</COLUMN>
-				<COLUMN>CREWID</COLUMN>
-				<COLUMN>SUPERVISOR</COLUMN>
-				<COLUMN>LEAD</COLUMN>
-				<COLUMN>PHONE</COLUMN>
-				<COLUMN>TASKID</COLUMN>
-				<COLUMN>REPORTEDBY</COLUMN>
-				<COLUMN>WOPRIORITY</COLUMN>
-				<COLUMN>REPORTDATE</COLUMN>
-				<COLUMN>SCHEDSTART</COLUMN>
-				<COLUMN>SCHEDFINISH</COLUMN>
-				<COLUMN>STATUSDATE</COLUMN>
-				<COLUMN>ESTDUR</COLUMN>
-				<COLUMN>WORKTYPE</COLUMN>
-				<COLUMN>FAILURECODE</COLUMN>
-				<COLUMN>PROBLEMCODE</COLUMN>
-				<COLUMN>ISTASK</COLUMN>
-				<COLUMN>ORIGRECORDCLASS</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>TARGSTARTDATE</COLUMN>
-				<COLUMN>TARGCOMPDATE</COLUMN>
-				<COLUMN>ACTSTART</COLUMN>
-				<COLUMN>ACTFINISH</COLUMN>
-				<COLUMN>OWNER</COLUMN>
-				<COLUMN>OWNERGROUP</COLUMN>
-				<COLUMN>GLACCOUNT</COLUMN>
-				<COLUMN>OBSERVATION</COLUMN>
-				<COLUMN>MEASUREMENTVALUE</COLUMN>
-				<COLUMN>LONGDESCRIPTION</COLUMN>
-				<COLUMN>WOCLASS</COLUMN>
-				<COLUMN>HISTORYFLAG</COLUMN>
-				<COLUMN>NEWSITE</COLUMN>
-				<COLUMN>NEWLOCATION</COLUMN>
-				<COLUMN>PLUSPCUSTOMER</COLUMN>
-				<COLUMN>PLUSTCOMP</COLUMN>
-				<COLUMN>PLUSTACCOMP</COLUMN>
-				<COLUMN>PLUSTREASON</COLUMN>
-				<COLUMN>AEPUSINGDEPARTMENT</COLUMN>
-				<COLUMN>REPAIRFACILITY</COLUMN>
-				<COLUMN>CHANGEDATE</COLUMN>
-				<COLUMN>SCHEDSTARTFROM</COLUMN>
-				<COLUMN>SCHEDSTARTTO</COLUMN>
-				<COLUMN>PLUSTPRIENTERED</COLUMN>
+				<COLUMN sameasentity="WORKORDER" sameascol="WONUM">ORIGRECORDID</COLUMN>
+				<!-- ORIGRECORDID column can be 1 to many.  If from SR, this column will store TICKETID info. -->
+				<COLUMN sameasentity="SR" sameascol="TICKETID">ORIGRECORDID</COLUMN>
 			</COLUMNS>
 			<INIT_ACTION>
-				<ACTION>offline/getMyWorkOrderListJson.action</ACTION>
-				<ACTION>offline/getMyTaskWorkOrderListJson.action</ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyWorkOrderListJson"/>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyTaskWorkOrderListJson"/>
 			</INIT_ACTION>
- 			<DELTA_ACTION>
- 				<ACTION>offline/getDeltaMyWorkOrderListJson.action</ACTION>
- 				<ACTION>offline/getDeltaMyTaskWorkOrderListJson.action</ACTION>
-			</DELTA_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addWorkOrder"/>
-				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editWorkOrder"/>
-				<ACTION name="INSERT_TASK" beanname="OfflineDataSyncAction" methodname="addTaskWorkOrder"/>
-				<ACTION name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="updateWorkOrderStatus"/>
-				<ACTION name="UPDATE_TASK" beanname="OfflineDataSyncAction" methodname="updateWorkOrderTask"/>
-				<ACTION name="UPDATE_TASK_STATUS" beanname="OfflineDataSyncAction" methodname="updateWorkOrderStatus"/>
-				<ACTION name="COMPLETE" beanname="OfflineDataSyncAction" methodname="updateWorkOrderStatus"/>				
-				<ACTION name="EMM_FILE_UPLOAD"/>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyWorkOrderListJson"/> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyTaskWorkOrderListJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addWorkOrder"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editWorkOrder"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT_TASK" beanname="OfflineDataSyncAction" methodname="addTaskWorkOrder"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="updateWorkOrderStatus"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="UPDATE_TASK" beanname="OfflineDataSyncAction" methodname="updateWorkOrderTask"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="UPDATE_TASK_STATUS" beanname="OfflineDataSyncAction" methodname="updateWorkOrderStatus"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EMM_FILE_UPLOAD"/>
 			</SYNC_ACTIONS>
 		</ENTITY>
 		<ENTITY name="LABTRANS">
-			<INDEXES>			
+			<INDEXES>
 				<INDEX name="IDX_LT_1">WONUM, SITEID, LABORCODE</INDEX>
 				<INDEX name="IDX_LT_2">WONUM, SITEID, LABORCODE, TIMERSTATUS</INDEX>
+				<INDEX name="IDX_SRLT_1">TICKETUID, SITEID, LABORCODE</INDEX>
+				<INDEX name="IDX_SRLT_2">TICKETUID, SITEID, LABORCODE, TIMERSTATUS</INDEX>
 			</INDEXES>
 			<COLUMNS>
-				<COLUMN displaykey="Y" uniquekey="Y" autokey="Y" autokeyprefix="LT">LABTRANSID</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>TASKID</COLUMN>
-				<COLUMN>ISTASK</COLUMN>
-				<COLUMN>LABORCODE</COLUMN>
-				<COLUMN>CRAFT</COLUMN>
-				<COLUMN>PREMIUMPAYCODES</COLUMN>
-				<COLUMN>REGULARHRS</COLUMN>
-				<COLUMN>PREMIUMPAYHOURS</COLUMN>
-				<COLUMN>STARTDATE</COLUMN>
-				<COLUMN>STARTTIME</COLUMN>
-				<COLUMN>FINISHDATE</COLUMN>
-				<COLUMN>FINISHTIME</COLUMN>
-				<COLUMN>TIMERSTATUS</COLUMN>
-				<COLUMN>TRANSTYPE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>TICKETUID</COLUMN>
-				<COLUMN>TICKETID</COLUMN>
-				<COLUMN>TICKETCLASS</COLUMN>
-				<COLUMN>GENAPPRSERVRECEIPT</COLUMN>
-				<COLUMN>SKILLLEVEL</COLUMN>
-				<COLUMN>PAYRATE</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>	
-				<COLUMN>GLDEBITACCT</COLUMN>
-				<COLUMN>GLCREDITACCT</COLUMN>
-				<COLUMN>STARTDATEFROM</COLUMN>
-				<COLUMN>STARTDATETO</COLUMN>			
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="LT">LABTRANSID</COLUMN>
 			</COLUMNS>
 			<INIT_ACTION>
-				<ACTION>offline/getMyLabTransJson.action</ACTION>
-				<ACTION>offline/getMyTaskLabTransJson.action</ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyLabTransJson"/>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyTaskLabTransJson"/>
 			</INIT_ACTION>
-			<DELTA_ACTION>
-				<ACTION>offline/getDeltaMyLabTransJson.action</ACTION>
-				<ACTION>offline/getDeltaMyTaskLabTransJson.action</ACTION>
-			</DELTA_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addLabTrans"/>
-				<ACTION name="START_TIMER" beanname="OfflineDataSyncAction" methodname="startTimer"/>
-				<ACTION name="STOP_TIMER" beanname="OfflineDataSyncAction" methodname="stopTimer"/>
-				<ACTION name="APPROVE" beanname="OfflineDataSyncAction" methodname="approveLabTrans"/>	
-				<ACTION name="INSERTLR"  beanname="OfflineDataSyncAction" methodname="addLabRep"/>
-				<ACTION name="EDITLABREP"  beanname="OfflineDataSyncAction" methodname="editLabRep"/>			
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addLabTrans"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="START_TIMER" beanname="OfflineDataSyncAction" methodname="startTimer"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="STOP_TIMER" beanname="OfflineDataSyncAction" methodname="stopTimer"/>
+				<ACTION transentityname="LABTRANS" transentitykey="LABTRANSID" name="INSERTLR"  beanname="OfflineDataSyncAction" methodname="addLabRep"/>
+				<ACTION transentityname="SR" transentitykey="TICKETUID" name="INSERTSR" beanname="OfflineDataSyncAction" methodname="addSRLabTrans"/>
 			</SYNC_ACTIONS>
 		</ENTITY>	
-		<ENTITY name="FAILUREREPORT">
-	       <INDEXES>                                        
-	          <INDEX name="IDX_FR_1">WORKORDERID</INDEX>
-	       </INDEXES>        
-	       <COLUMNS>
-	         <COLUMN uniquekey="Y">WORKORDERID</COLUMN>
-	         <COLUMN>WONUM</COLUMN>
-	         <COLUMN>FAILURECODE</COLUMN>
-	         <COLUMN>PROBLEMCODE</COLUMN>
-	         <COLUMN>CAUSECODE</COLUMN>
-	         <COLUMN>REMEDYCODE</COLUMN>                                                 
-	         <COLUMN>SITEID</COLUMN>
-	         <COLUMN>ORGID</COLUMN>                                                
-	       </COLUMNS>
-	       <INIT_ACTION>offline/getMyFailureRptListJson.action</INIT_ACTION>
-	       <DELTA_ACTION>offline/getDeltaMyFailureRptListJson.action</DELTA_ACTION>
-	       <SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-	             <ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editFailureReport"/>
-	       </SYNC_ACTIONS>
-       </ENTITY>           
-
-		<ENTITY name="MATUSETRANS">
-			<INDEXES>			
-				<INDEX name="IDX_MT_1">WONUM, SITEID</INDEX>
-			</INDEXES>
-			<COLUMNS>
-				<COLUMN displaykey="Y" uniquekey="Y" autokey="Y" autokeyprefix="MT">MATUSETRANSID</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>TASKID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>LINETYPE</COLUMN>
-				<COLUMN>ITEMNUM</COLUMN>
-				<COLUMN>QUANTITY</COLUMN>
-				<COLUMN>UNITCOST</COLUMN>
-				<COLUMN>TRANSDATE</COLUMN>
-				<COLUMN>ISSUETYPE</COLUMN>
-				<COLUMN>ISSUETO</COLUMN>
-				<COLUMN>BINNUM</COLUMN>
-				<COLUMN>LOTNUM</COLUMN>
-				<COLUMN>STORELOC</COLUMN>
-				<COLUMN>CURBAL</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>ROTASSETNUM</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getMyMatUseTransJson.action</INIT_ACTION>
-			<DELTA_ACTION>offline/getDeltaMyMatUseTransJson.action</DELTA_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addMatUseTrans"/>
-			</SYNC_ACTIONS>
-		</ENTITY>
-	<!-- 	<ENTITY name="TOOLTRANS">
+		<ENTITY name="TOOLTRANS">
 			<INDEXES>			
 				<INDEX name="IDX_TT_1">WONUM, SITEID</INDEX>
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="TT">TOOLTRANSID</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>ITEMNUM</COLUMN>
-				<COLUMN>TOOLRATE</COLUMN>
-				<COLUMN>LINECOST</COLUMN>
-				<COLUMN>ITEMSETID</COLUMN>
-				<COLUMN>TOOLQTY</COLUMN>
-				<COLUMN>TOOLHRS</COLUMN>
-				<COLUMN>TRANSDATE</COLUMN>
-				<COLUMN>ENTEREDDATE</COLUMN>
-				<COLUMN>ENTERBY</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
 			<INIT_ACTION>
-				<ACTION>offline/getMyToolTransJson.action</ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyToolTransJson"/>	
 			</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addToolTrans"/>	
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addToolTrans"/>	
 			</SYNC_ACTIONS>
-		</ENTITY>	 -->
+		</ENTITY>	
+		<ENTITY name="WPLABOR">
+			<INDEXES>
+				<INDEX name="IDX_WPL_1">WPLABORID</INDEX>
+			</INDEXES>  
+			<COLUMNS>
+				<COLUMN autokey="Y" uniquekey="Y" autokeyprefix="WPL">WPLABORUID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyWPLaborJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addWPLabor"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="UPDATE" beanname="OfflineDataSyncAction" methodname="editWPLabor"/>
+			</SYNC_ACTIONS>
+		</ENTITY>		
+		<ENTITY name="WPMATERIAL">
+			<INDEXES>
+				<INDEX name="IDX_WPM_1">WPITEMID</INDEX>
+			</INDEXES>  
+			<COLUMNS>
+				<COLUMN autokeyprefix="LOCAL" autokey="Y" uniquekey="Y">WPITEMID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyWPMaterialJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addWPMaterial"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="UPDATE" beanname="OfflineDataSyncAction" methodname="editWPMaterial"/>
+			</SYNC_ACTIONS>
+		</ENTITY>		
+		<ENTITY name="MATUSETRANS">
+			<INDEXES>			
+				<INDEX name="IDX_MT_1">WONUM, SITEID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="MT">MATUSETRANSID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyMatUseTransJson"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyMatUseTransJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addMatUseTrans"/>
+				<ACTION transentityname="MATUSETRANS" transentitykey="MATUSETRANSID" name="INSERTISSUE" beanname="OfflineDataSyncAction" methodname="addMatUseTransIssue"/>
+			</SYNC_ACTIONS>
+		</ENTITY>
+		<ENTITY name="MATRECTRANS">
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="MR">MATRECTRANSID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyMatRecTransJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="MATRECTRANS" transentitykey="MATRECTRANSID" name="INSERTTRANSFERIN" beanname="OfflineDataSyncAction" methodname="addMatRecTransTransferIn"/>
+				<ACTION transentityname="MATRECTRANS" transentitykey="MATRECTRANSID" name="INSERTTRANSFEROUT" beanname="OfflineDataSyncAction" methodname="addMatRecTransTransferOut"/>
+			</SYNC_ACTIONS>
+		</ENTITY>
 		<ENTITY name="WORKLOG">
 			<INDEXES>			
 				<INDEX name="IDX_WL_1">WONUM, SITEID</INDEX>
+				<INDEX name="IDX_SRWL_1">TICKETUID, SITEID</INDEX>
 			</INDEXES>
 			<COLUMNS>
-				<COLUMN displaykey="Y" uniquekey="Y" autokey="Y" autokeyprefix="WL">WORKLOGID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>RECORDKEY</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>LONGDESCRIPTION</COLUMN>
-				<COLUMN>CLASS</COLUMN>
-				<COLUMN>CREATEBY</COLUMN>
-				<COLUMN>LOGTYPE</COLUMN>
-				<COLUMN>CREATEDATE</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="WL">WORKLOGID</COLUMN>
+<!-- 				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="SRWL">WORKLOGID</COLUMN> -->
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyWorkLogListJson.action</INIT_ACTION>
-			<DELTA_ACTION>offline/getDeltaMyWorkLogListJson.action</DELTA_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addWorkLog"/>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyWorkLogListJson"/>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMySRWorkLogListJson"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyWorkLogListJson"/> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMySRWorkLogListJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addWorkLog"/>
+				<ACTION transentityname="SR" transentitykey="TICKETUID" name="INSERTSR" beanname="OfflineDataSyncAction" methodname="addSRWorkLog"/>
 			</SYNC_ACTIONS>
-		</ENTITY>		
-		
-		<!-- <ENTITY name="MULTIASSETLOCCI">
+		</ENTITY>
+		<ENTITY name="FAILUREREPORT">
+			<INDEXES>			
+				<INDEX name="IDX_FR_1">WORKORDERID</INDEX>
+			</INDEXES>	
+			<COLUMNS>
+				<COLUMN uniquekey="Y">WORKORDERID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyFailureRptListJson"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyFailureRptListJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editFailureReport"/>
+			</SYNC_ACTIONS>
+		</ENTITY>	
+		<ENTITY name="MULTIASSETLOCCI">
 			<INDEXES>			
 				<INDEX name="IDX_MULTI_1">WORKORDERID</INDEX>
 			</INDEXES>
 			<COLUMNS>
-				<COLUMN displaykey="Y" uniquekey="Y">MULTIID</COLUMN>
-				<COLUMN>SEQUENCE</COLUMN>
-				<COLUMN>RECORDKEY</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ROUTE</COLUMN>
-				<COLUMN>ROUTESTOP</COLUMN>
-				<COLUMN>TARGETDESC</COLUMN>
-				<COLUMN>COMMENTS</COLUMN>
-				<COLUMN>PROGRESS</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="MA">MULTIID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyMultiAssetLocListJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editMultiAssetLocCi"/>
-				<ACTION name="EDIT_PRG" beanname="OfflineDataSyncAction" methodname="editMultiProgress"/>			
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyMultiAssetLocListJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addMultiAssetLocCi"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editMultiAssetLocCi"/>
+				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EDIT_PRG" beanname="OfflineDataSyncAction" methodname="editMultiProgress"/>			
 			</SYNC_ACTIONS>
-		</ENTITY>	-->	
+		</ENTITY>		
 		<ENTITY name="SR">
 			<INDEXES>
 				<INDEX name="IDX_SR_1">TICKETUID</INDEX>
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN autokey="Y" autokeyprefix="LOCAL" uniquekey="Y">TICKETUID</COLUMN>
-				<COLUMN displaykey="Y" autokey="Y" autokeyprefix="OFFLN">TICKETID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>LONGDESCRIPTION</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>AFFECTEDPERSON</COLUMN>
-				<COLUMN>REPORTEDEMAIL</COLUMN>
-				<COLUMN>REPORTEDPHONE</COLUMN>
-				<COLUMN>REPORTEDBY</COLUMN>
-				<COLUMN>REPORTDATE</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>STATUSDATE</COLUMN>
-				<COLUMN>REPORTEDPRIORITY</COLUMN>
-				<COLUMN>FAILURECODE</COLUMN>
-				<COLUMN>PROBLEMCODE</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>OWNER</COLUMN>
-				<COLUMN>OWNERGROUP</COLUMN>
-				<COLUMN>ASSETSITEID</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>GLACCOUNT</COLUMN>
+				<COLUMN autokey="Y" autokeyprefix="SRN">TICKETID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMySRListJson.action</INIT_ACTION>
-			<DELTA_ACTION>offline/getDeltaMySRListJson.action</DELTA_ACTION>
-			<SYNC_ACTIONS transentityname="SR" transentitykey="TICKETUID">
-				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editSR"/>
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addSR"/>
-				<ACTION name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="updateSRStatus"/>
-				<ACTION name="EMM_FILE_UPLOAD"/>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMySRListJson"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMySRListJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>
+				<ACTION transentityname="SR" transentitykey="TICKETUID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editSR"/>
+				<ACTION transentityname="SR" transentitykey="TICKETUID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addSR"/>
+				<ACTION transentityname="SR" transentitykey="TICKETUID" name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="updateSRStatus"/>
+				<ACTION transentityname="SR" transentitykey="TICKETUID" name="EMM_FILE_UPLOAD"/>
 			</SYNC_ACTIONS>
-		</ENTITY> 
+		</ENTITY>
         <ENTITY name="INVENTORY">
 			<INDEXES>
 				<INDEX name="IDX_INV_1">ITEMNUM, SITEID</INDEX>
@@ -381,27 +215,16 @@
 				<INDEX name="IDX_INV_4">SITEID</INDEX>
 			</INDEXES>
 			<COLUMNS>
-				<COLUMN displaykey="Y" uniquekey="Y">INVENTORYID</COLUMN>
-                <COLUMN>ITEMNUM</COLUMN>
-                <COLUMN>ITEMSETID</COLUMN>
-                <COLUMN>LOCATION</COLUMN>
-                <COLUMN>DESCRIPTION</COLUMN>
-                <COLUMN>CATEGORY</COLUMN>
-                <COLUMN>MANUFACTURER</COLUMN>
-                <COLUMN>MODELNUM</COLUMN>
-                <COLUMN>SITEID</COLUMN>
-                <COLUMN>STATUS</COLUMN>
-                <COLUMN>STATUSDATE</COLUMN>
-                <COLUMN>BINNUM</COLUMN>
-                <COLUMN>ISSUEUNIT</COLUMN>
-                <COLUMN>ISSUEYTD</COLUMN>
-                <COLUMN>ISSUE1YRAGO</COLUMN>
-                <COLUMN>LASTISSUEDATE</COLUMN>
+				<COLUMN uniquekey="Y">INVENTORYID</COLUMN>
             </COLUMNS>
-			<INIT_ACTION>offline/getAllInventoryJson.action</INIT_ACTION>
-			<DELTA_ACTION>offline/getDeltaInventoryListJson.action</DELTA_ACTION>
-			<SYNC_ACTIONS transentityname="INVENTORY" transentitykey="INVENTORYID">
-				<ACTION name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="updateInventoryStatus"/>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAllInventoryJson"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaInventoryListJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>
+				<ACTION transentityname="INVENTORY" transentitykey="INVENTORYID" name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="updateInventoryStatus"/>
 			</SYNC_ACTIONS>
 		</ENTITY>			
 		<ENTITY name="INVBALANCES">
@@ -414,142 +237,71 @@
 			</INDEXES>  
 			<COLUMNS>
 				<COLUMN uniquekey="Y">INVBALANCESID</COLUMN>
-				<COLUMN displaykey="Y">ITEMNUM</COLUMN>
-				<COLUMN>ITEMSETID</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>LOTTYPE</COLUMN>
-				<COLUMN>ITEMTYPE</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>BINNUM</COLUMN>
-				<COLUMN>LOTNUM</COLUMN>
-				<COLUMN>CURBAL</COLUMN>
-				<COLUMN>PHYSCNT</COLUMN>
-				<COLUMN>PHYSCNTDATE</COLUMN>
-				<COLUMN>RECONCILED</COLUMN>
-				<COLUMN>ROTATING</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getInvBalancesJson.action</INIT_ACTION>
-			<DELTA_ACTION>offline/getDeltaInvBalancesJson.action</DELTA_ACTION>
-			<SYNC_ACTIONS transentityname="INVBALANCES" transentitykey="INVBALANCESID">
-				<ACTION name="UPDATE_PHYSCNT" beanname="OfflineDataSyncAction" methodname="adjustPhysicalCount"/>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getInvBalancesJson"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaInvBalancesJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>
+				<ACTION transentityname="INVBALANCES" transentitykey="INVBALANCESID" name="UPDATE_PHYSCNT" beanname="OfflineDataSyncAction" methodname="adjustPhysicalCount"/>
 			</SYNC_ACTIONS>
-		</ENTITY>	
-		
+		</ENTITY>
+		<ENTITY name="ASSET">
+			<INDEXES>			
+				<INDEX name="IDX_AST_1">ASSETNUM, SITEID</INDEX>
+				<INDEX name="IDX_AST_2">ASSETNUM, SITEID, PARENT, LOCATION</INDEX>
+				<INDEX name="IDX_AST_3">ASSETNUM</INDEX>
+				<INDEX name="IDX_AST_4">LOCATION,SITEID</INDEX>
+				<INDEX name="IDX_AST_5">SITEID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN autokey="Y" autokeyprefix="LOCAL" uniquekey="Y">ASSETUID</COLUMN>
+				<COLUMN autokey="Y" autokeyprefix="TMPAST">ASSETID</COLUMN>
+				<COLUMN autokey="Y" autokeyprefix="ASTN">ASSETNUM</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyAssetsJson"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyAssetsJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+			<SYNC_ACTIONS>	
+				<ACTION transentityname="ASSET" transentitykey="ASSETUID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editAsset"/>
+				<ACTION transentityname="ASSET" transentitykey="ASSETUID" name="EMM_FILE_UPLOAD"/>
+				<ACTION transentityname="ASSET" transentitykey="ASSETUID" name="MOVEASSET" beanname="OfflineDataSyncAction" methodname="moveAsset"/>
+			</SYNC_ACTIONS>
+		</ENTITY>
 		<ENTITY name="ASSETMETER">
 			<INDEXES>
 				<INDEX name="IDX_ASM_1">ASSETID,METERNAME</INDEX>
 			</INDEXES>
 			<COLUMNS>
-				<COLUMN>METERNAME</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>ASSETID</COLUMN>
-				<COLUMN>ASSETUID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
 				<COLUMN uniquekey="Y">ASSETMETERID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>READING</COLUMN>
-				<COLUMN>READINGDATE</COLUMN>
-				<COLUMN>READINGTYPE</COLUMN>
-				<COLUMN>NEWREADING</COLUMN>
-				<COLUMN>NEWREADINGDATE</COLUMN>
-				<COLUMN>LASTREADING</COLUMN>
-				<COLUMN>LASTREADINGDATE</COLUMN>
-				<COLUMN>MEASUREUNITID</COLUMN>
-				<COLUMN>LASTREADINGINSPCTR</COLUMN>
-				<COLUMN>DOMAINID</COLUMN>
-				<COLUMN>SINCEINSTALL</COLUMN>
-				<COLUMN>SINCELASTINSPECT</COLUMN>
-				<COLUMN>SINCELASTOVERHAUL</COLUMN>
-				<COLUMN>SINCELASTREPAIR</COLUMN>
-				<COLUMN>PLUSTPRIMETER</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyAssetMeterJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="ASSETMETER" transentitykey="ASSETMETERID">
-				<ACTION name="UPDATE_METER" beanname="OfflineDataSyncAction" methodname="updateAssetMeter"/>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyAssetMeterJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="ASSETMETER" transentitykey="ASSETMETERID" name="UPDATE_METER" beanname="OfflineDataSyncAction" methodname="updateAssetMeter"/>
 			</SYNC_ACTIONS>
 		</ENTITY>
-		<!-- <ENTITY name="MR">
+		<ENTITY name="MR">
 			<INDEXES>
 				<INDEX name="IDX_MR_1">MRID</INDEX>
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN autokey="Y" autokeyprefix="LOCAL" uniquekey="Y">MRID</COLUMN>
 				<COLUMN displaykey="Y" autokey="Y" autokeyprefix="RQTEMP">MRNUM</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>STATUSDATE</COLUMN>
-				<COLUMN>REQUIREDDATE</COLUMN>
-				<COLUMN>PRIORITY</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ENTERDATE</COLUMN>
-				<COLUMN>LONGDESCRIPTION</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyMRListJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="MR" transentitykey="MRID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addMR"></ACTION>
-				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editMR"></ACTION>
-				<ACTION name="COMMIT" beanname="OfflineDataSyncAction" methodname="commitMR"></ACTION>
-			</SYNC_ACTIONS>
-		</ENTITY>
-		<ENTITY name="WPLABOR">
-			<INDEXES>
-				<INDEX name="IDX_WPL_1">WPLABORID</INDEX>
-			</INDEXES>  
-			<COLUMNS>
-				<COLUMN autokey="Y" uniquekey="Y" autokeyprefix="WPL">WPLABORUID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>WPLABORID</COLUMN>
-				<COLUMN>LABORCODE</COLUMN>
-				<COLUMN>LABORHRS</COLUMN>
-				<COLUMN>DISPLAYNAME</COLUMN>
-				<COLUMN>SKILLLEVEL</COLUMN>
-				<COLUMN>VENDOR</COLUMN>
-				<COLUMN>CRAFT</COLUMN>
-				<COLUMN>QUANTITY</COLUMN>
-				<COLUMN>AMCREW</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getMyWPLaborJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addWPLabor"/>
-				<ACTION name="UPDATE" beanname="OfflineDataSyncAction" methodname="editWPLabor"/>
-			</SYNC_ACTIONS>
-		</ENTITY>
-		<ENTITY name="WPMATERIAL">
-			<INDEXES>
-				<INDEX name="IDX_WPM_1">WPITEMID</INDEX>
-			</INDEXES>  
-			<COLUMNS>
-				<COLUMN autokeyprefix="LOCAL" autokey="Y" uniquekey="Y">WPITEMID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>PARENT</COLUMN>
-				<COLUMN>LINETYPE</COLUMN>
-				<COLUMN>ITEMNUM</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>REQUIREDATE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>ITEMQTY</COLUMN>
-				<COLUMN>LINECOST</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>STORELOCSITE</COLUMN>
-				<COLUMN>ORDERUNIT</COLUMN>
-				<COLUMN>UNITCOST</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>RESTYPE</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getMyWPMaterialJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addWPMaterial"/>
-				<ACTION name="UPDATE" beanname="OfflineDataSyncAction" methodname="editWPMaterial"/>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyMRListJson"></ACTION>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="MR" transentitykey="MRID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addMR"></ACTION>
+				<ACTION transentityname="MR" transentitykey="MRID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editMR"></ACTION>
+				<ACTION transentityname="MR" transentitykey="MRID" name="COMMIT" beanname="OfflineDataSyncAction" methodname="commitMR"></ACTION>
 			</SYNC_ACTIONS>
 		</ENTITY>
 		<ENTITY name="MRLINES">
@@ -558,261 +310,135 @@
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN uniquekey="Y">MRLINEID</COLUMN>
-				<COLUMN>MRID</COLUMN>
-				<COLUMN>MRNUM</COLUMN>
-				<COLUMN displaykey="Y">MRLINENUM</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>LINETYPE</COLUMN>
-				<COLUMN>ITEMNUM</COLUMN>
-				<COLUMN>QTY</COLUMN>
-				<COLUMN>ORDERUNIT</COLUMN>
-				<COLUMN>UNITCOST</COLUMN>
-				<COLUMN>LINECOST</COLUMN>
-				<COLUMN>REQUIREDDATE</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyMRLinesListJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="MR" transentitykey="MRID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addMRLine"></ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyMRLinesListJson"></ACTION>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="MR" transentitykey="MRID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addMRLine"></ACTION>
 			</SYNC_ACTIONS>
-		</ENTITY> -->
+		</ENTITY>
+		<ENTITY name="WOSAFETYLINK">
+			<INDEXES>
+				<INDEX name="IDX_WS_1">WOSAFETYLINKID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="WS">WOSAFETYLINKID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getWosafetylinkListJson"></ACTION>
+			</INIT_ACTION>
+		</ENTITY>
+		<ENTITY name="WOHAZARDPREC">
+			<INDEXES>
+				<INDEX name="IDX_HP_1">WOHAZARDPRECID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="HP">WOHAZARDPRECID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getWoHazardPrecListJson"></ACTION>
+			</INIT_ACTION>
+		</ENTITY>
+		<ENTITY name="WOTAGLOCK">
+			<INDEXES>
+				<INDEX name="IDX_TG_1">TAGLOCKID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="TG">TAGLOCKID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getTagLockListJson"></ACTION>
+			</INIT_ACTION>
+		</ENTITY>
+		<ENTITY name="WOHAZARD">
+			<INDEXES>
+				<INDEX name="IDX_WHAZ_1">WOHAZARDID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="WHAZ">WOHAZARDID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getWoHazardListJson"></ACTION>
+			</INIT_ACTION>
+		</ENTITY>
+		<ENTITY name="WOPRECAUTION">
+			<INDEXES>
+				<INDEX name="IDX_PREC_1">WOPRECAUTIONID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="PREC">WOPRECAUTIONID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getPrecautionListJson"></ACTION>
+			</INIT_ACTION>
+		</ENTITY>
+		<ENTITY name="WOTAGOUT">
+			<INDEXES>
+				<INDEX name="IDX_TAG_1">WOTAGOUTID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="TAG">WOTAGOUTID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getTagoutListJson"></ACTION>
+			</INIT_ACTION>
+		</ENTITY>
+		<ENTITY name="WOLOCKOUT">
+			<INDEXES>
+				<INDEX name="IDX_LOCK_1">WOLOCKOUTID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="LOCK">WOLOCKOUTID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getLockoutListJson"></ACTION>
+			</INIT_ACTION>
+		</ENTITY>
 		<ENTITY name="LOCATIONMETER">
 			<INDEXES>
 				<INDEX name="IDX_LOCM_1">LOCATION,METERNAME</INDEX>
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN uniquekey="Y">LOCATIONMETERID</COLUMN>
-				<COLUMN>LOCATIONSID</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>METERNAME</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>LASTREADING</COLUMN>
-				<COLUMN>LASTREADINGDATE</COLUMN>
-				<COLUMN>MEASUREUNITID</COLUMN>
-				<COLUMN>DOMAINID</COLUMN>
-				<COLUMN>SINCEINSTALL</COLUMN>
-				<COLUMN>SINCELASTINSPECT</COLUMN>
-				<COLUMN>SINCELASTOVERHAUL</COLUMN>
-				<COLUMN>SINCELASTREPAIR</COLUMN>
-				<COLUMN>LASTREADINGINSPCTR</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>NEWREADING</COLUMN>
-				<COLUMN>NEWREADINGDATE</COLUMN>
-				<COLUMN>READINGDATE</COLUMN>
-				<COLUMN>READING</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyLocationMeterJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="LOCATIONMETER" transentitykey="LOCATIONMETERID">
-				<ACTION name="UPDATE_METER" beanname="OfflineDataSyncAction" methodname="updateLocationMeter"/>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyLocationMeterJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="LOCATIONMETER" transentitykey="LOCATIONMETERID" name="UPDATE_METER" beanname="OfflineDataSyncAction" methodname="updateLocationMeter"/>
 			</SYNC_ACTIONS>
 		</ENTITY>
-		<!-- <ENTITY name="WOSAFETYLINK">
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="WS">WOSAFETYLINKID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>WOSAFETYDATASOURCE</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>REQUIREDSTATE</COLUMN>
-				<COLUMN>HAZARDID</COLUMN>
-				<COLUMN>TAGOUTID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>WHDESCRIPTION</COLUMN>
-				<COLUMN>WTDESCRIPTION</COLUMN>
-				<COLUMN>ASSET</COLUMN>
-				<COLUMN>LOC</COLUMN>
-				<COLUMN>WHLONGDESCRIPTION</COLUMN>
-				<COLUMN>WTLONGDESCRIPTION</COLUMN>			
-			</COLUMNS>
-			<INIT_ACTION>offline/getWosafetylinkListJson.action</INIT_ACTION>
-		</ENTITY>	
-		<ENTITY name="WOHAZARDPREC">
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="HP">WOHAZARDPRECID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>WOSAFETYDATASOURCE</COLUMN>
-				<COLUMN>HAZARDID</COLUMN>
-				<COLUMN>PRECAUTIONID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>WPDESCRIPTION</COLUMN>
-				<COLUMN>WPLONGDESCRIPTION</COLUMN>					
-			</COLUMNS>
-			<INIT_ACTION>offline/getWoHazardPrecListJson.action</INIT_ACTION>
-		</ENTITY>	
-		<ENTITY name="WOTAGLOCK">
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="TG">TAGLOCKID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>TAGOUTID</COLUMN>
-				<COLUMN>LOCKOUTID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>WLDESCRIPTION</COLUMN>
-				<COLUMN>REQUIREDSTATE</COLUMN>
-				<COLUMN>WLLONGDESCRIPTION</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>		
-			</COLUMNS>
-			<INIT_ACTION>offline/getTagLockListJson.action</INIT_ACTION>
-		</ENTITY>	
-		<ENTITY name="WOHAZARD">
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="WHAZ">WOHAZARDID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>HAZARDID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>PRECAUTIONENABLED</COLUMN>
-				<COLUMN>HAZMATENABLED</COLUMN>
-				<COLUMN>TAGOUTENABLED</COLUMN>
-				<COLUMN>WOSAFETYDATASOURCE</COLUMN>
-				<COLUMN>HAZARDTYPE</COLUMN>
-				<COLUMN>MSDSNUM</COLUMN>
-				<COLUMN>HEALTHRATING</COLUMN>
-				<COLUMN>FLAMMABILITYRATING</COLUMN>
-				<COLUMN>REACTIVITYRATING</COLUMN>
-				<COLUMN>CONTACTRATING</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>				
-			</COLUMNS>
-			<INIT_ACTION>offline/getWoHazardListJson.action</INIT_ACTION>
-		</ENTITY>	
-		<ENTITY name="WOPRECAUTION">
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="PREC">WOPRECAUTIONID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>PRECAUTIONID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>WOSAFETYDATASOURCE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getPrecautionListJson.action</INIT_ACTION>
-		</ENTITY>	
-		<ENTITY name="WOTAGOUT">
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="TAG">WOTAGOUTID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>TAGOUTID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>WOSAFETYDATASOURCE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>				
-			</COLUMNS>
-			<INIT_ACTION>offline/getTagoutListJson.action</INIT_ACTION>
-		</ENTITY>	
-		<ENTITY name="WOLOCKOUT">
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="LOCK">WOLOCKOUTID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>LOCKOUTID</COLUMN>
-				<COLUMN>DEVICEDESCRIPTION</COLUMN>
-				<COLUMN>REQUIREDSTATE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>				
-			</COLUMNS>
-			<INIT_ACTION>offline/getLockoutListJson.action</INIT_ACTION>
-		</ENTITY>					 -->
-													
-	 <!-- <ENTITY name="ASSETSPEC">
+		<ENTITY name="ASSETSPEC">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">ASSETSPECID</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>ASSETATTRID</COLUMN>
-				<COLUMN>CLASSSTRUCTUREID</COLUMN>
-				<COLUMN>DISPLAYSEQUENCE</COLUMN>
-				<COLUMN>NUMVALUE</COLUMN>
-				<COLUMN>ALNVALUE</COLUMN>
-				<COLUMN>MEASUREUNITID</COLUMN>
-				<COLUMN>DATATYPE</COLUMN>
-				<COLUMN>DOMAINID</COLUMN>
-				<COLUMN>ASSETUID</COLUMN>
-				<COLUMN>MANDATORY</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyAssetSpecJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyAssetSpecJson"/>
+			</INIT_ACTION>
 			<SYNC_ACTIONS transentityname="ASSET" transentitykey="ASSETUID">
-				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="insertAssetSpec"/>
+				<ACTION name="GENERATE" beanname="OfflineDataSyncAction" methodname="generateAssetSpec"/>
+				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editAssetSpec"/>
 			</SYNC_ACTIONS>
-		</ENTITY> -->
-	<!-- <ENTITY name="WORKORDERSPEC">
+		</ENTITY>
+		<ENTITY name="WORKORDERSPEC">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">WORKORDERSPECID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>ASSETATTRID</COLUMN>
-				<COLUMN>CLASSSTRUCTUREID</COLUMN>
-				<COLUMN>DISPLAYSEQUENCE</COLUMN>
-				<COLUMN>NUMVALUE</COLUMN>
-				<COLUMN>ALNVALUE</COLUMN>
-				<COLUMN>MEASUREUNITID</COLUMN>
-				<COLUMN>DATATYPE</COLUMN>
-				<COLUMN>DOMAINID</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>MANDATORY</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getWorkOrderSpecJson.action</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
-				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="insertWorkOrderSpec"/>
-			</SYNC_ACTIONS>
-		</ENTITY>					  -->
-		<ENTITY name="ASSIGNMENT">
-			<INDEXES>			
-				<INDEX name="IDX_AS_1">ASSIGNMENTID</INDEX>
-				<INDEX name="IDX_AS_2">WONUM, SITEID, LABORCODE</INDEX>
-			</INDEXES>
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="AS">ASSIGNMENTID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>LABORHRS</COLUMN>
-				<COLUMN>AMCREW</COLUMN>
-				<COLUMN>CRAFT</COLUMN>
-				<COLUMN>LABORCODE</COLUMN>
-				<COLUMN>SCHEDULEDATE</COLUMN>
-				<COLUMN>STARTDATE</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>WORKDATE</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>				
 			</COLUMNS>
 			<INIT_ACTION>
-				<ACTION>offline/getMyAssignmentsJson.action</ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyWorkOrderSpecJson"/>
 			</INIT_ACTION>
-			<SYNC_ACTIONS transentityname="ASSIGNMENT" transentitykey="ASSIGNMENTID">
-				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addAssignment"/>
-				<ACTION name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="completeAssignment"/>
-			</SYNC_ACTIONS>	
+			<SYNC_ACTIONS transentityname="WORKORDER" transentitykey="WORKORDERID">
+				<ACTION name="GENERATE" beanname="OfflineDataSyncAction" methodname="generateWorkOrderSpec"/>
+				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editWorkOrderSpec"/>
+			</SYNC_ACTIONS>
 		</ENTITY>
-	<ENTITY name="DOWNTIME">
+		<ENTITY name="DOWNTIME">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">DOWNTIMEID</COLUMN>
-				<COLUMN>DOWNTIME</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>ASSETUID</COLUMN>
-				<COLUMN>STATUSCHANGEDATE</COLUMN>
-				<COLUMN>STATUSCHANGECODE</COLUMN>
-				<COLUMN>OPERATIONAL</COLUMN>
-				<COLUMN>ISRUNNING</COLUMN>
-				<COLUMN>STARTDATESOURCE</COLUMN>
-				<COLUMN>ENDOPERATIONAL</COLUMN>
-				<COLUMN>STARTOPERATIONAL</COLUMN>				
-				<COLUMN>STARTDATE</COLUMN>
-				<COLUMN>ENDDATE</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>					
 			</COLUMNS>
 			<INIT_ACTION>
-				<ACTION>offline/getDowntimeJson.action</ACTION>			
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getDowntimeJson" />
 			</INIT_ACTION>
 			<SYNC_ACTIONS transentityname="DOWNTIME" transentitykey="DOWNTIMEID">
 				<ACTION name="INSERT" beanname="OfflineDataSyncAction" methodname="addDowntimeRpt"/>
@@ -822,221 +448,183 @@
 		<ENTITY name="ASSETSTATUS">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">ASSETSTATUSID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>ISRUNNING</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>CHANGEBY</COLUMN>
-				<COLUMN>CHANGEDATE</COLUMN>
-				<COLUMN>DOWNTIME</COLUMN>
-				<COLUMN>CALNUM</COLUMN>
-				<COLUMN>CODE</COLUMN>
-				<COLUMN>OPERATIONAL</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>				
 			</COLUMNS>		
 			<INIT_ACTION>
-				<ACTION>offline/getAssetStatusesJson.action</ACTION>			
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAssetStatusesJson"/>
 			</INIT_ACTION>
-		</ENTITY>						
+		</ENTITY>
+		<ENTITY name="TICKETSPEC">
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y">TICKETSPECID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyTicketSpecJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS transentityname="TICKET" transentitykey="TICKETUID">
+				<ACTION name="GENERATE" beanname="OfflineDataSyncAction" methodname="generateTicketSpec"/>
+				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editTicketSpec"/>
+			</SYNC_ACTIONS>
+		</ENTITY>
+		<ENTITY name="INSPECTIONRESULT">
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y">INSPECTIONRESULTID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyInspectionResultJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS transentityname="INSPECTIONRESULT" transentitykey="INSPECTIONRESULTID">
+				<ACTION name="SCHEDULE" beanname="OfflineDataSyncAction" methodname="scheduleInspection"/>
+				<ACTION name="UPDATE_STATUS" beanname="OfflineDataSyncAction" methodname="updateInspResultStatus"/>
+				<ACTION name="COMPLETE" beanname="OfflineDataSyncAction" methodname="completeInspection"/>
+				<ACTION name="CREATEINSPWO" beanname="OfflineDataSyncAction" methodname="createInspWorkOrder"/>
+			</SYNC_ACTIONS>
+		</ENTITY>
+		<ENTITY name="INSPFIELDRESULT">
+			<INDEXES>
+				<INDEX name="IDX_IFR_1">INSPFIELDNUM, INSPFORMNUM, INSPQUESTIONNUM, RESULTNUM, REVISION, ORGID</INDEX>
+			</INDEXES>
+			<COLUMNS>
+				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="IFR">INSPFIELDRESULTID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMyInspFieldResultJson"/>
+			</INIT_ACTION>
+			<SYNC_ACTIONS>
+				<ACTION transentityname="INSPECTIONRESULT" transentitykey="INSPECTIONRESULTID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addInspFieldResult"/>
+				<ACTION transentityname="INSPECTIONRESULT" transentitykey="INSPECTIONRESULTID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editInspFieldResult"/>
+				<ACTION transentityname="INSPECTIONRESULT" transentitykey="INSPECTIONRESULTID" name="ADD_SIGNATURE" beanname="OfflineDataSyncAction" methodname="addInspFieldResultSignature"></ACTION>
+				<ACTION transentityname="INSPECTIONRESULT" transentitykey="INSPECTIONRESULTID" name="EMM_FILE_UPLOAD"/>
+			</SYNC_ACTIONS>
+		</ENTITY>
 	</ENTITY_DEFS>
 	
 	<SELECTION_DEFS>
-		<!-- Provide Version attribute for each SELECTION definition to allow omission of download when user re-sync back to server  -->
-		<!-- We check if app's version is the same as server's version.  If versions are the same, the SELECTION will not be re-downloaded upon user re-sync -->
-		<!-- To force re-download every time the user syncs to server, remove the version attribute altogether for each SELECTION -->
 		<SELECTION name="LOCATIONS">
 			<INDEXES>
 				<INDEX name="IDX_LOC_1">LOCATION, SITEID</INDEX>
-				<INDEX name="IDX_LOC_2">LOCATIONSID</INDEX>
+				<INDEX name="IDX_LOC_2">LOCATION</INDEX>
 				<INDEX name="IDX_LOC_3">SITEID</INDEX>
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN uniquekey="Y">LOCATIONSID</COLUMN>
-				<COLUMN displaykey="Y">LOCATION</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>TYPE</COLUMN>
-				<COLUMN>DISABLED</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>SYSTEMID</COLUMN>
-				<COLUMN>PARENT</COLUMN>
-				<COLUMN>HASCHILDREN</COLUMN>
-				<COLUMN>PLUSPCUSTOMER</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMyLocationsJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheLocations"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyLocationsJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+		</SELECTION>
+		<SELECTION name="TOOLITEM">
+ 			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheToolItem"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="DOMAIN">
-			<COLUMNS>
-				<COLUMN>DOMAINID</COLUMN>
-				<COLUMN>MAXVALUE</COLUMN>
-				<COLUMN displaykey="Y">VALUE</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>PLUSPCUSTOMER</COLUMN>				
-			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyCachedDomainJson.action</INIT_ACTION>
-		</SELECTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheDomain"/>
+			</INIT_ACTION>
+		</SELECTION>		
 		<SELECTION name="PERSONGROUP">
-			<INDEXES>
-				<INDEX name="IDX_PG_1">PERSONGROUPID</INDEX>
-			</INDEXES>
-			<COLUMNS>
-				<COLUMN uniquekey="Y">PERSONGROUPID</COLUMN>
-				<COLUMN displaykey="Y">PERSONGROUP</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getPersonGroupJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cachePersonGroup"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="PERSONGROUPTEAM">
-			<COLUMNS>
-				<COLUMN>PERSONGROUPTEAMID</COLUMN>
-				<COLUMN displaykey="Y">PERSONGROUP</COLUMN>
-				<COLUMN>RESPPARTY</COLUMN>
-				<COLUMN>RESPPARTYGROUP</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyCachedPersonGroupTeamJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cachePersonGroupTeam"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="PERSON">
-			<INDEXES>
-				<INDEX name="IDX_PERSON_1">PERSONID</INDEX>
-			</INDEXES>
-			<COLUMNS>
-				<COLUMN uniquekey="Y">PERSONID</COLUMN>
-				<COLUMN displaykey="Y">DISPLAYNAME</COLUMN>
-				<COLUMN>FIRSTNAME</COLUMN>
-				<COLUMN>LASTNAME</COLUMN>
-				<COLUMN>SUPERVISOR</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getPersonJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cachePerson"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="LABOR">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">LABORID</COLUMN>
-				<COLUMN displaykey="Y">LABORCODE</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>PERSONID</COLUMN>
-				<COLUMN>DISPLAYNAME</COLUMN>
-				<COLUMN>CREWID</COLUMN>
-				<COLUMN>WORKLOCATION</COLUMN>
-				<COLUMN>WORKSITE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getLaborJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheLabor"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="CRAFT">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">CRAFTID</COLUMN>
-				<COLUMN displaykey="Y">CRAFT</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyCachedCraftJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheCraft"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="CRAFTRATE">
 			<COLUMNS>
-				<COLUMN uniquekey="Y" displaykey="Y">CRAFTRATEID</COLUMN>
-				<COLUMN>CRAFT</COLUMN>
-				<COLUMN>SKILLLEVEL</COLUMN>
-				<COLUMN>VENDOR</COLUMN>
-				<COLUMN>STANDARDRATE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
+				<COLUMN uniquekey="Y">CRAFTRATEID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getCraftRateJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheCraftRate"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="LABORCRAFTRATE">
 			<COLUMNS>
-				<COLUMN uniquekey="Y" displaykey="Y">LABORCRAFTRATEID</COLUMN>
-				<COLUMN>LABORCODE</COLUMN>
-				<COLUMN>CRAFT</COLUMN>
-				<COLUMN>DEFAULTCRAFT</COLUMN>
-				<COLUMN>RATE</COLUMN>
-				<COLUMN>SKILLLEVEL</COLUMN>
-				<COLUMN>GLACCOUNT</COLUMN>
-				<COLUMN>ORGID</COLUMN>
+				<COLUMN uniquekey="Y">LABORCRAFTRATEID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getLaborCraftRateJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheLaborCraftRate"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="PPCRAFTRATE">
 			<COLUMNS>
-				<COLUMN uniquekey="Y" displaykey="Y">PPCRAFTRATEID</COLUMN>
-				<COLUMN>CRAFT</COLUMN>
-				<COLUMN>PREMIUMPAYCODE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
+				<COLUMN uniquekey="Y">PPCRAFTRATEID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getPPCraftRateJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cachePPCraftRate"/>
+			</INIT_ACTION>
 		</SELECTION>
  		<SELECTION name="WORKTYPE">
-			<COLUMNS>
-				<COLUMN>WORKTYPEID</COLUMN>
-				<COLUMN>WORKTYPE</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>TYPE</COLUMN>
-				<COLUMN displaykey="Y">WTYPEDESC</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyCachedWorktypeJson.action</INIT_ACTION>
+ 			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheWorktype"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="FAILURECODE">
-			<COLUMNS>
-				<COLUMN>FAILURELIST</COLUMN>
-				<COLUMN displaykey="Y">FAILURECODE</COLUMN>
-				<COLUMN>PARENT</COLUMN>
-				<COLUMN>TYPE</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>FAILURECODEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getFailureCodeJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheFailureCode"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="STOREROOM">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">LOCATIONSID</COLUMN>
-				<COLUMN displaykey="Y">LOCATION</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyCachedStoreroomsJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheStorerooms"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="COMPANIES">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">COMPANIESID</COLUMN>
-				<COLUMN displaykey="Y">COMPANY</COLUMN>
-				<COLUMN>TYPE</COLUMN>
-				<COLUMN>NAME</COLUMN>
-				<COLUMN>DISABLED</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getCompaniesJson.action</INIT_ACTION>
-<!-- 			<DELTA_ACTION>offline/getDeltaCompaniesJson.action</DELTA_ACTION>
- -->		</SELECTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheCompanies"/>
+			</INIT_ACTION>
+<!-- 			<DELTA_ACTION> -->
+<!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaCompaniesJson"/> -->
+<!-- 			</DELTA_ACTION> -->
+		</SELECTION>
 		<SELECTION name="SITE">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">SITEUID</COLUMN>
-				<COLUMN displaykey="Y">SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getSitesJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getSitesJson"/>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="SPAREPART">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">SPAREPARTID</COLUMN>
-				<COLUMN displaykey="Y">ITEMNUM</COLUMN>
-				<COLUMN>ITEMDESCRIPTION</COLUMN>
-				<COLUMN>REMARKS</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>QUANTITY</COLUMN>
-				<COLUMN>ISSUEDQTY</COLUMN>
-				<COLUMN>ITEMSETID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>				
 			</COLUMNS>
-			<INIT_ACTION>offline/getSparePartsJson.action</INIT_ACTION>
-		</SELECTION>				
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getSparePartsJson"/>
+			</INIT_ACTION>
+		</SELECTION>
 		<SELECTION name="METERGROUP">
 			<INDEXES>
 				<INDEX name="IDX_MG_1">GROUPNAME</INDEX>
@@ -1044,20 +632,19 @@
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN uniquekey="Y">METERGROUPID</COLUMN>
-				<COLUMN displaykey="Y">GROUPNAME</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getAllMeterGroupJson.action</INIT_ACTION>
-		</SELECTION>	
-		<!-- <SELECTION name="AMCREW">
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheAllMeterGroup"/>
+			</INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="AMCREW">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">AMCREWID</COLUMN>
-				<COLUMN displaykey="Y">AMCREW</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyCachedAMCrewJson.action</INIT_ACTION>
-		</SELECTION>-->
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheAMCrew"></ACTION>
+			</INIT_ACTION>
+		</SELECTION>
 		<SELECTION name="MEASUREPOINT">
 			<INDEXES>
 				<INDEX name="IDX_MPOINT_1">MEASUREPOINTID</INDEX>
@@ -1067,585 +654,157 @@
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN uniquekey="Y">MEASUREPOINTID</COLUMN>
-				<COLUMN>POINTNUM</COLUMN>
-				<COLUMN>METERNAME</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>LOWERWARNING</COLUMN>
-				<COLUMN>LOWERACTION</COLUMN>
-				<COLUMN>UPPERWARNING</COLUMN>
-				<COLUMN>UPPERACTION</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getMeasurepointJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheMeasurePoint"></ACTION>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="CLASSSTRUCTURE">
-			<COLUMNS>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>CLASSIFICATIONUID</COLUMN>
-				<COLUMN>CLASSSTRUCTUREID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>GENASSETDESC</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>CLASSIFICATIONID</COLUMN>
-				<COLUMN>HASCHILDREN</COLUMN>
-				<COLUMN>PARENT</COLUMN>
-				<COLUMN>OBJECTVALUE</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getClasstructureJson.action</INIT_ACTION>
-		</SELECTION>	
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheClassStructure"></ACTION>
+			</INIT_ACTION>
+		</SELECTION>
 		<SELECTION name="ASSETATTRIBUTE">
-			<COLUMNS>
-				<COLUMN>ASSETATTRID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>DATATYPE</COLUMN>
-				<COLUMN>MEASUREUNITID</COLUMN>
-				<COLUMN>DOMAINID</COLUMN>
-				<COLUMN>ASSETATTRIBUTEID</COLUMN>
-				<COLUMN>CLASSSTRUCTUREID</COLUMN>
-				<COLUMN>OBJECTVALUE</COLUMN>
-				<COLUMN>MANDATORY</COLUMN>
-				<COLUMN>SEQUENCE</COLUMN>
-			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyAssetAttributeJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheAssetAttribute"></ACTION>
+			</INIT_ACTION>
 		</SELECTION>
 		<SELECTION name="SPECDOMAIN">
-			<COLUMNS>
-				<COLUMN>DOMAINID</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>DOMAINTYPE</COLUMN>
-				<COLUMN>VALUE</COLUMN>
-			</COLUMNS>		
-			<INIT_ACTION>offline/getLegacyCachedSpecDomainJson.action</INIT_ACTION>
-		</SELECTION>	
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheSpecDomain"></ACTION>
+			</INIT_ACTION>
+		</SELECTION>
 		<SELECTION name="MEASUREUNIT">
-			<COLUMNS>
-				<COLUMN>MEASUREUNITUID</COLUMN>
-				<COLUMN>MEASUREUNITID</COLUMN>
-				<COLUMN>ABBREVIATION</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>				
-			</COLUMNS>			
-			<INIT_ACTION>offline/getLegacyCachedMeasureUnitJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheMeasureunit"></ACTION>
+			</INIT_ACTION>
 		</SELECTION>	
-		<SELECTION name="PLUSTASSETALIAS">
-			<COLUMNS>
-				<COLUMN>PLUSTASSETALIASID</COLUMN>
-				<COLUMN>ALIAS</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>ISDEFAULT</COLUMN>
-				<COLUMN>ISACTIVE</COLUMN>
-				<COLUMN>ISASSETNUM</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>LONGDESCRIPTION</COLUMN>
-			</COLUMNS>				
- 			<INIT_ACTION>offline/getAssetAliasesJson.action</INIT_ACTION>
+				<SELECTION name="INSPECTIONFORM">
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheInspectionForm"></ACTION>
+			</INIT_ACTION>
 		</SELECTION>
-		<!-- <SELECTION name="INVOICELINE">
-			<INDEXES>			
-				<INDEX name="IDX_ST_1">WONUM, SITEID</INDEX>
-			</INDEXES>
+		<SELECTION name="INSPQUESTION">
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheInspquestion"></ACTION>
+			</INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="INSPFIELD">
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheInspfield"></ACTION>
+			</INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="INSPFIELDOPTION">
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheInspfieldoption"></ACTION>
+			</INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="INSPCASCADEOPTION">
+			<INIT_ACTION>
+				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheInspcascadeoption"></ACTION>
+			</INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="MEASUREMENT">
 			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="TT">INVOICELINEID</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>INVOICENUM</COLUMN>
-				<COLUMN>AEPPARTNUMBER</COLUMN>
-				<COLUMN>INVOICELINENUM</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ITEMNUM</COLUMN>
-			</COLUMNS>				
- 			<INIT_ACTION>offline/getInvoiceLineJson.action</INIT_ACTION>
-		</SELECTION>-->
-		<SELECTION name ="SERVRECTRANS">
-			<INDEXES>			
-				<INDEX name="IDX_ST_1">WONUM, SITEID</INDEX>
-			</INDEXES>
-			<COLUMNS>
-				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="TT">SERVRECTRANSID</COLUMN>
-				<COLUMN>WORKORDERID</COLUMN>
-				<COLUMN>WONUM</COLUMN>
-				<COLUMN>PARENT</COLUMN>
-				<COLUMN>ITEMNUM</COLUMN>
-				<COLUMN>INVOICENUM</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>QUANTITY</COLUMN>
-				<COLUMN>AEPPARTNUMBER</COLUMN>
-				<COLUMN>UNITCOST</COLUMN>
-				<COLUMN>LOADEDCOST</COLUMN>
-				<COLUMN>PLUSTHASWARRANTY</COLUMN>
-				<COLUMN>LOCATION</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>ORGID</COLUMN>
+				<COLUMN uniquekey="Y">MEASUREMENTID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getServrectransJson.action</INIT_ACTION>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMeasurementJson"/>
+			</INIT_ACTION>
 		</SELECTION>
-		<SELECTION name="AEPASSETDEPT">
+		<SELECTION name="METERREADING">
 			<COLUMNS>
-				<COLUMN>AEPASSETDEPTID</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>CUSTOMER</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>NAME</COLUMN>
-				<COLUMN>AEPEFFECTIVEDATE</COLUMN>
-				<COLUMN>ISUSINGDEPT</COLUMN>
-				<COLUMN>ISOWNINGDEPT</COLUMN>
-			</COLUMNS>				
- 			<INIT_ACTION>offline/getAepAssetDeptJson.action</INIT_ACTION>
-		</SELECTION>
-		<SELECTION name="PLUSTLICENSE">
-			<COLUMNS>
-				<COLUMN>PLUSTLICENSEID</COLUMN>
-				<COLUMN>LICENSENUM</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>STARTDATE</COLUMN>
-				<COLUMN>ENDDATE</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>LONGDESCRIPTION</COLUMN>		
-			</COLUMNS>				
-			<INIT_ACTION>offline/getAssetLicensesJson.action</INIT_ACTION>
-		</SELECTION>
-		<SELECTION name="ASSETUSERCUST">
-			<COLUMNS>
-				<COLUMN>ASSETLOCUSERCUSTID</COLUMN>
-				<COLUMN>ISCUSTODIAN</COLUMN>
-				<COLUMN>ASSETNUM</COLUMN>
-				<COLUMN>ISPRIMARY</COLUMN>
-				<COLUMN>ISUSER</COLUMN>
-				<COLUMN>CUSTOMER</COLUMN>
-				<COLUMN>ISOWNINGDEPT</COLUMN>
-				<COLUMN>ISUSINGDEPT</COLUMN>
-				<COLUMN>AEPEFFECTIVEDATE</COLUMN>
-				<COLUMN>NAME</COLUMN>
-				<COLUMN>AEPFLEETSUPERVISOR</COLUMN>
-				<COLUMN>ORGID</COLUMN>
-				<COLUMN>SITEID</COLUMN>
-				<COLUMN>PERSONID</COLUMN>
-				<COLUMN>DISPLAYNAME</COLUMN>		
-			</COLUMNS>				
-			<INIT_ACTION>offline/getAssetUsersJson.action</INIT_ACTION>
-		</SELECTION> 
-		<SELECTION name="MAXUSER">
-			<COLUMNS>
-				<COLUMN>USERID</COLUMN>
-				<COLUMN>PERSONID</COLUMN>
-				<COLUMN>STATUS</COLUMN>
-				<COLUMN>TYPE</COLUMN>
-				<COLUMN>DEFSITE</COLUMN>
-				<COLUMN>DEFSTOREROOM</COLUMN>
-				<COLUMN>PASSWORD</COLUMN>
-				<COLUMN>LOGINID</COLUMN>
-				<COLUMN>MAXUSERID</COLUMN>
-				<COLUMN>DEFAULTREPFACSITEID</COLUMN>
-				<COLUMN>DEFAULTREPFAC</COLUMN>		
-			</COLUMNS>				
-			<INIT_ACTION>offline/getMaxUserJson.action</INIT_ACTION>
-		</SELECTION>
-		<SELECTION name="PLUSTCOMP">
-			<COLUMNS>
-				<COLUMN>COMPONENT</COLUMN>
-				<COLUMN>DESCRIPTION</COLUMN>			
-			</COLUMNS>			
-			<INIT_ACTION>offline/getPlustCompJson.action</INIT_ACTION>
-		</SELECTION>
-		<SELECTION name="AEPMFGMAKEMODEL">
-			<COLUMNS>
-				<COLUMN>MODEL</COLUMN>
-				<COLUMN>MANUFACTURER</COLUMN>
-				<COLUMN>MAKE</COLUMN>			
-			</COLUMNS>			
-			<INIT_ACTION>offline/getAEPMFGMAKEMODELJson.action</INIT_ACTION>
-		</SELECTION>		
-		<SELECTION name="PLUSPCUSTOMER">
-			<COLUMNS>
-				<COLUMN>CUSTOMER</COLUMN>
-				<COLUMN>NAME</COLUMN>
-				<COLUMN>TYPE</COLUMN>
-				<COLUMN>DOMAINID</COLUMN>
-				
-				<COLUMN>PARENT</COLUMN>				
-			</COLUMNS>			
-			<INIT_ACTION>offline/getLegacyCachedPlusPCustomerJson.action</INIT_ACTION>
-		</SELECTION>
-		<SELECTION name="PLUSPCUSTASSOC">
-			<COLUMNS>
-				<COLUMN>CUSTOMER</COLUMN>
-				<COLUMN>OWNERTABLE</COLUMN>	
-				<COLUMN>OWNERID</COLUMN>
+				<COLUMN uniquekey="Y">METERREADINGID</COLUMN>
 			</COLUMNS>
-			<INIT_ACTION>offline/getLegacyCachedPlusPCustAssocJson.action</INIT_ACTION>		
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMeterReadingJson"/>
+			</INIT_ACTION>
 		</SELECTION>
-		<SELECTION name="APPDOCTYPE">
-                  <COLUMNS>
-                        <COLUMN>APPDOCTYPEID</COLUMN>
-                        <COLUMN>APP</COLUMN>
-                        <COLUMN>DOCTYPE</COLUMN>
-                  </COLUMNS>
-                  <INIT_ACTION>offline/getLegacyAppDoctype.action</INIT_ACTION>
-            </SELECTION>
-							
-													
+		<SELECTION name="LOCMETERREADING">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">METERREADINGID</COLUMN>
+			</COLUMNS>
+			<INIT_ACTION>
+				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getLocMeterReadingJson"/>
+			</INIT_ACTION>
+		</SELECTION>
 	</SELECTION_DEFS>
 	
 	<TX_SETTINGS>
 		<TX_SERVICE_NAME batchsize="1">offline/doUploadOfflineData.action</TX_SERVICE_NAME>
 		<TX_SERVER_TIME retelement="TXTIMESTAMP">offline/getTxTimeStamp.action</TX_SERVER_TIME>
+		<DOWNLOADS pollinterval="20" trylimit="10">
+			<DB_DOWNLOAD>offline/getSQLite.action</DB_DOWNLOAD>
+			<DELTA_DOWNLOAD>offline/getDeltaSQLite.action</DELTA_DOWNLOAD>
+			<RESOURCE_DOWNLOAD>offline/getResource.action</RESOURCE_DOWNLOAD>
+			<ATTACHMENT_UPLOAD>doclinks/uploadDoclink.action</ATTACHMENT_UPLOAD>
+			<ATTACHMENT_DOWNLOAD>
+				<ACTION>offline/getAttachments.action</ACTION>
+				<TYPES>PDF,TXT,DOC,DOCX,PNG,GIF,JPG,CSV,XLS,XLSX</TYPES>
+				<MAX_SIZE_MB>1</MAX_SIZE_MB>
+				<EXP_DAYS>30</EXP_DAYS>
+			</ATTACHMENT_DOWNLOAD>
+		</DOWNLOADS>
 	</TX_SETTINGS>
 	
-	<!-- Set the OFFLINE_FILE_CACHE debug attribute to 1 allows for app to cache the list of files every time when user sync -->
-	<!-- To not re-cache the files on user re-sync, set the debug attribute to 0 -->
-	<OFFLINE_FILE_CACHE debug="1" version="1">
-		<!-- offline/login -->
+	<!-- 
+	When modifying files or adding addition files included inside the OFFLINE_FILE_CACHE please remember  
+	to restart your server in order to get the changes when you go offline.
+	-->
+	<OFFLINE_FILE_CACHE>
 		<FILE dir="offline/login" defaultstartpage="Y">default.htm</FILE>
-		<FILE dir="offline/login">index.htm</FILE>
-        <!-- offline/asset -->
-        <FILE dir="offline/asset/services">assetService.js</FILE>
-		<FILE dir="offline/asset">actions.htm</FILE>
-		<FILE dir="offline/asset">advancedsearch.htm</FILE>
-		<FILE dir="offline/asset">asset.htm</FILE>
-		<FILE dir="offline/asset">assetmeter.htm</FILE>
-		<FILE dir="offline/asset">assetmeterlist.htm</FILE>
-		<FILE dir="offline/asset">downtime.htm</FILE>
-		<FILE dir="offline/asset">list.htm</FILE>
-		<FILE dir="offline/asset">listspareparts.htm</FILE>
-		<FILE dir="offline/asset">main.htm</FILE>
-		<FILE dir="offline/asset">moveasset.htm</FILE>
-        <!-- offline/classes -->
-        <FILE dir="offline/classes">Assignment.js</FILE>
-        <FILE dir="offline/classes">Asset.js</FILE>
-        <FILE dir="offline/classes">AssetMeter.js</FILE>
-        <FILE dir="offline/classes">AssetSpec.js</FILE>
-        <FILE dir="offline/classes">AssetStatus.js</FILE>
-		<FILE dir="offline/classes">Directives.js</FILE>
-		<FILE dir="offline/classes">Doclinks.js</FILE>
-		<FILE dir="offline/classes">Domain.js</FILE>
-		<FILE dir="offline/classes">Downtime.js</FILE>
-		<FILE dir="offline/classes">FailureCode.js</FILE>
-		<FILE dir="offline/classes">Filters.js</FILE>
-		<FILE dir="offline/classes">InvBalances.js</FILE>
-		<FILE dir="offline/classes">Inventory.js</FILE>
-		<FILE dir="offline/classes">LabTrans.js</FILE>
-		<FILE dir="offline/classes">LocationMeter.js</FILE>
-		<FILE dir="offline/classes">MatRecTrans.js</FILE>
-		<FILE dir="offline/classes">MatUseTrans.js</FILE>
-		<FILE dir="offline/classes">MR.js</FILE>
-		<FILE dir="offline/classes">MRLines.js</FILE>
-		<FILE dir="offline/classes">MultiAssetLocCi.js</FILE>
-		<FILE dir="offline/classes">Person.js</FILE>
-		<FILE dir="offline/classes">Portlet.js</FILE>
-		<FILE dir="offline/classes">Query.js</FILE>
-		<FILE dir="offline/classes">SR.js</FILE>
-		<FILE dir="offline/classes">StartCenter.js</FILE>
-		<FILE dir="offline/classes">TicketSpec.js</FILE>
-		<FILE dir="offline/classes">ToolTrans.js</FILE>
-		<FILE dir="offline/classes">WorkLog.js</FILE>
-		<FILE dir="offline/classes">WorkOrder.js</FILE>
-		<FILE dir="offline/classes">WorkOrderSpec.js</FILE>
-		<FILE dir="offline/classes">WPLabor.js</FILE>
-		<FILE dir="offline/classes">WPMaterial.js</FILE>
-		<!-- offline/classification -->
-		<FILE dir="offline/classification/services">classificationService.js</FILE>
-		<FILE dir="offline/classification">classify.htm</FILE>
-		<FILE dir="offline/classification">specification.htm</FILE>		
-		<!-- offline/common -->
-		<FILE dir="offline/common">assetdrilldown.htm</FILE>
-		<FILE dir="offline/common">changestatus.htm</FILE>
-		<FILE dir="offline/common">classificationdrilldown.htm</FILE>
-		<FILE dir="offline/common">classificationlookup.htm</FILE>
-		<FILE dir="offline/common">domain.htm</FILE>
-		<FILE dir="offline/common">domainClassify.htm</FILE>
-		<FILE dir="offline/common">includes.htm</FILE>
-		<FILE dir="offline/common">locationdrilldown.htm</FILE>
-		<FILE dir="offline/common">menu.htm</FILE>		
-		<FILE dir="offline/common">selectowner.htm</FILE>
-		<!-- offline/createdr -->
-		<FILE dir="offline/createdr/services">createdrService.js</FILE>
-		<FILE dir="offline/createdr">actions.htm</FILE>
-		<FILE dir="offline/createdr">mr.htm</FILE>
-		<FILE dir="offline/createdr">mrline.htm</FILE>
-		<FILE dir="offline/createdr">mrlines.htm</FILE>
-		<!-- offline/docklinks -->
-		<FILE dir="offline/doclinks/services">doclinksService.js</FILE>
-		<FILE dir="offline/doclinks">main.htm</FILE>
-		<!-- offline/invbalances -->
-		<FILE dir="offline/invbalances/services">invBalancesService.js</FILE>
-		<FILE dir="offline/invbalances">physicalcount.htm</FILE>
-		<!-- offline/inventor -->
-        <FILE dir="offline/inventor/services">inventoryService.js</FILE>
-		<FILE dir="offline/inventor">actions.htm</FILE>
-		<FILE dir="offline/inventor">cyclecountactions.htm</FILE>
-		<FILE dir="offline/inventor">cyclecountlist.htm</FILE>
-		<FILE dir="offline/inventor">cyclecountview.htm</FILE>
-        <FILE dir="offline/inventor">list.htm</FILE>
-        <FILE dir="offline/inventor">main.htm</FILE>
-        <FILE dir="offline/inventor">view.htm</FILE>
-		<!-- offline/invissue -->
-        <FILE dir="offline/invissue/services">issuestransfersService.js</FILE>
-		<FILE dir="offline/invissue">issue.htm</FILE>
-		<FILE dir="offline/invissue">issuedetail.htm</FILE>
-        <FILE dir="offline/invissue">main.htm</FILE>
-		<FILE dir="offline/invissue">transferin.htm</FILE>
-		<FILE dir="offline/invissue">transferindetail.htm</FILE>
-        <FILE dir="offline/invissue">transferout.htm</FILE>
-        <FILE dir="offline/invissue">transferoutdetail.htm</FILE>
-		<!-- offline/labtrans -->
-		<FILE dir="offline/labtrans/services">labtransService.js</FILE>
-		<FILE dir="offline/labtrans">labtrans.htm</FILE>
-		<FILE dir="offline/labtrans">main.htm</FILE>
-		<!-- offline/labrep -->
-		<FILE dir="offline/labrep/services">labrepService.js</FILE>
-		<FILE dir="offline/labrep">advancedsearch.htm</FILE>
-		<FILE dir="offline/labrep">enterbylabor.htm</FILE>
-		<FILE dir="offline/labrep">labrep.htm</FILE>
-		<FILE dir="offline/labrep">list.htm</FILE>
-		<FILE dir="offline/labrep">main.htm</FILE>
-		<!-- offline/plustlrp -->
-		<FILE dir="offline/plustlrp/services">plustlrpService.js</FILE>
-		<FILE dir="offline/plustlrp">advancedsearch.htm</FILE>
-		<FILE dir="offline/plustlrp">enterbylabor.htm</FILE>
-		<FILE dir="offline/plustlrp">labrep.htm</FILE>
-		<FILE dir="offline/plustlrp">list.htm</FILE>
-		<FILE dir="offline/plustlrp">main.htm</FILE>		
-		<!-- offline/matusetrans -->
-		<FILE dir="offline/matusetrans/services">matusetransService.js</FILE>
-		<FILE dir="offline/matusetrans">main.htm</FILE>
-		<FILE dir="offline/matusetrans">matusetrans.htm</FILE>
-		<!-- offline/query -->
-		<FILE dir="offline/query/services">queryService.js</FILE>
-		<FILE dir="offline/query">list.htm</FILE>
-        <!-- offline/pluspasset -->
-        <FILE dir="offline/pluspasset/services">pluspassetService.js</FILE>
-		<FILE dir="offline/pluspasset">actions.htm</FILE>
-		<FILE dir="offline/pluspasset">advancedsearch.htm</FILE>
-		<FILE dir="offline/pluspasset">asset.htm</FILE>
-		<FILE dir="offline/pluspasset">assetmeter.htm</FILE>
-		<FILE dir="offline/pluspasset">assetmeterlist.htm</FILE>
-		<FILE dir="offline/pluspasset">downtime.htm</FILE>
-		<FILE dir="offline/pluspasset">list.htm</FILE>
-		<FILE dir="offline/pluspasset">listspareparts.htm</FILE>
-		<FILE dir="offline/pluspasset">main.htm</FILE>
-		<FILE dir="offline/pluspasset">moveasset.htm</FILE>				
-		<!-- offline/pluspsr -->
-        <FILE dir="offline/pluspsr/services">pluspsrService.js</FILE>       
-		<FILE dir="offline/pluspsr">actions.htm</FILE>
-        <FILE dir="offline/pluspsr">advancedsearch.htm</FILE>
-        <FILE dir="offline/pluspsr">list.htm</FILE>
-        <FILE dir="offline/pluspsr">main.htm</FILE>
-        <FILE dir="offline/pluspsr">sr.htm</FILE>	
-		<!-- offline/pluspwo -->
-		<FILE dir="offline/pluspwo/map">callout_asset.htm</FILE>
-		<FILE dir="offline/pluspwo/map">callout_location.htm</FILE>
-		<FILE dir="offline/pluspwo/map">callout_workorder.htm</FILE>
-		<FILE dir="offline/pluspwo/map">sidebar_asset.htm</FILE>
-		<FILE dir="offline/pluspwo/map">sidebar_location.htm</FILE>
-		<FILE dir="offline/pluspwo/map">sidebar_workorder.htm</FILE>		
-		<FILE dir="offline/pluspwo/services">pluspmultiassetService.js</FILE>
-		<FILE dir="offline/pluspwo/services">pluspwoService.js</FILE>
-		<FILE dir="offline/pluspwo">actions.htm</FILE>
-		<FILE dir="offline/pluspwo">advancedsearch.htm</FILE>
-		<FILE dir="offline/pluspwo">downtime.htm</FILE>		
-		<FILE dir="offline/pluspwo">failurereporting.htm</FILE>
-		<FILE dir="offline/pluspwo">list.htm</FILE>
-		<FILE dir="offline/pluspwo">main.htm</FILE>
-		<FILE dir="offline/pluspwo">meters.htm</FILE>		
-		<FILE dir="offline/pluspwo">moveasset.htm</FILE>		
-		<FILE dir="offline/pluspwo">multiasset.htm</FILE>
-		<FILE dir="offline/pluspwo">multiassetlist.htm</FILE>
-		<FILE dir="offline/pluspwo">task.htm</FILE>
-		<FILE dir="offline/pluspwo">tasklist.htm</FILE>
-		<FILE dir="offline/pluspwo">wotrack.htm</FILE>    
-        <!-- offline/plustasset -->
-        <FILE dir="offline/plustasset/services">plustassetService.js</FILE>
-		<FILE dir="offline/plustasset">actions.htm</FILE>
-		<FILE dir="offline/plustasset">advancedsearch.htm</FILE>
-		<FILE dir="offline/plustasset">asset.htm</FILE>
-		<FILE dir="offline/plustasset">assetmeter.htm</FILE>
-		<FILE dir="offline/plustasset">assetmeterlist.htm</FILE>
-		<FILE dir="offline/plustasset">downtime.htm</FILE>
-		<FILE dir="offline/plustasset">list.htm</FILE>
-		<FILE dir="offline/plustasset">classify.htm</FILE>	
-		<FILE dir="offline/plustasset">listassetaliases.htm</FILE>
-		<FILE dir="offline/plustasset">listwos.htm</FILE>
-		<FILE dir="offline/plustasset">listassetlicenses.htm</FILE>		
-		<FILE dir="offline/plustasset">listspareparts.htm</FILE>
-		<FILE dir="offline/plustasset">listassetusers.htm</FILE>
-		<FILE dir="offline/plustasset">main.htm</FILE>
-		<FILE dir="offline/plustasset">moveasset.htm</FILE>		
-		<!-- offline/plustwo -->
-		<FILE dir="offline/plustwo/map">callout_asset.htm</FILE>
-		<FILE dir="offline/plustwo/map">callout_location.htm</FILE>
-		<FILE dir="offline/plustwo/map">callout_workorder.htm</FILE>
-		<FILE dir="offline/plustwo/map">sidebar_asset.htm</FILE>
-		<FILE dir="offline/plustwo/map">sidebar_location.htm</FILE>
-		<FILE dir="offline/plustwo/map">sidebar_workorder.htm</FILE>		
-		<FILE dir="offline/plustwo/services">plustmultiassetService.js</FILE>
-		<FILE dir="offline/plustwo/services">plustwoService.js</FILE>
-		<FILE dir="offline/plustwo/services">plustassignmentService.js</FILE>
-		<FILE dir="offline/plustwo">assignment.htm</FILE>	
-		<FILE dir="offline/plustwo">assignments.htm</FILE>			
-		<FILE dir="offline/plustwo">actions.htm</FILE>
-		<FILE dir="offline/plustwo">advancedsearch.htm</FILE>
-		<FILE dir="offline/plustwo">downtime.htm</FILE>		
-		<FILE dir="offline/plustwo">failurereporting.htm</FILE>
-		<FILE dir="offline/plustwo">list.htm</FILE>
-		<FILE dir="offline/plustwo">main.htm</FILE>
-		<FILE dir="offline/plustwo">nonstock.htm</FILE>
-		<FILE dir="offline/plustwo">meters.htm</FILE>		
-		<FILE dir="offline/plustwo">moveasset.htm</FILE>		
-		<FILE dir="offline/plustwo">multiasset.htm</FILE>
-		<FILE dir="offline/plustwo">multiassetlist.htm</FILE>
-		<FILE dir="offline/plustwo">taskactions.htm</FILE>		
-		<FILE dir="offline/plustwo">task.htm</FILE>
-		<FILE dir="offline/plustwo">tasklist.htm</FILE>
-		<FILE dir="offline/plustwo">wotrack.htm</FILE>	
-		<!-- offline/plustinv -->
-        <FILE dir="offline/plustinv/services">plustinvService.js</FILE>
-		<FILE dir="offline/plustinv">actions.htm</FILE>
-		<FILE dir="offline/plustinv">cyclecountactions.htm</FILE>
-		<FILE dir="offline/plustinv">cyclecountlist.htm</FILE>
-		<FILE dir="offline/plustinv">cyclecountview.htm</FILE>
-        <FILE dir="offline/plustinv">list.htm</FILE>
-        <FILE dir="offline/plustinv">main.htm</FILE>
-        <FILE dir="offline/plustinv">view.htm</FILE>			    	
-		<!-- offline/services -->
-		<FILE dir="offline/services">applicationService.js</FILE>
-		<FILE dir="offline/services">domainService.js</FILE>
-		<FILE dir="offline/services">exceptionHandlerService.js</FILE>
-		<FILE dir="offline/services">paginationService.js</FILE>		
-		<!-- offline/sr -->
-        <FILE dir="offline/sr/services">srService.js</FILE>       
-		<FILE dir="offline/sr">actions.htm</FILE>
-        <FILE dir="offline/sr">advancedsearch.htm</FILE>
-        <FILE dir="offline/sr">list.htm</FILE>
-        <FILE dir="offline/sr">main.htm</FILE>
-        <FILE dir="offline/sr">sr.htm</FILE>
-		<!-- offline/startcenter -->
-		<FILE dir="offline/startcenter/services">startcenterService.js</FILE>
-		<FILE dir="offline/startcenter">list.htm</FILE>
-		<!-- offline/tooltrans -->
-		<FILE dir="offline/tooltrans/services">tooltransService.js</FILE>
-		<FILE dir="offline/tooltrans">main.htm</FILE>
-		<FILE dir="offline/tooltrans">tooltrans.htm</FILE>
-		<!-- offline/viewdr -->
-		<FILE dir="offline/viewdr/services">viewdrService.js</FILE>
-		<FILE dir="offline/viewdr">actions.htm</FILE>
-		<FILE dir="offline/viewdr">list.htm</FILE>
-		<FILE dir="offline/viewdr">main.htm</FILE>
-		<FILE dir="offline/viewdr">mr.htm</FILE>
-		<FILE dir="offline/viewdr">mrline.htm</FILE>
-		<FILE dir="offline/viewdr">mrlines.htm</FILE>
-		<!-- offline/worklog -->
-		<FILE dir="offline/worklog/services">worklogService.js</FILE>
-		<FILE dir="offline/worklog">main.htm</FILE>
-		<FILE dir="offline/worklog">worklog.htm</FILE>
-		<!-- offline/wotrack -->
-		<FILE dir="offline/wotrack/map">callout_asset.htm</FILE>
-		<FILE dir="offline/wotrack/map">callout_location.htm</FILE>
-		<FILE dir="offline/wotrack/map">callout_workorder.htm</FILE>
-		<FILE dir="offline/wotrack/map">sidebar_asset.htm</FILE>
-		<FILE dir="offline/wotrack/map">sidebar_location.htm</FILE>
-		<FILE dir="offline/wotrack/map">sidebar_workorder.htm</FILE>		
-		<FILE dir="offline/wotrack/services">multiassetService.js</FILE>
-		<FILE dir="offline/wotrack/services">wotrackService.js</FILE>
-		<FILE dir="offline/wotrack">actions.htm</FILE>
-		<FILE dir="offline/wotrack">advancedsearch.htm</FILE>
-		<FILE dir="offline/wotrack">downtime.htm</FILE>		
-		<FILE dir="offline/wotrack">failurereporting.htm</FILE>
-		<FILE dir="offline/wotrack">list.htm</FILE>
-		<FILE dir="offline/wotrack">main.htm</FILE>
-		<FILE dir="offline/wotrack">meters.htm</FILE>		
-		<FILE dir="offline/wotrack">moveasset.htm</FILE>		
-		<FILE dir="offline/wotrack">multiasset.htm</FILE>
-		<FILE dir="offline/wotrack">multiassetlist.htm</FILE>
-		<FILE dir="offline/wotrack">task.htm</FILE>
-		<FILE dir="offline/wotrack">tasklist.htm</FILE>
-		<FILE dir="offline/wotrack">wotrack.htm</FILE>
-		<!-- offline/wplabor -->
-		<FILE dir="offline/wplabor/services">wplaborService.js</FILE>	
-		<FILE dir="offline/wplabor">main.htm</FILE>
-		<FILE dir="offline/wplabor">wplabor.htm</FILE>
-		<!-- offline/wpmaterial -->
-		<FILE dir="offline/wpmaterial/services">wpmaterialService.js</FILE>	
-		<FILE dir="offline/wpmaterial">main.htm</FILE>
-		<FILE dir="offline/wpmaterial">wpmaterial.htm</FILE>
-		<!-- offline/nonstock
-		<FILE dir="offline/nonstockl/services">nonstockService.js</FILE>	
-		<FILE dir="offline/nonstock">main.htm</FILE>
-		<FILE dir="offline/nonstock">nonstock.htm</FILE> -->
-		<!-- javascript -->
-		<FILE dir="javascript/angular">emm-pagination.js</FILE>
-		<FILE dir="javascript/localization">en_AU.js</FILE>
-		<FILE dir="javascript/localization">en_US.js</FILE>
-		<FILE dir="javascript">angular.min.js</FILE>
-		<FILE dir="javascript">angular-translate.min.js</FILE>
-		<FILE dir="javascript">ezmaxmobile.core-full.min.js</FILE>
-		<FILE dir="javascript">jquery.jqplot.min.js</FILE>
-		<FILE dir="javascript">jquery.js</FILE>
-		<!-- css -->
-		<FILE dir="css/fonts">icons_mobiscroll.eot</FILE>
-		<FILE dir="css/fonts">icons_mobiscroll.svg</FILE>
-		<FILE dir="css/fonts">icons_mobiscroll.ttf</FILE>
-		<FILE dir="css/fonts">icons_mobiscroll.woff</FILE>
-		<FILE dir="css">ezmaxmobile.ui-full.min.css</FILE>
-		<FILE dir="css">jquery.jqplot.min.css</FILE>
-		<!-- images -->	
-		<FILE dir="images">ezmaxmobile.ico</FILE>
-		<FILE dir="images">ezmaxmobile.png</FILE>
-		<FILE dir="images">homelink.png</FILE>
-		<FILE dir="images">startcenter.png</FILE>
-		<FILE dir="images">barcode.png</FILE>
-		<FILE dir="images">camera.png</FILE>
-		<FILE dir="images">menu.png</FILE>
-		<FILE dir="images">ie.png</FILE>
-		<FILE dir="images">returnarrow.png</FILE>
-		<FILE dir="images">failurereport.png</FILE>
-		<FILE dir="images">labor.png</FILE>
-		<FILE dir="images">classification.png</FILE>
-		<FILE dir="images">material.png</FILE>
-		<FILE dir="images">inventory.png</FILE>
-		<FILE dir="images">childwo.png</FILE>
-		<FILE dir="images">notes.png</FILE>
-		<FILE dir="images">attachment.png</FILE>
-		<FILE dir="images">tasks.png</FILE>
-		<FILE dir="images">asset.png</FILE>
-		<FILE dir="images">addnew.png</FILE>
-		<FILE dir="images">addfollowup.png</FILE>
-		<FILE dir="images">changestatus.png</FILE>
-		<FILE dir="images">relatedrecords.png</FILE>
-		<FILE dir="images">other.png</FILE>
-		<FILE dir="images">sync.png</FILE>
-		<FILE dir="images">minus.png</FILE>
-		<FILE dir="images">plus.png</FILE>
-		<FILE dir="images">offline.png</FILE>
-		<FILE dir="images">online.png</FILE>
-		<FILE dir="images">map.png</FILE>
-		<FILE dir="images">assetmove.png</FILE>
-		<FILE dir="images">multiasset.png</FILE>
-		<FILE dir="images">tag.png</FILE>	
-		<FILE dir="images">downtime.png</FILE>
-		<FILE dir="images">calendar.png</FILE>
-		<FILE dir="images">wos.png</FILE>
-		<FILE dir="images">balance.png</FILE>
-		<FILE dir="images">checkbox.png</FILE>
-		<FILE dir="images">sr.png</FILE>
-		<FILE dir="images">meter.png</FILE>
-		<FILE dir="images">selectowner.png</FILE>
-		<FILE dir="images">takeownership.png</FILE>
-		<FILE dir="images">usergroup.png</FILE>
-		<FILE dir="images">buttons.gif</FILE>
-		<FILE dir="images">toolbar.gif</FILE>
-		<FILE dir="images">transfer.png</FILE>
-		<FILE dir="images">purchase.png</FILE>
-		<FILE dir="images/pins">asset.png</FILE>
-		<FILE dir="images/pins">location.png</FILE>
-		<FILE dir="images/pins">wo.png</FILE>
+		<FILE dir="offline/login">*.*</FILE>
+		<FILE dir="offline/classes">*.*</FILE>
+		<FILE dir="offline/services">*.*</FILE>
+		<FILE dir="offline/common">*.*</FILE>
+		<FILE dir="offline/doclinks">*.*</FILE>
+		<FILE dir="offline/doclinks/services">*.*</FILE>
+		<FILE dir="offline/wotrack">*.*</FILE>
+		<FILE dir="offline/wotrack/services">*.*</FILE>
+		<FILE dir="offline/wplabor">*.*</FILE>
+		<FILE dir="offline/wplabor/services">*.*</FILE>	
+		<FILE dir="offline/tooltrans">*.*</FILE>
+		<FILE dir="offline/tooltrans/services">*.*</FILE>
+		<FILE dir="offline/wpmaterial">*.*</FILE>
+		<FILE dir="offline/wpmaterial/services">*.*</FILE>			
+		<FILE dir="offline/labtrans">*.*</FILE>
+		<FILE dir="offline/labtrans/services">*.*</FILE>
+		<FILE dir="offline/labrep">*.*</FILE>
+		<FILE dir="offline/labrep/services">*.*</FILE>
+		<FILE dir="offline/matusetrans">*.*</FILE>
+		<FILE dir="offline/matusetrans/services">*.*</FILE>
+		<FILE dir="offline/worklog">*.*</FILE>
+		<FILE dir="offline/worklog/services">*.*</FILE>
+		<FILE dir="offline/invbalances">*.*</FILE>
+		<FILE dir="offline/invbalances/services">*.*</FILE>
+        <FILE dir="offline/inventor">*.*</FILE>
+        <FILE dir="offline/inventor/services">*.*</FILE>
+		<FILE dir="offline/invissue">*.*</FILE>
+        <FILE dir="offline/invissue/services">*.*</FILE>
+        <FILE dir="offline/sr">*.*</FILE>
+        <FILE dir="offline/sr/services">*.*</FILE>       
+        <FILE dir="offline/asset">*.*</FILE> 
+        <FILE dir="offline/asset/services">*.*</FILE>  
+        <FILE dir="offline/createdr">*.*</FILE>
+        <FILE dir="offline/createdr/services">*.*</FILE>  
+        <FILE dir="offline/viewdr">*.*</FILE>
+        <FILE dir="offline/viewdr/services">*.*</FILE>
+		<FILE dir="offline/map">*.*</FILE>
+		<FILE dir="javascript">*.*</FILE>
+		<FILE dir="javascript/localization">*.*</FILE>
+		<FILE dir="javascript/signature">*.*</FILE>
+		<FILE dir="css">*.*</FILE>
+		<FILE dir="css/fonts">*.*</FILE>
+		<FILE dir="images">*.*</FILE>
+		<FILE dir="images/pins">*.*</FILE>		
+		<FILE dir="offline/startcenter/services">*.*</FILE>
+        <FILE dir="offline/startcenter">*.*</FILE>
+        <FILE dir="offline/query">*.*</FILE>
+        <FILE dir="offline/query/services">*.*</FILE>
+        <FILE dir="offline/classification">*.*</FILE>
+        <FILE dir="offline/classification/services">*.*</FILE>
+        <FILE dir="offline/inspector">*.*</FILE>
+		<FILE dir="offline/inspector/services">*.*</FILE>
 	</OFFLINE_FILE_CACHE>
 	
 </EZMAXMOBILE_OFFLINE_PROPERTIES>
