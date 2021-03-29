@@ -16,7 +16,7 @@
 <body>
 	<div class="ui-page ui-inset">
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="global.advancedsearch"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -55,6 +55,7 @@
 							id="ALLMULTIASSETLOCCI.LOCATION" 
 							value="<s:property value="mbo.getThisMboSet().getQbe('ALLMULTIASSETLOCCI.LOCATION')"/>"
 							onchange="emm.core.setValue(this)"
+							data-barcode
 					/>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="ALLMULTIASSETLOCCI.LOCATION" data-source="LOCATION" data-display="LOCATION,DESCRIPTION,ORGID" data-search="LOCATION,DESCRIPTION"></a>
 				</li>
@@ -64,6 +65,7 @@
 							id="ALLMULTIASSETLOCCI.ASSETNUM" 
 							value="<s:property value="mbo.getThisMboSet().getQbe('ALLMULTIASSETLOCCI.ASSETNUM')"/>"
 							onchange="emm.core.setValue(this)"
+							data-barcode
 					/>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="ALLMULTIASSETLOCCI.ASSETNUM" data-source="ASSETNUM" data-display="ASSETNUM,DESCRIPTION" data-search="ASSETNUM,DESCRIPTION"></a>
 				</li>

@@ -28,7 +28,7 @@
 			var api = pad || $('.sigPad').signaturePad({drawOnly:true});
 			api.clearCanvas();
 		}
-		$(window).bind('orientationchange', function(e) {
+		$(window).on('orientationchange', function(e) {
 			if (window.orientation != 0 || $(window).width() > 500){
 				$('#myform, .ui-btn-right, #clearButton').show();
 				$('#portrait').hide();
@@ -51,16 +51,16 @@
 <body>
 	<div class="ui-page ui-inset">
 		<div class="ui-header">
-			<a class="ui-btn-left ui-btn-e" href="javascript:emm.core.back();"><s:text name="global.cancel"/></a>
+			<a class="ui-btn-left ui-btn-e" href="javascript:emm.core.back();"><span class="emm-times-circle"></span></a>
 			<h3 class="ui-title"><s:text name="global.signature"/></h3>
-			<a id="clearButton" style="right : 75px" href="javascript:clear();"><s:text name="global.clear"/></a>
-			<a class="ui-btn-right ui-btn-c" href="javascript:confirmSubmit();"><s:text name="global.save"/></a>
+			<a id="clearButton" style="right : 75px" href="javascript:clear();"><span class="emm-eraser"></span></a>
+			<a class="ui-btn-right ui-btn-c" href="javascript:confirmSubmit();"><span class="emm-floppy-o"></span></a>
 		</div>
 		<div class="ui-content">
 			<ul id="portrait" class="ui-listview">
 				<li><span><h3><s:text name="global.rotatedevice"/></h3></span></li>
 			</ul>
-		  	<form id="myform" method="post" action="" class="sigPad" enctype="multipart/form-data" style="display: none;">
+		  	<form id="myform" method="post" action="" class="sigPad" enctype="multipart/form-data" style="display: none; touch-action: none;">
 		    	<div class="sig sigWrapper">
 		      		<div class="typed"></div>
 			      	<canvas class="pad" width="600px" height="220px"></canvas>

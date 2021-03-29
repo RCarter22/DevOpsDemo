@@ -23,14 +23,14 @@
 			<ul class="ui-listview ui-inset">
 				<li>
 					<a href="../viewsr/main.action">
-						<img src="../images/sr.png" />
+						<span class="emm-service-request"></span>
 						<h3><s:text name="ezmaxmobile.viewsr"/></h3>
 						<span class="ui-arrow"></span>
 					</a>
 				</li>
 				<li>
 					<a href="../createsr/main.action">
-						<img src="../images/addnew.png" />
+						<span class="emm-add"></span>
 						<h3><s:text name="ezmaxmobile.createsr"/></h3>
 						<span class="ui-arrow"></span>
 					</a>

@@ -71,7 +71,7 @@ angular.module('emm').factory('paginationService', function($filter){
 	PUBLIC.goToPage = function(pageNum){
 		if (options.pagination == null)
 			return;
-		if (options.pagination.pagenum <= 0 || options.pagination.pagemum > options.pagination.totalpages) {
+		if (options.pagination.pagenum <= 0 || options.pagination.pagenum > options.pagination.totalpages) {
 			return;
 		}							
 		var selectObj = EMMServer.DB.Select();

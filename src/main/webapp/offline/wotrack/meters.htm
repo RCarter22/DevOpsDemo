@@ -7,9 +7,9 @@
 	<body>
 		<div class="ui-page">
 			<div class="ui-header ui-header-b">
-				<a class="ui-btn-left" ng-click="goBack()" translate="BACK">Back</a>
+				<a class="ui-btn-left" ng-click="goBack()"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="METERREADINGS">Enter Meter Readings</h3>
-				<a ng-click="actions.saveAssetLocMeters(workorder, assetMeters, locMeters)" class="ui-btn-right" ng-class="{'ui-btn-c' : assetMeters.toBeSaved() || locMeters.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-click="actions.saveAssetLocMeters(workorder, assetMeters, locMeters)" class="ui-btn-right" ng-class="{'ui-btn-c' : assetMeters.toBeSaved() || locMeters.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
 			</div>
 	        <div class="ui-statusbar ui-statusbar-f">
@@ -49,7 +49,7 @@
 					</li>
 					<li class="ui-field">
 						<label translate="METER.LASTREADING">Last Reading</label>
-						<input disabled="true" ng-model="am.LASTREADING" ng-readonly="am.mbo.isReadOnly('LASTREADING')" ng-required="am.mbo.isRequired('LASTREADING')" ng-style="{'color':(am.mbo.isDirty() == '1'?'red':'inherit')}">
+						<input disabled="true" ng-value="am.LASTREADING | filterIfNumber" ng-readonly="am.mbo.isReadOnly('LASTREADING')" ng-required="am.mbo.isRequired('LASTREADING')" ng-style="{'color':(am.mbo.isDirty() == '1'?'red':'inherit')}">
 					</li>
 				</ul>
 			</div>
@@ -79,7 +79,7 @@
 					</li>							
 					<li class="ui-field">
 						<label translate="METER.LASTREADING">Last Reading</label>
-						<input disabled="true" ng-model="lm.LASTREADING" ng-readonly="lm.mbo.isReadOnly('LASTREADING')" ng-required="lm.mbo.isRequired('LASTREADING')" ng-style="{'color':(lm.mbo.isDirty() == '1'?'red':'inherit')}">
+						<input disabled="true" ng-value="lm.LASTREADING | filterIfNumber" ng-readonly="lm.mbo.isReadOnly('LASTREADING')" ng-required="lm.mbo.isRequired('LASTREADING')" ng-style="{'color':(lm.mbo.isDirty() == '1'?'red':'inherit')}">
 					</li>
 				</ul>
 			</div>

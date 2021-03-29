@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title">Tools</h3>
-				<a ng-show="tooltrans.mbo.isNew()" ng-click="actions.saveToolTrans(tooltrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : tooltrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-show="tooltrans.mbo.isNew()" ng-click="actions.saveToolTrans(tooltrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : tooltrans.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 			</div>
 			<div class="ui-content">
 				<ul class="ui-listview">	

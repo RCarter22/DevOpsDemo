@@ -5,6 +5,7 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 
 <!DOCTYPE html>
 <html>
@@ -21,7 +22,7 @@
 		<div class="ui-content ui-content-narrow">
 			<s:include value="../common/message.jsp"/>
 			<div class="ui-btn-container">
-				<a class="ui-btn-a" href="<s:property value="currentAction"/>"><s:text name="global.ok"/></a>
+				<a class="ui-btn-a" href="gotourl.action?currentAction=<e:forUriComponent value="${currentAction}" />"><s:text name="global.ok"/></a>
 			</div>
 		</div>
 	</div>	

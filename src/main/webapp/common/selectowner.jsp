@@ -5,6 +5,7 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 
 <!DOCTYPE html>
 <html>
@@ -15,9 +16,9 @@
 <body>
 	<div class="ui-page">
 		<div class="ui-header ui-header-b">
-			<a class="ui-btn-left" href="<s:property value='currentAction'/>"><s:text name="global.cancel"/></a>
+			<a class="ui-btn-left" href="gotourl.action?currentAction=<e:forUriComponent value="${currentAction}" />"><span class="emm-times-circle"></span></a>
 			<h3 class="ui-title"><s:text name="global.selectvalue"/></h3>	
-			<a class="ui-btn-right" onclick="emm.core.ezlookup()"><img src="../images/barcode.png"/></a>
+			<a class="ui-btn-right" onclick="emm.core.ezlookup()"><span class="emm-barcode-3"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>	
 		<div class="ui-content">
@@ -36,7 +37,7 @@
 			</div>
 			<ul class="ui-navbar">
 				<li>
-					<a onclick="emm.core.selectOwner(this)" data-field="OWNER" data-source="PERSONID" data-display="PERSONID,DISPLAYNAME" data-search="PERSONID,DISPLAYNAME" data-currentaction="<s:property value='currentAction'/>"
+					<a onclick="emm.core.selectOwner(this)" data-field="OWNER" data-source="PERSONID" data-display="PERSONID,DISPLAYNAME" data-search="PERSONID,DISPLAYNAME" data-currentaction="<e:forHtml value="${currentAction}" />"
 							<s:if test="fieldName.equals('OWNER')">		
 								class="ui-active" 
 							</s:if>
@@ -44,7 +45,7 @@
 						<s:text name="global.persons"/>
 					</a>
 				<li>
-					<a onclick="emm.core.selectOwner(this)" data-field="OWNERGROUP" data-source="PERSONGROUP" data-display="PERSONGROUP,DESCRIPTION" data-search="PERSONGROUP,DESCRIPTION" data-currentaction="<s:property value='currentAction'/>"
+					<a onclick="emm.core.selectOwner(this)" data-field="OWNERGROUP" data-source="PERSONGROUP" data-display="PERSONGROUP,DESCRIPTION" data-search="PERSONGROUP,DESCRIPTION" data-currentaction="<e:forHtml value="${currentAction}" />"
 							<s:if test="fieldName.equals('OWNERGROUP')">		
 								class="ui-active" 
 							</s:if>					
@@ -61,7 +62,7 @@
 				<s:include value="../common/pagination.jsp"/>					
 					<s:iterator value="lookupList">
 						<li>
-							<a onclick="emm.core.setOwnerValue('<s:property value='fieldName'/>','<s:property value="lookupSourceFieldValue"/>','<s:property value='currentAction'/>')">
+							<a onclick="emm.core.setOwnerValue('<e:forJavaScript value="${fieldName}" />','<e:forJavaScript value="${lookupSourceFieldValue}" />','<e:forJavaScript value="${currentAction}" />')">
 								<s:iterator value="displayValues" status="status">
 									<s:if test="#status.index == 0 ">
 										<h3><s:property value="%{displayValues[#status.index]}"/></h3>

@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="WORKLOG.NAME">Work Log</h3>
-				<a ng-show="worklog.mbo.isNew()" ng-click="actions.saveWorkLog(worklog)" class="ui-btn-right" ng-class="{'ui-btn-c' : worklog.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-show="worklog.mbo.isNew()" ng-click="actions.saveWorkLog(worklog)" class="ui-btn-right" ng-class="{'ui-btn-c' : worklog.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !worklog.mbo.isDirty(), 'ui-statusbar-c': worklog.mbo.isDirty()}">
 				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="worklog.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
@@ -62,8 +62,16 @@
 				$scope.goBack = function(){
 					// Clear any changes and remove from session
 					$scope.worklog.session.remove();
-					EMMServer.DB.Select()
-						.go("offline/worklog/main.htm");
+				
+					var fromPage = EMMServer.Session.getItem('FROM_PAGE');
+					if (fromPage != null){
+						EMMServer.Session.removeItem('FROM_PAGE');	
+						EMMServer.DB.Select().go(fromPage, true);
+					}
+					else{
+						EMMServer.DB.Select()
+							.go("offline/worklog/main.htm");
+					}
 				}
 				$scope.actions = worklogService.actions;
 			}

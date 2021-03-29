@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="WPMATERIAL.NAME">Planned Materials</h3>
-				<a ng-click="actions.saveWPMaterial(wpmaterial)" class="ui-btn-right" ng-class="{'ui-btn-c' : wpmaterial.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-click="actions.saveWPMaterial(wpmaterial)" class="ui-btn-right" ng-class="{'ui-btn-c' : wpmaterial.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !wpmaterial.mbo.isDirty(), 'ui-statusbar-c': wpmaterial.mbo.isDirty()}">
 				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="wpmaterial.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>

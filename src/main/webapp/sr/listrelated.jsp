@@ -17,7 +17,7 @@
 	<div class="ui-page">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="global.relatedrecords"/></h3>			
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -34,7 +34,7 @@
 									<h3><s:property value="getMboValueInfoStatic('RELATEDRECWO.DESCRIPTION').getTitle()"/>: <s:property value="getString('RELATEDRECWO.DESCRIPTION')"/></h3>
 									<p><s:property value="getMboValueInfoStatic('RELATEDRECCLASS').getTitle()"/>: <s:property value="getString('RELATEDRECCLASS')"/></p>
 									<p><s:property value="getMboValueInfoStatic('RELATETYPE').getTitle()"/>: <s:property value="getString('RELATETYPE')"/></p>
-									<p><s:property value="getMboValueInfoStatic('RELATEDRECTK.STATUS').getTitle()"/>: <s:property value="getMboValueInfoStatic('RELATEDRECTK.STATUS').getTitle()"/>: <s:property value="getString('RELATEDRECWO.STATUS')"/></p>
+									<p><s:property value="getMboValueInfoStatic('RELATEDRECWO.STATUS').getTitle()"/>: <s:property value="getString('RELATEDRECWO.STATUS')"/></p>
 									<span class="ui-arrow"></span>
 								</a>
 							</li>

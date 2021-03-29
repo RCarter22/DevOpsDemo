@@ -16,12 +16,12 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
+			<a class="ui-btn-left" href="../main.action"><span class="emm-home"></span></a>
 			<h3 class="ui-title"><s:text name="global.passwordinfo"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
-			<s:form action="changepwd.action">
+			<s:form action="changepwd.action" autocomplete="false">
 				<ul class="ui-listview">
 					<li class="ui-divider ui-divider-a"><s:text name="profile.passwordinstructions"/></li>
 					<li class="ui-field ui-field-auto ui-details ui-readonly">
@@ -37,6 +37,7 @@
 								required="<s:property value="mbo.getMboValueData('PASSWORDOLD').isRequired()"/>"
 								readonly="<s:property value="mbo.getMboValueData('PASSWORDOLD').isReadOnly()"/>"
 								value="<s:property value="mbo.getString('PASSWORDOLD')"/>"
+								autocomplete="false"
 						/>
 					</li>		
 				</ul>

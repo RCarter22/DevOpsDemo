@@ -5,6 +5,7 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 
 <!DOCTYPE html>
 <html>
@@ -23,9 +24,9 @@
 			<s:include value="../common/statusbar.jsp"/>
 			
 			<div class="ui-header ui-header-b">
-				<a class="ui-btn-left" href="<s:property value="currentAction"/>"><s:text name="global.cancel"/></a>
+				<a class="ui-btn-left" href="gotourl.action?currentAction=<e:forUriComponent value="${currentAction}" />"><span class="emm-times-circle"></span></a>
 				<h3 class="ui-title"><s:text name="global.selectvalue"/></h3>
-				<a class="ui-btn-right" onclick="emm.core.setGLA('<s:property value='currentAction'/>');"><s:text name="global.ok"/></a>		
+				<a class="ui-btn-right" onclick="emm.core.setGLA('<e:forUriComponent value="${currentAction}" />');"><span class="emm-check"></span></a>		
 			</div>
 			<div class="ui-searchbar">
 				<input type="search" placeholder="<s:text name="global.search"/>" name="search" type="text" value="<s:property value="search"/>"/>

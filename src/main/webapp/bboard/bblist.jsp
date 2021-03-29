@@ -16,7 +16,7 @@
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.bboard"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>	
@@ -29,7 +29,7 @@
 							<a href="bbview.action?id=<s:property value="getUniqueIDValue()"/>">
 								<p class="ui-aside"><s:property value="getString('SITEID')"/></p>
 								<p><strong><s:property value="getString('SUBJECT')"/></strong></p>								
-								<h3><s:property value="getString('MESSAGE')" escape="false"/></h3>
+								<h3><s:property value="getString('MESSAGE')" escapeHtml="false"/></h3>
 								<p><s:property value="getMboValueInfoStatic('POSTDATE').getTitle()"/>: <s:property value="getString('POSTDATE')"/></p>
 								<span class="ui-arrow"></span>
 							</a>

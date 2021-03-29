@@ -8,9 +8,18 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="EZMAXMOBILE.WOTRACK">Work Order Tracking</h3>
-				<a ng-click="actions.saveWorkorder(workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : workorder.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-click="actions.saveWorkorder(workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : workorder.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
+				<a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>
+<!-- 				<div class="ui-subheader"> -->
+<!-- 					<button ng-click="actions.doChangeStatus(workorder, 'APPR')" title="Approve Work Order"><span class="emm-check-circle-o"></span></button> -->
+<!-- 					<button ng-click="actions.doChangeStatus(workorder, 'INPRG')" title="Initiate Work Order"><span class="emm-play-circle"></span></button> -->
+<!-- 					<button ng-click="actions.doChangeStatus(workorder, 'COMP')" title="Complete Work Order"><span class="emm-check-circle"></span></button> -->
+<!-- 					<button ng-show="!mboObject.isInHistory()" ng-click="createNewWorklog(workorder)" title="Add Worklog"><span class="emm-files-o"></span></button> -->
+<!-- 					<button ng-if="labtransInfo && labtransInfo.TIMERSTATUS != 'ACTIVE'" ng-show="workorder.canAddActuals() && !workorder.isInHistory()" ng-click="actions.startTimer(workorder, labtransInfo)" title="Start Timer"><span class="emm-clock-o"></span></button> -->
+<!-- 					<button ng-if="labtransInfo && labtransInfo.TIMERSTATUS == 'ACTIVE'" ng-show="workorder.canAddActuals() && !workorder.isInHistory()" ng-click="actions.stopTimer(workorder, labtransInfo)" title="Stop Timer" class="ui-btn-c"><span class="emm-clock-o"></span></button> -->
+<!--       	  		</div> -->
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !workorder.mbo.isDirty(), 'ui-statusbar-c': workorder.mbo.isDirty()}">
@@ -24,13 +33,13 @@
 						<li>
 							<span>
 								<h3><strong>{{h.WHDESCRIPTION}}</strong></h3>
-								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('h.WHLONGDESCRIPTION')">{{h.WHLONGDESCRIPTION | htmlToText}}</p>
+								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('h.WHLONGDESCRIPTION')" ng-bind-html="h.WHLONGDESCRIPTION | trust"></p>
 								<ul class="ui-listview ui-message-e" ng-show="precautionExists(h.HAZARDID) === true">
 									<li class="ui-divider ui-divider-c" translate="WORKORDER.PRECAUTIONS"></li>
 									<li  ng-repeat="p in precaution">
 										<span ng-if="h.HAZARDID == p.HAZARDID">
 											<h3 class="ui-wrap">{{p.WPDESCRIPTION}}</h3>
-											<p class="ui-wrap" ng-show="!String.isNullOrEmpty('p.WPLONGDESCRIPTION')">{{p.WPLONGDESCRIPTION | htmlToText}}</p>
+											<p class="ui-wrap" ng-show="!String.isNullOrEmpty('p.WPLONGDESCRIPTION')" ng-bind-html="p.WPLONGDESCRIPTION | trust"></p>
 										</span>
 									</li>										
 								</ul>
@@ -45,7 +54,7 @@
 						<li>
 							<span>
 								<h3><strong>{{m.WHDESCRIPTION}}</strong></h3>
-								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('m.WHLONGDESCRIPTION')">{{m.WHLONGDESCRIPTION | htmlToText}}</p>
+								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('m.WHLONGDESCRIPTION')" ng-bind-html="m.WHLONGDESCRIPTION | trust"></p>
 								<p class="ui-wrap"><strong translate="WORKORDER.RELATELOC">Related Location</strong>: {{m.LOC}}</p>
 								<p class="ui-wrap"><strong translate="WORKORDER.RELATEASSET">Related Asset</strong>: {{m.ASSET}}</p>
 								<p class="ui-wrap"><strong translate="WORKORDER.HEALTH">Health</strong>: {{m.HEALTHRATING}}</p>
@@ -62,7 +71,7 @@
 						<li>
 							<span>
 								<h3><strong>{{h.WHDESCRIPTION}}</strong></h3>
-								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('h.WHLONGDESCRIPTION')">{{h.WHLONGDESCRIPTION | htmlToText}}</p>
+								<p class="ui-wrap" ng-show="!String.isNullOrEmpty('h.WHLONGDESCRIPTION')" ng-bind-html="h.WHLONGDESCRIPTION | trust"></p>
 							</span>
 							<li ng-repeat="t in tagout">
 								<ul class="ui-listview ui-message-e" ng-show="h.HAZARDID == t.HAZARDID">
@@ -70,7 +79,7 @@
 									<li>
 										<span>
 											<h3 class="ui-wrap">{{t.WTDESCRIPTION}}</h3>
-											<p class="ui-wrap" ng-show="!String.isNullOrEmpty('t.WTLONGDESCRIPTION')">{{t.WTLONGDESCRIPTION | htmlToText}}</p>
+											<p class="ui-wrap" ng-show="!String.isNullOrEmpty('t.WTLONGDESCRIPTION')" ng-bind-html="t.WTLONGDESCRIPTION | trust"></p>
 											<p class="ui-wrap"><strong translate="WORKORDER.LOCATION">Location</strong>: {{t.LOCATION}}</p>
 											<p class="ui-wrap"><strong translate="WORKORDER.ASSETNUM">Asset</strong>: {{t.ASSETNUM}}</p>
 											<p class="ui-wrap"><strong translate="WORKORDER.REQSTATE">Required State</strong>: {{t.REQUIREDSTATE}}</p>
@@ -79,7 +88,7 @@
 												<li ng-repeat="w in wotaglock">
 													<span ng-show="t.TAGOUTID == w.TAGOUTID">
 														<h3 class="ui-wrap">{{w.WLDESCRIPTION}}</h3>
-														<p class="ui-wrap" ng-show="!String.isNullOrEmpty('w.WLLONGDESCRIPTIONK')">{{w.WLLONGDESCRIPTION | htmlToText}}</p>
+														<p class="ui-wrap" ng-show="!String.isNullOrEmpty('w.WLLONGDESCRIPTION')" ng-bind-html="w.WLLONGDESCRIPTION | trust"></p>
 														<p class="ui-wrap" translate="WORKORDER.LOCATION"><strong>Location</strong>: {{w.LOCATION}}</p>
 														<p class="ui-wrap" translate="WORKORDER.ASSETNUM"><strong>Asset</strong>: {{w.ASSETNUM}}</p>
 														<p class="ui-wrap" translate="WORKORDER.REQSTATE"><strong>Required State</strong>: {{w.REQUIREDSTATE}}</p>
@@ -147,6 +156,10 @@
 						<label translate="WORKORDER.GLACCOUNT">GL Account</label>
 						<input ng-model="workorder.GLACCOUNT" ng-readonly="workorder.mbo.isReadOnly('GLACCOUNT')" ng-required="workorder.mbo.isRequired('GLACCOUNT')">
 					</li> -->
+					<li class="ui-field" ng-show="workorder.INSPFORMNUM">
+						<label translate="WORKORDER.INSPFORMNUM">Inspection</label>
+						<input disabled="true" ng-model="workorder.INSPFORMNUM" ng-readonly="true" >
+					</li>
 					<li class="ui-field">
 						<label translate="WORKORDER.FAILURECODE">Failure Class</label>
 						<input disabled="true" ng-model="workorder.FAILURECODE" ng-readonly="workorder.mbo.isReadOnly('FAILURECODE')" ng-required="workorder.mbo.isRequired('FAILURECODE')">
@@ -232,6 +245,9 @@
 					<div class="ui-btn-container">
 						<a class="ui-btn-a" ng-click="locationDrilldown(workorder)" translate="DRILLDOWN">Drilldown</a>
 					</div>	
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="locationMap(workorder)" translate="OPENMAP">Open Map</a>
+					</div>	
 				</div>
 			</div>
 		</div>
@@ -262,6 +278,9 @@
 					<div class="ui-btn-container">
 						<a class="ui-btn-a" ng-click="assetDrilldown(workorder)" translate="DRILLDOWN">Drilldown</a>
 					</div>
+					<div class="ui-btn-container">
+						<a class="ui-btn-a" ng-click="assetMap(workorder)" translate="OPENMAP">Open Map</a>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -282,7 +301,7 @@
 			</div>
 		</div> 
 		<script type="text/javascript">
-			function MainController($scope, domainService, wotrackService) {
+			function MainController($scope, domainService, wotrackService, inspectorService, mapService) {
 				var appName = 'WOTRACK';
 				var viewName = 'offline/wotrack/wotrack.htm';
 				
@@ -304,13 +323,24 @@
 					viewName : viewName,
 					entityName : 'WORKORDER'
 				});
+				inspectorService.init({
+					userInfo : $scope.userInfo
+				});
+				mapService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName : 'WORKORDER'
+				});
+				
 				$scope.domain = domainService.domain;
 				$scope.locationDrilldown = domainService.locationDrilldown;
 				$scope.assetDrilldown = domainService.assetDrilldown;
 				
 				$scope.lookups = wotrackService.lookups;
 				$scope.actions = wotrackService.actions;
-
+				
+				$scope.dataSources = mapService.getOptions().dataSources;
+				
 				var messages = EMMServer.DB.getQueryResult("MESSAGE");
 				if (messages)
 					$scope.message = messages[0].DISPLAYMESSAGE;
@@ -332,6 +362,14 @@
 				$scope.hazardtag = EMMServer.DB.getQueryResult("WOHAZARDTAG");
 				$scope.tagout = EMMServer.DB.getQueryResult("WOTAGOUT");
 				$scope.wotaglock = EMMServer.DB.getQueryResult("WOTAGLOCK");
+				var inspResult = EMMServer.DB.getQueryResult("INSPECTIONRESULT");
+				if (inspResult && inspResult[0]) {
+					$scope.inspectionresult = new InspectionResult(inspResult[0]);
+				}
+				var inspResultnonParent = EMMServer.DB.getQueryResult("INSPECTIONRESULTNONPARENT");
+				if (inspResultnonParent && inspResultnonParent[0]) {
+					$scope.inspectionresult = new InspectionResult(inspResultnonParent[0]);
+				}
 				
 				$scope.precautionExists = function(id){
 					var id = id;
@@ -379,6 +417,58 @@
 				}
 				// *Important* to set app name
 				$scope.workorder.mbo.appName(appName);
+				
+				$scope.createNewWorklog = function(parentMbo){
+					EMMServer.Session.setItem('FROM_PAGE', viewName);
+					$scope.actions.createWorklog(parentMbo);
+				}
+				
+				$scope.assetMap = function(workorder) {
+					workorder.session.cache();
+					
+					EMMServer.Session.setItem('ASSETMAP_DATA', {
+						returnPage : 'offline/wotrack/wotrack.htm',
+						cacheKey : workorder.session.cacheKey(),
+						crossovers: ["LOCATION"]
+					});
+					
+					var map = new emm.maps.Map();
+					
+					map.includeDataSources($scope.dataSources)
+					
+					map.includeDataSourceModules([
+						{
+							dataSourceId:'DS_ASSETS', 
+							isLookup: true						
+						}
+						]);
+										
+					// Launch Map
+					emm.maps.launchMap(map);
+				}
+				
+				$scope.locationMap = function(workorder) {
+					workorder.session.cache();
+					
+					EMMServer.Session.setItem('LOCATIONMAP_DATA', {
+						returnPage : 'offline/wotrack/wotrack.htm',
+						cacheKey : workorder.session.cacheKey()
+					});
+					
+					var map = new emm.maps.Map();
+					
+					map.includeDataSources($scope.dataSources)
+					
+					map.includeDataSourceModules([
+						{
+							dataSourceId:'DS_LOCATIONS', 
+							isLookup: true						
+						}
+						]);					
+					
+					// Launch Map
+					emm.maps.launchMap(map);
+				}
 				
 				$scope.goBack = function() {
 					// Clear any changes and remove from session

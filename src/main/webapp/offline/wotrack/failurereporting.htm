@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="cancel()" class="ui-btn-left">Cancel</a>
+				<a ng-click="cancel()" class="ui-btn-left"><span class="emm-times-circle"></span></a>
 				<h3 class="ui-title" translate="FAILUREREPORT">Failure Reporting</h3>
-				<a ng-click="save()" class="ui-btn-right" ng-class="{'ui-btn-c' : failureCode.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-click="save()" class="ui-btn-right" ng-class="{'ui-btn-c' : failureCode.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 			</div>
 			<div class="ui-statusbar ui-statusbar-f">
 				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>

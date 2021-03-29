@@ -1,4 +1,4 @@
-angular.module('emm').factory('wotrackService', function(domainService, doclinksService, labtransService, classificationService){
+angular.module('emm').factory('wotrackService', function($filter, domainService, doclinksService, labtransService, classificationService, worklogService, inspectorService){
 	var options = {
 			defaultPageSize: 20,
 			viewName : null,
@@ -24,6 +24,9 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 	
 	PUBLIC.init = function(opt){
 		$.extend(options, opt);
+		worklogService.init({
+			userInfo : options.userInfo
+		});
 	};
 	
 	PUBLIC.createNew = function(){
@@ -47,6 +50,7 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 		var advWo = new WorkOrder();
 		// Create a new in memory work order and set field defaults
 		advWo.createNew({
+			ORGID: options.userInfo.orgId,
 			ISADVANCED: '1'
 		});
 		// Save to the cache
@@ -60,7 +64,10 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 	PUBLIC.doAdvancedSearch = function(wo){		
 		var viewName = 'offline/wotrack/list.htm';
 		var query = "SELECT * FROM WORKORDER WHERE ISTASK='0'";
-			
+
+		var today = Date.today().toISOString();
+		var timezoneOffset = (Date.today().getTimezoneOffset()) * (-1);
+		
 		if(wo.WONUM && wo.WONUM != '')
 			query += " AND WONUM = '" + wo.WONUM + "'";
 		if(wo.DESCRIPTION && wo.DESCRIPTION != '')
@@ -87,13 +94,13 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 			query += " AND PROBLEMCODE = '" + wo.PROBLEMCODE + "'";
 		if(wo.SCHEDSTARTFROM && wo.SCHEDSTARTFROM != ''){
 			//need to convert the selected date into the appropriate format
-			var schedstartfrom = wo.SCHEDSTARTFROM.toDate().toISOString().substring(0,10);
-			query += " AND date(SCHEDSTART/1000, 'unixepoch') >= date('" + schedstartfrom + "')";
+			var schedstartfrom = wo.SCHEDSTARTFROM.toDate().toISOString();
+			query += " AND date(SCHEDSTART, '{1} minutes') >= date('{0}', '{1} minutes')".format(schedstartfrom, timezoneOffset);
 		}
 		if(wo.SCHEDSTARTTO && wo.SCHEDSTARTTO != ''){
 			//need to convert the selected date into the appropriate format
-			var schedstartto = wo.SCHEDSTARTTO.toDate().toISOString().substring(0,10);
-			query += " AND date(SCHEDSTART/1000, 'unixepoch') <= date('" + schedstartto + "')";
+			var schedstartto = wo.SCHEDSTARTTO.toDate().toISOString();
+			query += " AND date(SCHEDSTART, '{1} minutes') <= date('{0}', '{1} minutes')".format(schedstartto, timezoneOffset);
 		}
 		
 		query += " ORDER BY REPORTDATE DESC";
@@ -146,7 +153,7 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 			.submit("offline/wotrack/list.htm", true);									
 	};
 	
-	PUBLIC.showDetail = function(wo, message){
+	PUBLIC.showDetail = function(wo, message, fromMap){		
 		// The MBO object should be queried in one SQL clause, this is because when the MBO object is updated, it has a one-to-one mapping to the database
 		var sql = "SELECT * FROM WORKORDER WHERE WORKORDERID = '" + wo.WORKORDERID + "'";
 		
@@ -160,10 +167,16 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 
 		var statusListSql = "SELECT * FROM DOMAIN WHERE DOMAINID = 'WOSTATUS'";
 		
-		var assetSql = "SELECT A.ISRUNNING FROM WORKORDER W " +
+		var assetSql = "SELECT A.ISRUNNING, A.DESCRIPTION FROM WORKORDER W " +
 				" LEFT JOIN ASSET A ON A.ASSETNUM = W.ASSETNUM AND A.SITEID=W.SITEID" +
 				" WHERE W.WORKORDERID = '" + wo.WORKORDERID + "'";
 		
+		var inspectionresultSql = "SELECT * FROM INSPECTIONRESULT WHERE REFERENCEOBJECTID = '" + wo.WONUM +
+				"' AND REFERENCEOBJECT ='PARENTWO' AND ORGID = '" + wo.ORGID + "' AND SITEID ='" + wo.SITEID + "'";
+		
+		var inspectionresultNonParentSql = "SELECT * FROM INSPECTIONRESULT WHERE REFERENCEOBJECTID = '" + wo.WONUM +
+				"' AND REFERENCEOBJECT ='WORKORDER' AND PARENT IS NULL AND ORGID='" + wo.ORGID + "' AND SITEID ='" + wo.SITEID + "'";
+
 		// Initialize variable for workorder display and MAXVALUE of status. 
 		var hazard = getWOHazardSql(wo);
 		var precaution = getWOPrecautionSql(wo);
@@ -183,7 +196,10 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 			.addQuery("WOTAGOUT", tagout)
 			.addQuery("WOTAGLOCK", wotaglock)
 			.addQuery("WOSTATUS", statusListSql)
+			.addQuery("INSPECTIONRESULT", inspectionresultSql)
+			.addQuery("INSPECTIONRESULTNONPARENT", inspectionresultNonParentSql)
 			.addMessage(message)
+			.addEZWebMap(fromMap) /* This function tells the native app to go from map view to web view (Parameter: boolean) */
 			.submit("offline/wotrack/wotrack.htm", true);
 	};	
 	
@@ -232,6 +248,7 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 							CAUSECODE: null,
 							REMEDYCODE: null
 						});
+
 						var multiUpdate = EMMServer.DB.MultiUpdate()
 							.addInsertObject("WORKORDER", "INSERT", wo.getMbo())
 							.addInsertObject("FAILUREREPORT", "EDIT", failureCode.getMbo())
@@ -321,6 +338,35 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 				returnPage : options.viewName
 			});
 		},
+		doChangeStatus: function(wo, newStatus){
+			var currentTime = new Date();
+			var updateData = { 
+					STATUSDATE : currentTime.getTime()
+				};
+			updateData['STATUS'] = newStatus;						
+			if(wo.canChangeStatus(newStatus)){
+				EMMServer.DB.Update('WORKORDER', 'UPDATE_STATUS')
+				.addObject(updateData, 'WORKORDERID = "' + wo.WORKORDERID + '"')
+				.submit()
+				.then(function(result){
+					wo.session.remove(); // Be sure to remove session data
+					PUBLIC.showDetail(wo, getText('EMMOF1008I', null, 'Status Successfully Changed'));
+				});
+			}
+			else{
+				alert(wo.mbo.message());
+			}
+			
+		},
+		createWorklog : function(wo){
+			wo.session.cache();
+			
+			EMMServer.Session.setItem('WORKLOG_DATA', {
+				returnPage : options.viewName,
+				cacheKey : wo.session.cacheKey()
+			});
+			worklogService.createNew(wo);
+		},
 		toToolTrans: function(wo){
 			wo.session.cache();
 			
@@ -346,7 +392,7 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
         		"WHERE LABOR.PERSONID = '" + options.userInfo.personId + "' AND LABOR.ORGID =  '" + options.userInfo.orgId + "'";
 	        
 			EMMServer.DB.Select()
-				.addQuery("LABTRANS", "SELECT * FROM LABTRANS WHERE WORKORDERID = '" + wo.WORKORDERID + "'")
+				.addQuery("LABTRANS", "SELECT * FROM LABTRANS WHERE WORKORDERID = '" + wo.WORKORDERID + "'", 1, options.defaultPageSize)
 				.addQuery("LABORINFO", laborInfo)
 				.submit("offline/labtrans/main.htm", true);				
 		},
@@ -462,7 +508,7 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 				return;
 			}
 
-			if (workorder.mbo.toBeSaved() && !message){
+			if (workorder.mbo.toBeSaved()){
 				alert(getText('MODIFYSAVE', null, 'Record modified.  Please save your changes.'));
 				return;
 			}
@@ -619,61 +665,94 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 				.submit("offline/wotrack/meters.htm",true);
 		},
 		saveAssetLocMeters: function(wo, assetmeters, locationmeters){
-			// Get Current Date Time
-			var dateTime = new Date();
-			var update = EMMServer.DB.MultiUpdate();
-			if (assetmeters) {
+			try{
+				// Get Current Date Time
+				var dateTime = new Date();
+				var update = EMMServer.DB.MultiUpdate();
+				if (assetmeters) {
+					for (var i=0; i<assetmeters.length; i++) {
+						var assetmeter = assetmeters[i];
+						if(assetmeter.READING){
+							var WhereClause = "ASSETMETERID = '" + assetmeter.ASSETMETERID + "'";
+	
+							assetmeter.LASTREADINGINSPCTR = options.userInfo.personId;
+							// if the READING TYPE is DELTA, we don't want to overwrite the LASTREADING for displaying reasons
+							// instead we will add the READING on top of the LASTREADING
+							if (!String.isNullOrEmpty(assetmeter.READINGTYPE) && assetmeter.READINGTYPE.toUpperCase() == 'DELTA') {
+								if (!assetmeter.LASTREADING)
+									assetmeter.LASTREADING = '0';
+								assetmeter.LASTREADING = assetmeter.LASTREADING.toNumber() + assetmeter.READING.toNumber();
+								assetmeter.LASTREADING = assetmeter.LASTREADING.toLocaleString();
+							}
+							assetmeter.LASTREADINGDATE = dateTime;
+							
+							var newReading = assetmeter.READING;
+							// Validate to make sure reading matches based on users locale
+							if ($filter('number')(numeral(assetmeter.READING).value()) == assetmeter.READING){
+								// Copy to LASTREADING
+								assetmeter.LASTREADING = numeral(newReading).value();	
+							} else if (!assetmeter.DOMAINID){
+								throw 'Invalid Input';
+							}
+							
+							assetmeter.NEWREADING = newReading;						
+							assetmeter.NEWREADINGDATE = dateTime;
+							
+							assetmeter.READING = '';
+							update.addUpdateObject("ASSETMETER", "UPDATE_METER", assetmeter.getMbo(), WhereClause);
+						}
+					}
+				}
+				
+				if (locationmeters) {
+					for (var j=0; j<locationmeters.length; j++) {
+						var locmeter = locationmeters[j];
+						if(locmeter.READING){
+							var WhereClause = "LOCATIONMETERID = '" + locmeter.LOCATIONMETERID + "'";
+	
+							locmeter.LASTREADINGINSPCTR = options.userInfo.personId;
+							// if the READING TYPE is DELTA, we don't want to overwrite the LASTREADING for displaying reasons
+							// instead we will add the READING on top of the LASTREADING
+							if (!String.isNullOrEmpty(locmeter.READINGTYPE) && locmeter.READINGTYPE.toUpperCase() == 'DELTA') {
+								if (!locmeter.LASTREADING)
+									locmeter.LASTREADING = '0';
+								locmeter.LASTREADING = locmeter.LASTREADING.toNumber() + locmeter.READING.toNumber();
+								locmeter.LASTREADING = locmeter.LASTREADING.toLocaleString();
+							}
+							locmeter.LASTREADINGDATE = dateTime;
+							
+							var newReading = locmeter.READING;
+							// Validate to make sure reading matches based on users locale
+							if ($filter('number')(numeral(locmeter.READING).value()) == locmeter.READING){
+								// Copy to LASTREADING
+								locmeter.LASTREADING = numeral(newReading).value();
+							} else if(!locmeter.DOMAINID){
+								throw 'Invalid Input';
+							}
+							
+							locmeter.NEWREADING = newReading;
+							locmeter.NEWREADINGDATE = dateTime
+							
+							locmeter.READING = '';
+							update.addUpdateObject("LOCATIONMETER", "UPDATE_METER", locmeter.getMbo(), WhereClause);
+						}
+					}
+				}
+	
 				for (var i=0; i<assetmeters.length; i++) {
-					var assetmeter = assetmeters[i];
-					if(assetmeter.READING){
-						var WhereClause = "ASSETMETERID = '" + assetmeter.ASSETMETERID + "'";
-
-						assetmeter.LASTREADINGINSPCTR = options.userInfo.personId;
-						// if the READING TYPE is DELTA, we don't want to overwrite the LASTREADING for displaying reasons
-						// instead we will add the READING on top of the LASTREADING
-						if (!String.isNullOrEmpty(assetmeter.READINGTYPE) && assetmeter.READINGTYPE.toUpperCase() == 'DELTA') {
-							if (!assetmeter.LASTREADING)
-								assetmeter.LASTREADING = '0';
-							assetmeter.LASTREADING = assetmeter.LASTREADING.toNumber() + assetmeter.READING.toNumber();
-							assetmeter.LASTREADING = assetmeter.LASTREADING.toLocaleString();
-						} else
-							assetmeter.LASTREADING = assetmeter.READING;
-						assetmeter.LASTREADINGDATE = dateTime.getTime();	
-						
-						assetmeter.NEWREADING = assetmeter.READING;
-						assetmeter.NEWREADINGDATE = dateTime.getTime();
-						
-						assetmeter.READING = '';
-						update.addUpdateObject("ASSETMETER", "UPDATE_METER", assetmeter.getMbo(), WhereClause);
-					}
+					assetmeters[i].session.remove();
 				}
-			}
-			
-			if (locationmeters) {
 				for (var j=0; j<locationmeters.length; j++) {
-					var locmeter = locationmeters[j];
-					if(locmeter.READING){
-						var WhereClause = "LOCATIONMETERID = '" + locmeter.LOCATIONMETERID + "'";
-
-						locmeter.LASTREADINGINSPCTR = options.userInfo.personId;
-						// if the READING TYPE is DELTA, we don't want to overwrite the LASTREADING for displaying reasons
-						// instead we will add the READING on top of the LASTREADING
-						if (!String.isNullOrEmpty(locmeter.READINGTYPE) && locmeter.READINGTYPE.toUpperCase() == 'DELTA') {
-							if (!locmeter.LASTREADING)
-								locmeter.LASTREADING = '0';
-							locmeter.LASTREADING = locmeter.LASTREADING.toNumber() + locmeter.READING.toNumber();
-							locmeter.LASTREADING = locmeter.LASTREADING.toLocaleString();
-						} else
-							locmeter.LASTREADING = locmeter.READING;
-						locmeter.LASTREADINGDATE = dateTime.getTime();	
-						
-						locmeter.NEWREADING = locmeter.READING;
-						locmeter.NEWREADINGDATE = dateTime.getTime();
-						
-						locmeter.READING = '';
-						update.addUpdateObject("LOCATIONMETER", "UPDATE_METER", locmeter.getMbo(), WhereClause);
-					}
+					locationmeters[j].session.remove();
 				}
+				
+				update.submit().then(function(result){
+					EMMServer.DB.Select()
+						.addMessage(getText('RECORDSAVED', null, 'Record Saved'))
+						.go("offline/wotrack/meters.htm");
+				});
+			} catch (e) {
+				alert(e);	
 			}
 
 			for (var i=0; i<assetmeters.length; i++) {
@@ -706,17 +785,17 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 			var WORKORDERID = (wo.ISTASK == '1') ? wo.PARENTID : wo.WORKORDERID;
 			
 			var query = "SELECT FR.*, ";
-			query += "  (SELECT FAILURELIST FROM FAILURECODE WHERE FAILURECODE = FR.FAILURECODE) AS FAILURECODE_FAILURELIST,";
+			query += "  (SELECT FAILURELIST FROM FAILURECODE WHERE FAILURECODE = FR.FAILURECODE AND ORGID = FR.ORGID AND PARENT IS NULL) AS FAILURECODE_FAILURELIST,";
 			query += "	(SELECT FAILURELIST FROM FAILURECODE";
-			query += "		WHERE FAILURECODE = FR.PROBLEMCODE";
-			query += "			AND PARENT = (SELECT FAILURELIST FROM FAILURECODE WHERE FAILURECODE = FR.FAILURECODE)";
+			query += "		WHERE FAILURECODE = FR.PROBLEMCODE AND ORGID = FR.ORGID";
+			query += "			AND PARENT = (SELECT FAILURELIST FROM FAILURECODE WHERE FAILURECODE = FR.FAILURECODE AND ORGID = FR.ORGID AND PARENT IS NULL)";
 			query += "	) AS PROBLEMCODE_FAILURELIST,";
 			query += "	(SELECT FAILURELIST FROM FAILURECODE";
-			query += "		WHERE FAILURECODE = FR.CAUSECODE"; 
+			query += "		WHERE FAILURECODE = FR.CAUSECODE AND ORGID = FR.ORGID"; 
 			query += "			AND PARENT = (";
 			query += "				SELECT FAILURELIST FROM FAILURECODE";
-			query += "					WHERE FAILURECODE = FR.PROBLEMCODE ";
-			query += "						AND PARENT = (SELECT FAILURELIST FROM FAILURECODE WHERE FAILURECODE = FR.FAILURECODE)";
+			query += "					WHERE FAILURECODE = FR.PROBLEMCODE AND ORGID = FR.ORGID";
+			query += "						AND PARENT = (SELECT FAILURELIST FROM FAILURECODE WHERE FAILURECODE = FR.FAILURECODE AND ORGID = FR.ORGID AND PARENT IS NULL)";
 			query += "			)";
 			query += "	) AS CAUSECODE_FAILURELIST";			
 			query += " FROM FAILUREREPORT FR WHERE WORKORDERID = '" + WORKORDERID + "'";			
@@ -818,7 +897,7 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 			} else {
 				labtransService.stopTimer(wo, labtransInfo, function(result){
 					if (options.viewName == 'offline/wotrack/task.htm')
-						PUBLIC.actions.toTask(wo, getText('TIMERSTARTED', null, 'Timer Started'));
+						PUBLIC.actions.toTask(wo, getText('TIMERSTOPPED', null, 'Timer Stopped'));
 					else
 						PUBLIC.showDetail(wo, getText('TIMERSTOPPED', null, 'Timer Stopped'));
 				});
@@ -850,7 +929,30 @@ angular.module('emm').factory('wotrackService', function(domainService, doclinks
 				
 			};
 			classificationService.actions.toClassify(workorder, classificationObj);
-		}
+		},
+		toInspection : function(inspectionresult, wo) {
+			if (wo.mbo.toBeSaved()){
+				alert(getText('MODIFYSAVE', null, 'Record modified.  Please save your changes.'));
+				return;
+			}
+
+			// Cache the current object
+			wo.session.cache();
+			inspectionresult.session.remove();
+			
+			EMMServer.Session.setItem('INSP_DATA',{
+				returnPage : options.viewName,
+				cacheKey : wo.session.cacheKey(),
+				entityName : options.entityName
+			});
+				
+			if (inspectionresult.REFERENCEOBJECT == 'PARENTWO')
+				inspectorService.actions.toWoinsplist(inspectionresult);
+			else {
+				EMMServer.Session.setItem('FROM_PAGE', 'offline/wotrack/wotrack.htm');
+				inspectorService.showDetail(inspectionresult);
+			}
+		}	
 	};
 
 	var getWOHazardSql = function(wo){

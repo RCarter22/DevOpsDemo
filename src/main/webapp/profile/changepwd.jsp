@@ -16,7 +16,7 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
+			<a class="ui-btn-left" href="../main.action"><span class="emm-home"></span></a>
 			<h3 class="ui-title"><s:text name="global.passwordinfo"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>

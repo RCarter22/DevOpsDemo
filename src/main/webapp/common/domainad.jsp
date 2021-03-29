@@ -19,10 +19,11 @@
 			$('.ui-filter').toggleClass('ui-filter-on ui-filter-off');
 			return false;
 		}
-		function resetFilter(){
+		function resetadFilter(){
 			$.each($('#emm_filterform input'), function(i, e){
 				$(e).val('');
 			});
+			$('#resetFilter').val(true);
 			$('#emm_domainform').submit();
 			return false;	
 		}
@@ -36,7 +37,7 @@
 				fieldName = '<e:forJavaScript value="${fieldName}" />';
 			
 			if (searchLookupFlds)
-				$scope.lookups = JSON.parse(searchLookupFlds);				
+				$scope.lookups = $.parseJSON(searchLookupFlds);				
 			else
 				$scope.lookups = {};
 			
@@ -110,8 +111,7 @@
 		<div class="ui-header ui-header-b">
 			<a class="ui-btn-left" href="gotourl.action?currentAction=<e:forUriComponent value="${currentAction}" />"><span class="emm-times-circle"></span></a>
 			<h3 class="ui-title"><s:text name="global.selectvalue"/></h3>
-			<a class="ui-btn-right" onclick="emm.core.ezlookup()"><span class="emm-barcode-3"></span></a>
-			<s:include value="../common/statusbar.jsp"/>
+			<a class="ui-btn-right" href="prepareQbe.action?currentAction=<e:forUriComponent value="${currentAction}" />"><span class="emm-check"></span></a>
 		</div>				
 		<%--<div class="ui-searchbar">
 			<form method="post">				
@@ -143,6 +143,7 @@
 				<s:hidden name="currentAction"/>
 				<s:hidden name="lookupMbo"/>
 				<s:hidden name="lookupMboId"/>
+				<s:hidden id="resetFilter" name="resetFilter"/>
 				<ul id="emm_filterform" class="ui-listview ui-inset">					
 					<s:if test="search neq null && search neq ''">
 						<li class="ui-field ui-readonly">
@@ -150,17 +151,17 @@
 							<input type="text" readonly="true" value="<e:forHtml value="${search}" />"/>
 						</li>						
 					</s:if>	
-					<s:iterator value="filterList">
+					<s:iterator value="filterListad">
 						<li class="ui-field">
 							<label><e:forHtml value="${filterDisplayName}" /></label>
-				       		<input type="text" name="<e:forHtml value="${filterName}" />" value="<e:forHtml value="${filterValue}" />"/>
-				       		<a class="ui-arrow" ng-show="lookups.hasOwnProperty('<e:forJavaScript value="${filterName}" />')" ng-click="lookupDomain('<e:forJavaScript value="${filterName}" />')" data-display="{{lookups['<e:forJavaScript value="${filterName}" />']}}"></a>
-				      	</li>
-				    </s:iterator> 
+							<input type="text" name="<e:forHtml value="${filterName}" />" value="<e:forHtml value="${filterValue}" />"/>
+							<a class="ui-arrow" ng-show="lookups.hasOwnProperty('<e:forJavaScript value="${filterName}" />')" ng-click="lookupDomain('<e:forJavaScript value="${filterName}" />')" data-display="{{lookups['<e:forJavaScript value="${filterName}" />']}}"></a>
+						</li>
+					</s:iterator>
 					<s:hidden name="search"/>				
 				</ul>	
 				<div class="ui-btn-container" style="width: 300px; margin: 0 auto;">
-					<a class="ui-btn-b" onclick="resetFilter();"><s:text name="global.reset"/></a>
+					<a class="ui-btn-b" onclick="resetadFilter();"><s:text name="global.reset"/></a>
 					<input class="ui-btn-a" type="submit" value="<s:text name="global.apply"/>"/>								
 				</div>				
 			</s:form>	
@@ -171,32 +172,29 @@
 					<h3 class="ui-title"><s:text name="global.quicksearch" />: <e:forJavaScript value="${search}" /></h3>
 				</div>
 			</s:if>
-			<s:iterator value="filterList">
+			<s:iterator value="filterListad">
 				<s:if test="filterValue neq ''">
 					<div class="ui-statusbar">
 						<h3 class="ui-title"><e:forJavaScript value="${filterDisplayName}" />: <e:forJavaScript value="${filterValue}" /></h3>
 					</div>
 				</s:if>
 			</s:iterator>
-			<s:if test="lookupList.size == 0">
-				<div class="ui-statusbar ui-statusbar-c">	
-					<h3 class="ui-title"><s:text name="global.norecords"/></h3>
-				</div>
-			</s:if>
+			<s:include value="../common/statusbar.jsp"/>
 			<ul class="ui-listview">
 				<s:include value="../common/pagination.jsp"/>	
-				<s:iterator value="lookupList">
+				<s:iterator value="mboList">
 					<li>
-						<a onclick="emm.core.setLookupValue('<e:forJavaScript value="${fieldName}" />','<e:forJavaScript value="${lookupSourceFieldValue}" />','<e:forJavaScript value="${currentAction}" />','<e:forJavaScript value="${lookupMbo}" />','<e:forJavaScript value="${lookupMboId}" />','<e:forJavaScript value="${updateField}" />','<e:forJavaScript value="${lookupSourceField}" />','<e:forJavaScript value="${uniqueId}" />','<e:forJavaScript value="${postLookupValueActionUrl}" />')">
+						<a onclick="emm.core.toggleSelection(this)" data-id="<s:property value="getUniqueIDValue()"/>" data-mbo="<e:forHtml value="${fieldNameAD}"/>">
 							<s:iterator value="displayValues" status="status">
 								<s:if test="#status.index == 0 ">
-									<h3><s:property value="%{displayValues[#status.index]}"/></h3>
+									<h3><s:property value="getString(displayValues[#status.index])"/></h3>
 								</s:if>
 								<s:else>
-									<p><s:property value="%{displayValues[#status.index]}"/></p>
+									<p><s:property value="getMboValueInfoStatic(displayValues[#status.index]).getTitle()"/>: <s:property value="getString(displayValues[#status.index])"/></p> 
 								</s:else>
 							</s:iterator>
 						</a>
+						<a onclick="emm.core.toggleSelection(this)" data-id="<s:property value="getUniqueIDValue()"/>" data-mbo="<e:forHtml value="${fieldNameAD}"/>" class="ui-checklistbutton" data-checked="<s:property value="isSelected()"/>"></a>
 					</li>
 				</s:iterator>
 				<s:include value="../common/pagination.jsp"/>

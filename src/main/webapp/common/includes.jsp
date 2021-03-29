@@ -11,11 +11,11 @@
 <meta name="format-detection" content="telephone=no">
 <meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport" />
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="frame-ancestors 'self';">
 <link href="../images/ezmaxmobile.ico" rel="shortcut icon" />
-<link href="../css/ezmaxmobile.ui-full.min.css?v=5.2.1" rel="stylesheet" type="text/css" />
+<link href="../css/ezmaxmobile-font.css" rel="stylesheet" type="text/css" />
+<link href="../css/ezmaxmobile.ui-full.min.css?v=5.4.1" rel="stylesheet" type="text/css" />
 <script src="../javascript/jquery.js" type="text/javascript"></script>
-<script src="../javascript/ezmaxmobile.core-full.min.js?v=5.2.1" type="text/javascript"></script>
+<script src="../javascript/ezmaxmobile.core-full.min.js?v=5.4.1" type="text/javascript"></script>
 
 <!-- Localization Files -->
 <script src="../javascript/localization/ar_KW.js" type="text/javascript"></script>
@@ -56,3 +56,20 @@
 		userInfo: '<s:property value="user.getUserInfo()" escapeHtml="false"/>'
 	});
 </script>
+
+<s:if test="pushEnabled && mbo != null">
+	<script type="text/javascript">
+		// EZEvents are supported on any mbo.
+		function checkIfRecordHasEvent() {
+			var id = '<s:property value="mbo.getUniqueIDValue()"/>';
+			var mboName = '<s:property value="mbo.getName()"/>';
+	
+			if (id != '0' && mboName == "WORKORDER") {
+				emm.util.prepareEventActions(id, mboName);
+			}			
+		}
+		$(function(){
+			checkIfRecordHasEvent();
+		});
+	</script>
+</s:if>

@@ -5,6 +5,7 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 
 <!DOCTYPE html>
 <html>
@@ -26,7 +27,7 @@
 <body>
 	<div class="ui-page">	
 		<div class="ui-header ui-header-b">
-			<a class="ui-btn-left" onclick="emm.core.back();"><s:text name="global.cancel"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back();"><span class="emm-times-circle"></span></a>
 			<h3 class="ui-title"><s:text name="classification.drilldown"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>				
@@ -41,8 +42,8 @@
 			<ul class="ui-listview">
 				<s:if test="mbo neq null">
 					<li>
-						<a onclick="goToParent('<s:property value="parentMboId"/>')">
-							<img src="../images/returnarrow.png"/>
+						<a onclick="goToParent('<e:forJavaScript value="${parentMboId}" />')">
+							<span class="emm-return"></span>
 							<h3><s:property value='mbo.getString("CLASSIFICATIONID")'/></h3>
 							<p><s:property value='mbo.getString("CLASSIFICATIONDESC")'/></p>							
 						</a>
@@ -66,11 +67,11 @@
 							</span>
 						</s:if>
 						<s:else>	
-							<a onclick="emm.core.setLookupValue('<s:property value='fieldName'/>','<s:property value="top[2].getData()"/>','<s:property value='currentAction'/>','<s:property value='lookupMbo'/>','<s:property value='lookupMboId'/>',null,'<s:property value='lookupSourceField'/>')">
+							<a onclick="emm.core.setLookupValue('<e:forJavaScript value="${fieldName}" />','<s:property value="top[2].getData()" />','<e:forJavaScript value="${currentAction}" />','<e:forJavaScript value="${lookupMbo}" />','<e:forJavaScript value="${lookupMboId}" />',null,'<e:forJavaScript value="${lookupSourceField}" />')">
 								<h3><s:property value='top[4].getData()'/></h3>
 								<p><s:property value='top[3].getData()'/></p>
 							</a>							
-							<s:if test='top[1].getData().equals("Y")'>
+							<s:if test='top[1].getDataAsBoolean()'>
 								<a class="ui-arrow" onclick="submitForm('<s:property value="top[0].getDataAsLong()"/>')"></a>
 							</s:if>
 						</s:else>

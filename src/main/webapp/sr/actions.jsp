@@ -12,7 +12,7 @@
 		<ul class="ui-listview ui-inset">
 			<li>
 				<a onclick="EMMServer.Offline.sync()">
-					<img src="../images/sync.png" />
+					<span class="emm-sync"></span>
 					<h3><s:text name="global.syncserver"/></h3>
 					<span class="ui-badge"><s:text name="global.sync"/></span> 
 					<span class="ui-arrow"></span>
@@ -27,7 +27,7 @@
 	<ul class="ui-listview ui-inset">
 		<li data-visible="<s:property value="mbo.sigopGranted('STATUS')"/>">
 			<a onclick="emm.core.changeStatus()">
-				<img src="../images/changestatus.png" />
+				<span class="emm-status"></span>
 				<h3><s:text name="global.changestatus"/></h3>
 				<span class="ui-arrow"></span>
 			</a>
@@ -35,14 +35,14 @@
 		<li data-visible="<s:property value="mbo.sigopGranted('ROUTEWF')"/>">
 			<s:if test="actionBar.isWFActive()">
 				<a onclick="emm.core.routeWorkflow()">
-					<img src="../images/routeworkflow.png" />
+					<span class="emm-route-workflow"></span>
 					<h3><s:text name="workflow.routeworkflow"/></h3>
 					<span class="ui-arrow"></span>
 				</a>
 			</s:if>
 			<s:else>
 				<a onclick="emm.core.startWorkflow()">
-					<img src="../images/workflow.png" />
+					<span class="emm-workflow"></span>
 					<h3><s:text name="workflow.startworkflow"/></h3>
 					<span class="ui-arrow"></span>
 				</a>
@@ -51,7 +51,7 @@
 		<s:if test="actionBar.isWFActive()">
 			<li data-visible="<s:property value="mbo.sigopGranted('STOPWF')"/>">
 	            <a onclick="emm.core.stopWorkflow()">
-	                <img src="../images/stopworkflow.png" />
+	                <span class="emm-stop-workflow"></span>
 	                <h3><s:text name="workflow.stopworkflow"/></h3>
 					<span class="ui-arrow"></span>
 	            </a>
@@ -60,7 +60,7 @@
 		<s:if test="mbo.getMboSet('WFASSIGNMENT').isEmpty() neq true">
 			<li data-visible="<s:property value="mbo.sigopGranted('ASSIGNWF')"/>">
 				<a href="../workflow/viewassignments.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-					<img src="../images/usergroup.png" />
+					<span class="emm-user-group"></span>
 					<h3><s:text name="workflow.assignment"/></h3>
 					<span class="ui-arrow"></span>
 				</a>
@@ -69,22 +69,35 @@
 		<li class="ui-divider ui-divider-b"></li>
 		<li data-visible="<s:property value="mbo.sigopGranted('OWNERSHIP')"/>">
 			<a href="takeownership.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/takeownership.png" />
+				<span class="emm-owner-select-1"></span>
 				<h3><s:text name="global.takeownership"/></h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li data-visible="<s:property value="mbo.sigopGranted('OWNER')"/>">
 			<a onclick="emm.core.selectOwner(this)" data-field="OWNER" data-source="PERSONID" data-display="PERSONID,DISPLAYNAME" data-search="PERSONID,DISPLAYNAME">
-				<img src="../images/selectowner.png" />
+				<span class="emm-owner-select-1"></span>
 				<h3><s:text name="global.selectowner"/></h3>
 				<span class="ui-arrow"></span>
 			</a>
-		</li>	
+		</li>
+		<s:if test="isEmmMapEnabled()">		
+			<li class="ui-divider ui-divider-b"></li>
+			<li data-native="true">
+				<a data-control="map"
+					data-modules='["DS_SRS"]'					
+					data-zoom='["DS_SRS", "TICKETUID", "<s:property value="mbo.getUniqueIDValue()"/>", "<s:property value="mbo.getString('SERVICEADDRESS.LATITUDEY')"/>", "<s:property value="mbo.getString('SERVICEADDRESS.LONGITUDEX')"/>"]'
+				>
+					<span class="emm-map-location"></span>
+					<h3><s:text name="global.openmap"/></h3>
+					<span class="ui-arrow"></span>
+				</a>
+			</li>
+		</s:if>
 		<li class="ui-divider ui-divider-b"></li>
 		<li data-visible="<s:property value="mbo.sigopGranted('CREATEWO')"/>">
 			<a onclick="emm.util.confirm({message:'<s:text name="sr.createwo"/>',yes:function(){window.location='createworkorder.action?id=<s:property value='mbo.getUniqueIDValue()'/>'}});">
-				<img src="../images/addfollowup.png" />
+				<span class="emm-add-new"></span>
 				<h3><s:text name="sr.createwo"/></h3>
 				<span class="ui-arrow"></span>
 			</a>
@@ -92,14 +105,14 @@
 		<li class="ui-divider ui-divider-b"></li>	
 		<li>
 			<a href="classify.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/classification.png" />
+				<span class="emm-classification"></span>
 				<h3><s:text name="global.classification"/></h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>				
 		<li>
 			<a href="../labtrans/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/labor.png" />
+				<span class="emm-labor"></span>
 				<h3><s:text name="labtrans.labor"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('LABTRANS').count()"/></span>
 				<span class="ui-arrow"></span>
@@ -107,7 +120,7 @@
 		</li>
 		<li>
 			<a href="../worklog/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/notes.png" />
+				<span class="emm-notes"></span>
 				<h3><s:text name="ezmaxmobile.worklog"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('MODIFYWORKLOG').count()"/></span>
 				<span class="ui-arrow"></span>
@@ -116,7 +129,7 @@
 		<s:if test="mbo.getMboSet('RELATEDRECORD').isEmpty() neq true">
 			<li>
 				<a href="listrelated.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-					<img src="../images/relatedrecords.png" />
+					<span class="emm-related-records"></span>
 					<h3><s:text name="global.relatedrecords"/></h3>
 					<span class="ui-bubble"><s:property value="mbo.getMboSet('RELATEDRECORD').count()"/></span>
 					<span class="ui-arrow"></span>
@@ -125,7 +138,7 @@
 		</s:if>			
 		<li>
 			<a href="doclinks.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/attachment.png" />
+				<span class="emm-attachments"></span>
 				<h3><s:text name="global.attachments"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('DOCLINKS').count()"/></span>
 				<span class="ui-arrow"></span>
@@ -134,7 +147,7 @@
 		<li class="ui-divider ui-divider-b"></li>
 		<li data-visible="<s:property value="mbo.sigopGranted('CREATECOMM')"/>">
 			<a href="../commlog/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/email.png" />
+				<span class="emm-message"></span>
 				<h3><s:text name="ezmaxmobile.commlog"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('COMMLOG').count()"/></span>
 				<span class="ui-arrow"></span>
@@ -143,7 +156,7 @@
 		<li class="ui-divider ui-divider-b"></li>	
 		<li data-visible="<s:property value="mbo.sigopGranted('RUNREPORTS')"/>">
 			<a href="reports.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/reports.png" />
+				<span class="emm-reports"></span>
 				<h3><s:text name="global.runreports"/></h3>
 				<span class="ui-arrow"></span>
 			</a>

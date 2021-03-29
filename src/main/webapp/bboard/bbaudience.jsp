@@ -16,16 +16,16 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.ok"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-check"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.bboard"/></h3>
 			<s:if test="appAction eq 'BBORG' && mbo.getName() neq 'BBOARDAUDIENCE'">
-				<a class="ui-btn-right" href="addbbaudience.action?appAction=BBORG"><img src="../images/plus.png"/></a>
+				<a class="ui-btn-right" href="addbbaudience.action?appAction=BBORG"><span class="emm-plus"></span></a>
 			</s:if>
 			<s:if test="appAction eq 'BBSITE' && mbo.getName() neq 'BBOARDAUDIENCE'">
-				<a class="ui-btn-right" href="addbbaudience.action?appAction=BBSITE"><img src="../images/plus.png"/></a>
+				<a class="ui-btn-right" href="addbbaudience.action?appAction=BBSITE"><span class="emm-plus"></span></a>
 			</s:if>
 			<s:if test="appAction eq 'BBGROUP' && mbo.getName() neq 'BBOARDAUDIENCE'">
-				<a class="ui-btn-right" href="addbbaudience.action?appAction=BBGROUP"><img src="../images/plus.png"/></a>
+				<a class="ui-btn-right" href="addbbaudience.action?appAction=BBGROUP"><span class="emm-plus"></span></a>
 			</s:if>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>

@@ -15,9 +15,9 @@
 <body>
 	<div class="ui-page ui-inset">
 		<div class="ui-header ui-header-b">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="receipts.selectorderedservice"/></h3>
-			<a class="ui-btn-right" onclick="$('#myform').submit()"><s:text name="global.ok"/></a>
+			<a class="ui-btn-right" onclick="$('#myform').submit()"><span class="emm-check"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">

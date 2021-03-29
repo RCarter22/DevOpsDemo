@@ -59,9 +59,9 @@ angular.module('emm').factory('worklogService', function(){
 			if (wl.mbo.toBeSaved()){
 				if(wl.mbo.validate()){
 					var entityName = 'WORKLOG';
-					if(wl.mbo.appName() === 'WOTRACK' || wl.mbo.appName() === 'PLUSTWO' || wl.mbo.appName() === 'PLUSPWO'){
+					if(wl.mbo.appName() === 'WOTRACK'){
 						actionName = 'INSERT';
-					} else if(wl.mbo.appName() === 'SR' || wl.mbo.appName() === 'PLUSPSR'){
+					} else if(wl.mbo.appName() === 'SR'){
 						actionName = 'INSERTSR';
 					}
 					EMMServer.DB.Insert(entityName, actionName)
@@ -70,9 +70,18 @@ angular.module('emm').factory('worklogService', function(){
 						.then(function(result) {
 							// Be sure to remove session data
 				        	wl.session.remove();
-							EMMServer.DB.Select()
-								.addMessage(getText('RECORDSAVED', null, 'Record Saved'))
-								.go("offline/worklog/main.htm");
+				        	var select = EMMServer.DB.Select()
+				        		.addMessage(getText('RECORDSAVED', null, 'Record Saved'));
+				        	
+				        	var fromPage = EMMServer.Session.getItem('FROM_PAGE');
+							if (fromPage != null){
+								EMMServer.Session.removeItem('FROM_PAGE');	
+								select.go(fromPage, true);
+							}
+				        	else{
+								select.go("offline/worklog/main.htm");
+				        	}
+							
 						});
 				} else {
 					alert(wl.mbo.message());

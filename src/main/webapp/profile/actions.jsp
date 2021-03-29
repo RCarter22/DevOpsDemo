@@ -11,10 +11,17 @@
 	<ul class="ui-listview ui-inset">
 		<li>
 			<a onclick="emm.core.changeDefInsertSite()">
-				<img src="../images/changestatus.png" />
+				<span class="emm-status"></span>
 				<h3><s:text name="global.changedefinsertsite"/></h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>	
+		<li data-native="true">
+            <a onclick ="emm.nativeapp.loadSettingsPage()">
+				<span class="emm-cogs"></span>
+                 <h3><s:text name="global.ezmaxmobilesettings"/></h3>
+                <span class="ui-arrow"></span>
+            </a>
+        </li>
 	</ul>
 </div>	

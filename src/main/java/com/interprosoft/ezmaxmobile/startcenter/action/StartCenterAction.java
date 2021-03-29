@@ -53,12 +53,22 @@ public class StartCenterAction extends BaseAction {
 	}
 	
 	@Action(value="main", results={
-		@Result(name="success",location="startcenter.jsp")
+			@Result(name="success",location="startcenter.jsp"),
+			@Result(name="error",location="startcenter.jsp"),
+			@Result(name="selfservice", location="../viewsr/selfsrstart.action", type="redirect")
 	})	
 	public String main() {
 		try {
+			/*Fix to #5050 - Self Service Licensing Issue - IdentityFilter has defaultPage set to null on initial launch
+			of new EZMaxMobile, resulting in a redirect on first login to /main.action - resulting to startcenter/main.action
+			Talk to Sam if unsure about this fix.
+			 */
+			if(user.isSelfServiceAcct())
+				return "selfservice";
+
 			this.clearMboSession("MAXUSER");
 			this.clearAppSessions();
+			this.clearAdvancedSearchSessions();
 			
 			this.startCenters =  this.startCenterService.getStartCenterList();
 			
@@ -97,32 +107,52 @@ public class StartCenterAction extends BaseAction {
 	}
 	
 	@Action(value="update", results={
-			@Result(name="success", location="main.action", type="redirect", params={"id","${id}"})
-		})	
+			@Result(name="success", location="main.action", type="redirect", params={"id","${id}"}),
+			@Result(name="error", location="main.action", type="redirect", params={"id","${id}"})
+	})
 	public String update() {
 		try {
 			MXSession test = this.user.getSession();
-			MboSetRemote scSet = (MboSetRemote)test.getMboSet("SCCONFIG");	
+
+//			Grab all current start centers
+			MboSetRemote scSet = test.getMboSet("SCCONFIG");
+
 			scSet.setQbe("SCCONFIGID", String.valueOf(id));
 			scSet.setQbeExactMatch(true);
-			MboRemote sc = (MboRemote)scSet.getMbo(0);
-			
-			if(sc != null)
-			{
-				
-				MboSetRemote scgTemplate = sc.getMboSet("SCGRPTEMPLATE");
-				String groupName = sc.getString("groupname");
 
-			    MboSetRemote scConfig = sc.getThisMboSet();
-			    sc.delete();
-			    scConfig.save();
-			    
-			    SCConfigServiceRemote scService = (SCConfigServiceRemote)this.user.getSession().lookup("SCCONFIG");
-				id = scService.loadStartCenterFromTemplate(Long.toString(scgTemplate.getMbo(0).getLong("sctemplateid")), groupName, this.user.getSession().getUserInfo(), false);
+			//Set groupName for current start center template
+			String initialGroupName = scSet.getMbo(0).getString("GROUPNAME");
 
-				scgTemplate.cleanup();
-			    scConfig.cleanup();
+			scSet = test.getMboSet("SCCONFIG");
+			scSet.setWhere("userid='" + this.user.getUserId() + "'");
+			MboRemote sc = scSet.moveFirst();
+
+			//Clean up all the current ones
+			while(sc != null){
+				sc.delete();
+				sc = scSet.moveNext();
 			}
+			scSet.save();
+
+			//Load all the new ones based on security group setting
+			MboSetRemote guSet = (MboSetRemote)test.getMboSet("GROUPUSER");
+			guSet.setWhere("userid='" + this.user.getUserId() + "' and groupname in (select groupname from maxgroup where sctemplateid is not null)");
+			MboRemote gu = guSet.moveFirst();
+
+			while(gu != null)
+			{
+				String groupName = gu.getString("GROUPNAME");
+
+				SCConfigServiceRemote scService = (SCConfigServiceRemote)this.user.getSession().lookup("SCCONFIG");
+				if (initialGroupName.equalsIgnoreCase(groupName)) {
+					id = scService.loadStartCenterFromTemplate(Long.toString(gu.getLong("maxgroup.sctemplateid")), groupName, this.user.getSession().getUserInfo(), false);
+				} else {
+					scService.loadStartCenterFromTemplate(Long.toString(gu.getLong("maxgroup.sctemplateid")), groupName, this.user.getSession().getUserInfo(), false);
+				}
+
+				gu = guSet.moveNext();
+			}
+
 		} catch (Exception e){
 			e.printStackTrace();
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));

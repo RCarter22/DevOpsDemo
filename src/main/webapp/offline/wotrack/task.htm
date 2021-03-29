@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a class="ui-btn-left" href="" ng-click="goBack()" translate="BACK">Back</a>
+				<a class="ui-btn-left" href="" ng-click="goBack()"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="TASKS">Tasks</h3>
-				<a ng-show="!workorder.isInHistory()" ng-click="actions.saveTask(workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : workorder.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-show="!workorder.isInHistory()" ng-click="actions.saveTask(workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : workorder.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !workorder.mbo.isDirty(), 'ui-statusbar-c': workorder.mbo.isDirty()}">
@@ -55,6 +55,10 @@
 	                    <label translate="WORKORDER.MEASUREMENTVALUE">Measurement Value</label>
 	                    <input type="text" ng-model="workorder.MEASUREMENTVALUE" ng-readonly="workorder.isReadOnly('MEASUREMENTVALUE')"/>
                		</li>
+               		<li class="ui-field" ng-show="workorder.INSPFORMNUM">
+						<label translate="WORKORDER.INSPFORMNUM">Inspection</label>
+						<input disabled="true" ng-model="workorder.INSPFORMNUM" ng-readonly="true" >
+					</li>
 				</ul>
 				
 				<emm:include value="actions.htm"/>			

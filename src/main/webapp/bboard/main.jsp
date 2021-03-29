@@ -16,7 +16,7 @@
 	<div class="ui-page">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
+			<a class="ui-btn-left" href="../main.action"><span class="emm-home"></span></a>
 			<h1 class="ui-title"><s:text name="ezmaxmobile.bboard"/></h1>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -27,7 +27,7 @@
 			<ul class="ui-listview">
 				<li data-visible="<s:property value="mbo.sigopGranted('INSERT')"/>">
 					<a href="create.action">
-						<img src="../images/addnew.png" />
+						<span class="emm-add"></span>
 						<h3><s:text name="global.addnew"/></h3>
 						<span class="ui-arrow"></span>
 					</a>

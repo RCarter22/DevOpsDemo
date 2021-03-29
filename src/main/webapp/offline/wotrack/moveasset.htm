@@ -8,7 +8,7 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="ASSET.MOVEASSET">Move Asset</h3>
 				<a ng-click="actions.moveAsset(asset,workorder)" class="ui-btn-right" ng-class="{'ui-btn-c' : asset.mbo.toBeSaved()}" translate="ASSET.MOVE">Move</a>
 			</div>

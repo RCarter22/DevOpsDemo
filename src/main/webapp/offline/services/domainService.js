@@ -191,9 +191,17 @@ angular.module('emm').factory('domainService', function(){
 		PRIVATE.rememberPageOffset();
 		
 		var sqlChildLoc = "SELECT * FROM LOCATIONS WHERE SITEID = '" + options.userInfo.siteId + "' AND (PARENT IS NULL OR PARENT = '') AND SYSTEMID = 'PRIMARY' ORDER BY LOCATION";
-		
+		var sqlCurrentLoc = "SELECT * FROM LOCATIONS WHERE 1=2";
+		if(!String.isNullOrEmpty(mbo.LOCATION)){
+			sqlCurrentLoc = "SELECT * FROM LOCATIONS WHERE LOCATION = '" + mbo.LOCATION + "' AND SYSTEMID = 'PRIMARY' AND SITEID = '" + mbo.SITEID + "' ORDER BY LOCATION";
+			sqlChildLoc = "SELECT * FROM LOCATIONS WHERE SITEID = '" + mbo.SITEID + "' AND PARENT IN (SELECT LOCATION FROM LOCATIONS WHERE LOCATION = '" + mbo.LOCATION + "' AND SYSTEMID = 'PRIMARY' AND SITEID = '" + mbo.SITEID + "') AND SYSTEMID = 'PRIMARY' ORDER BY LOCATION";
+		}	
 		var selectObj = EMMServer.DB.Select().addQuery("CHILDLOCATIONLIST", sqlChildLoc);
-		
+		selectObj.addQuery("CURRENTLOCATION", sqlCurrentLoc)
+		if(!String.isNullOrEmpty(mbo.LOCATION) && String.isNullOrEmpty(mbo.ASSETNUM)){
+			 sqlChildAsset = "SELECT * FROM ASSET WHERE ASSET.SITEID = '" + mbo.SITEID + "' AND (ASSET.PARENT NOT IN (SELECT ASSETNUM FROM ASSET WHERE SITEID = '" + mbo.SITEID + "' AND LOCATION =  '" + mbo.LOCATION + "') OR ASSET.PARENT IS NULL OR ASSET.PARENT = '') AND ASSET.LOCATION = '" + mbo.LOCATION + "' ORDER BY ASSET.ASSETNUM";
+			selectObj.addQuery("CHILDASSETLIST", sqlChildAsset);
+		}	
 		if(mbo[attributeName] != null){
 			PUBLIC.assetDrilldownActions.gotoAsset(mbo, null);
 		} else {
@@ -248,7 +256,7 @@ angular.module('emm').factory('domainService', function(){
             }
 			
 			if (!assetnum) {
-                sqlChildAsset = "SELECT * FROM ASSET WHERE SITEID = '" + siteId + "' AND (PARENT IS NULL OR PARENT = '') AND LOCATION = '" + location + "' ORDER BY ASSETNUM";
+				sqlChildAsset = "SELECT * FROM ASSET WHERE SITEID = '" + siteId + "' AND (PARENT NOT IN (SELECT ASSETNUM FROM ASSET WHERE SITEID = '" + siteId + "' AND LOCATION =  '" + location + "') OR PARENT IS NULL OR PARENT = '') AND LOCATION = '" + location + "' ORDER BY ASSETNUM";
             } else {
                 sqlCurrentAsset = "SELECT * FROM ASSET WHERE SITEID = '" + siteId + "' AND LOCATION = '" + location + "' AND ASSETNUM = '" + assetnum + "' ORDER BY ASSETNUM";
                 sqlChildAsset = "SELECT * FROM ASSET WHERE SITEID =  '" + siteId + "' AND PARENT IN (SELECT ASSETNUM FROM ASSET WHERE LOCATION = '" + location + "' AND SITEID = '" + siteId + "' AND ASSETNUM = '" + assetnum + "') ORDER BY ASSETNUM";
@@ -300,7 +308,7 @@ angular.module('emm').factory('domainService', function(){
 				whereClause : params.whereClause,
 				returnPage : params.returnPage,
 			});		
-			
+
 			if(obj.mbo.appName() == 'PLUSTWO'){
 				EMMServer.DB.Select()
 				.addQuery("STATUS", domain.getSql())
@@ -354,6 +362,30 @@ angular.module('emm').factory('domainService', function(){
 				.addQuery("DOMAIN", domain.getSql(), 1, options.defaultPageSize)
 				.submit("offline/common/classificationlookup.htm", true);
 		}
+	}
+	
+	PUBLIC.mapLookup = function(mboObject, mboField, lookupObject, crossoverFields) {
+		mboObject[mboField] = lookupObject[mboField];
+		if (crossoverFields){
+			var crossOverObject = {};
+			for(var i=0; i<crossoverFields.length; i++){
+				if (!String.isNullOrEmpty(lookupObject[crossoverFields[i]]) && lookupObject[crossoverFields[i]] != '<null>'){
+					crossOverObject[crossoverFields[i]] = lookupObject[crossoverFields[i]];
+				} else {
+					crossOverObject[crossoverFields[i]] = null;
+				}
+			}
+			mboObject.mbo.onChange(mboField, crossOverObject);
+		} else {
+			mboObject.mbo.onChange(mboField);
+		}
+		
+		mboObject.mbo.toBeSaved(true);
+		mboObject.session.cache();
+		
+		EMMServer.DB.Select()
+		.addEZWebMap(true) /* This function tells the native app to go from map view to web view (Parameter: boolean)*/
+		.go(options.viewName);
 	}
 	
 	/* Private functions */

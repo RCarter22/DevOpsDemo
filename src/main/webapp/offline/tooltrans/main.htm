@@ -8,9 +8,9 @@
 		<div class="ui-page">
 			<emm:include value="../common/menu.htm"/>
             <div class="ui-header ui-header-b">
-                <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+                <a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
                 <h3 class="ui-title" translate="TOOLS">Tools</h3>
-                <a ng-show="!mboObject.isInHistory()" ng-click="createNew(mboObject)" class="ui-btn-right"><img src="../../images/plus.png"/></a>
+                <a ng-show="!mboObject.isInHistory()" ng-click="createNew(mboObject)" class="ui-btn-right"><span class="emm-plus"></span></a>
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>            
             </div>
             <div id="statusbar" class="ui-statusbar ui-statusbar-f">
