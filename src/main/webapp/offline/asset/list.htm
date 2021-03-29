@@ -8,9 +8,9 @@
 		<div class="ui-page">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="EZMAXMOBILE.ASSET">Asset</h3>
-				<a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><span class="emm-barcode-3"></span></a>
 			</div>
 			<div class="ui-statusbar ui-statusbar-f">
 				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
@@ -35,6 +35,13 @@
 				</ul>
 				<ul class="ui-listview" ng-show="assets">
 					<li class="ui-divider ui-divider-c" translate="LIST">List</li>
+					<li ng-show="userInfo.nativeAppSettings.emmMapEnabled">
+						<a data-control="map" data-modules='["DS_ASSETS"]' data-datasources='{{dataSources}}'>
+							<span class="emm-map-location"></span>
+							<h3 translate="OPENMAP">Open Map</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>					
 				</ul>
 				
 			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
@@ -60,7 +67,7 @@
 			</div>
 		</div>
 		<script type="text/javascript">
-			function MainController ($scope, $window, $filter, assetService, paginationService, applicationService){
+			function MainController ($scope, $window, $filter, assetService, paginationService, applicationService, mapService){
 				var viewName = 'offline/asset/list.htm',
 					queryName = 'ASSET',
 					appName = 'ASSET';
@@ -86,6 +93,12 @@
 				});
 				$scope.pageService = paginationService;
 				
+				mapService.init({
+					userInfo : $scope.userInfo
+				});
+				
+				$scope.dataSources = mapService.getOptions().dataSources;
+				
 				$scope.showDetail = assetService.showDetail;
 				
 				$scope.goBack = function(){
@@ -106,7 +119,7 @@
 					assetService.toList($scope.pageService.search);
 				}
 				
-				$scope.advancedSearch = assetService.toAdvancedSearch;	
+				$scope.advancedSearch = assetService.toAdvancedSearch;			
 			}
 		</script>		
 	</body>

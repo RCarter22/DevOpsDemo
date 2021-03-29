@@ -61,8 +61,8 @@ AssetMeter.prototype.isRequired = function(attr){
     var attributes = {
         READING: function(){
         	return true;
-        },
-        NEWREADING: function(){
+		},
+		NEWREADING: function(){
         	return true;
         },
         
@@ -102,8 +102,6 @@ AssetMeter.prototype.lookup = function(attr, options){
 AssetMeter.prototype.validate = function(){
 	// Any validation logic goes here.
 	var self = this, validated = true;
-	
-	
 
 	// Return true if the object is valid
 	return validated;
@@ -131,11 +129,10 @@ AssetMeter.prototype.setValue = function(evt, attr, measurePoints){
     		//first make sure the input is valid (i.e. numeric input for a gauge meter)
     		if(String.isNullOrEmpty(self.DOMAINID)){
     			if(!String.isNullOrEmpty(self.READING)){
-	    			var isNumeric =  /^\d+(\.\d+)?$/.test(self.READING);
-	    			if(!isNumeric){
+    				if (!Number.isNumber(self.READING)) {
 	    				self.READING = null;
 	    	    		throw new EMMInputException(evt, 'Invalid numeric input value!', EMMConstants.ERROR); // EMMConstants.ERROR or EMMConstants.WARNING, EMMConstants.INFO
-	    			}
+    				}
 	    		}
     		}
     		

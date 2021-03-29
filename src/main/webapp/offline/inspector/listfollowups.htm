@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+    <head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">		
+				<a class="ui-btn-left" ng-click="goBack()"><span class="emm-chevron-left"></span></a>
+				<h3 class="ui-title" translate="INSPECTION.RELATEDRECORDS">Related Records</h3>		
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
+				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+            <div class="ui-content">
+			    <ul class="ui-listview">       		
+                   	<li class="ui-field ui-details ui-readonly">
+	                    <label translate="WORKORDER.WONUM">Work Order</label>
+	                    <p>{{workorder.WONUM}}</p>
+	                    <p>{{workorder.DESCRIPTION}}</p>
+                   	</li>
+                   <li class="ui-field ui-readonly">
+						<label translate="INSPECTION.NAME">Name</label>
+						<p style="line-height: 1.5em; margin: .2em 0">{{inspection.NAME}}</p>
+					</li>
+                   	<li class="ui-field ui-details ui-readonly">
+	                    <label translate="INSPECTION.STATUS">Status</label>
+	                    <p>{{inspection.STATUS}}</p>
+	                    <p>{{inspection.STATUSDATE | date}}</p>
+                   	</li>
+            	</ul>
+
+			    <ul class="ui-listview">       
+			    	<li ng-show='inspection.DISPLAYMESSAGE'>
+						<a>		
+							<h3>{{inspection.DISPLAYMESSAGE}}</h3>
+						</a>
+					</li>		
+            		<li ng-repeat="fup in followups">
+            			<a>
+	            			<span>
+								<p><strong>{{fup.INSPQUESTION}}</strong></p>
+								<h3 ng-show='fup.TXTRESPONSE'>{{fup.TXTRESPONSE}}</h3>
+								<h3 ng-show='fup.NUMRESPONSE'>{{fup.NUMRESPONSE}}</h3>
+								<h3 ng-show='fup.RESPONSE'>{{fup.RESPONSE}}</h3>
+	                            <p ng-show='fup.DISPLAYMESSAGE'>{{fup.DISPLAYMESSAGE}}</p>
+	            			</span>
+	            		</a>
+					</li>
+				
+            	</ul>
+
+            </div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, inspectorService, paginationService) {
+				var queryName = 'FOLLOWUPS',
+					viewName = "offline/inspector/listfollowup.htm";
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				var pageData = EMMServer.Session.getItem('INSPECTION_DATA');
+				$scope.inspection = pageData.cacheSession;
+				
+				$scope.followups = [];
+				var fupResult = EMMServer.DB.getQueryResult("FOLLOWUPS");
+				if (fupResult[0]) {
+					$scope.followups =fupResult;
+				} else if ($scope.inspection.DEFICIENCYLIST != null) {
+					$scope.followups = $.parseJSON($scope.inspection.DEFICIENCYLIST);
+				}
+
+				var woResult = EMMServer.DB.getQueryResult("WORKORDER");
+				if (woResult && woResult[0]){
+					$scope.workorder = woResult[0];
+				}
+				
+				inspectorService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				})
+								
+				$scope.actions = inspectorService.actions;				
+				
+				$scope.goBack = function(){
+					EMMServer.Session.removeItem('INSPECTION_DATA');
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);
+				}
+			}
+		</script>
+	</body>
+</html>

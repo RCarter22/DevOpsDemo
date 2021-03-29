@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset" data-rememberscroll="true">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
+				<h3 class="ui-title" translate="INSPECTION.CONDUCTINSPECTION">Conduct an Inspection</h3>
+				<a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>
+				<div class="ui-subheader ui-justify-space-between ui-flex-wrap-no-wrap">
+		        	<div class="ui-subheader-left">	        		
+						<a class="ui-btn-f" ng-if="inspection.isComplete() && !inspection.isStatusComplete() && !inspection.mbo.toBeSaved()" ng-click="actions.completeInspection(inspection)"><span class="emm-check-square-o"></span></a>     				
+		        	</div>
+					<div class="ui-progress-div">
+						<div>
+							<h3 style="margin:0 0 4px 0;">{{inspection.getTotalCompleteCount()}} / {{inspection.getTotalCount()}} Total &bull; {{inspection.getRequiredCompleteCount()}} / {{inspection.getRequiredCount()}} Required</h3>
+							<progress-bar value="{{inspection.getRequiredCompleteCount()}}" max-value="{{inspection.getRequiredCount()}}"></progress-bar>
+						</div>
+					</div>
+					<div class="ui-subheader-right">
+			        	<a type="submit" ng-click="actions.saveInspection(inspection)" ng-class="{'ui-btn-c' : inspection.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
+					</div>
+		        </div>
+				<div ng-if="inspMessage" class="ui-statusbar ui-statusbar-{{inspMessage[0].type}}"><h3 class="ui-title">{{inspMessage[0].message}}</h3></div>	
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !inspection.isDirty(), 'ui-statusbar-c': inspection.isDirty()}">
+				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="inspection.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-divider ui-divider-c ui-btn-toggle" style="padding:.4em;" href=".insp-detail" data-show="&#9660; {{inspection.NAME}}" data-hide="&#9650; {{inspection.NAME}}">
+						&#9660; {{inspection.NAME}}
+					</li>
+					<li class="ui-field ui-readonly ui-hidden insp-detail">
+						<label translate="INSPECTION.NAME">Name</label>
+						<p style="line-height: 1.5em; margin: .2em 0">{{inspection.NAME}}</p>
+					</li>
+					<li class="ui-field ui-readonly ui-hidden insp-detail">
+						<label translate="INSPECTION.RESULTNUM">Result Number</label>
+						<input ng-model="inspection.RESULTNUM" ng-readonly="true">
+					</li>
+					<li class="ui-field ui-readonly ui-hidden insp-detail" ng-show="inspection.LOCATION">
+						<label translate="EZMAXMOBILE.LOCATION">Location</label>
+						<p>{{inspection.LOCATION}}</p>
+						<p>{{inspection.LOCDESC}}</p>
+					</li>
+					<li class="ui-field ui-readonly ui-hidden insp-detail" ng-show="inspection.ASSET">
+						<label translate="EZMAXMOBILE.ASSET">Asset</label>
+						<p>{{inspection.ASSET}}</p>
+						<p>{{inspection.ASSETDESC}}</p>
+					</li>
+					<li class="ui-field ui-readonly ui-hidden insp-detail">
+						<label translate="INSPECTION.STATUS">Status</label>
+						<p>{{inspection.STATUS}}</p>
+					</li>
+					<li class="ui-field-block ui-readonly ui-hidden insp-detail" style="display:none;" ng-if="inspection.LONGDESCRIPTION != null">
+						<label translate="INSPECTION.INSPINSTRUCTION">Inspection Instruction</label>
+						<textarea data-htmleditor="true" ng-model="inspection.LONGDESCRIPTION" ng-readonly="true"></textarea>
+					</li>
+				</ul>
+			
+				<ul class="ui-inspection ui-listview">
+					<li ng-repeat="(key, question) in inspection.INSPQUESTION" ng-class="question.SEQUENCE == 0 ? 'ui-divider ui-divider-c' : ''" ng-hide="question.TOTALCOUNT == 0">
+						<h3 ng-if="question.SEQUENCE == 0" class="ui-wrap" id="groupseq{{question.GROUPSEQ}}">
+							{{question.GROUPSEQ  + '.'}} {{question.DESCRIPTION}}
+							<!-- Instructional information on group level -->
+							<span ng-if="question.LONGDESCRIPTION != null" ng-click="toggleShowHelp(question)" class="emm-info-circle"></span>
+							<span id="{{question.INSPQUESTIONNUM}}"></span>
+						</h3>
+										
+						<ul ng-if="question.SEQUENCE != 0" ng-repeat="(key, result) in question.FIELDRESULT">						
+							<li class="ui-callout ui-message-a" ng-if="result.INSPFIELDRESULT.ERRORFLAG == 1 && result.INSPFIELDRESULT.ERRORMESSAGE">{{result.INSPFIELDRESULT.ERRORMESSAGE}}</li>
+							<li class="ui-callout ui-message-c" ng-if="result.INSPFIELD.METERFLAG == true" translate="INSPECTION.METERNOTAVAILABLE" translate-value-metername="{{result.METERNAME}}">
+								The meter {{result.METERNAME}} is not available in the selected asset or location
+							</li>
+							
+							<li class="ui-row" ng-show="inspection.isVisible(result, question.FIELDRESULT)">
+								<label id="groupseq{{question.GROUPSEQ}}">
+									<h3 ng-show="key == 0" class="ui-wrap">
+										<span class="emm-asterisk ui-required-icon" ng-if="inspection.isQuestionRequired(question.FIELDRESULT)"></span>{{question.GROUPSEQ  + '.'}} {{question.DESCRIPTION}}
+										<!-- Instructional information on individual question level -->
+										<span ng-if="question.LONGDESCRIPTION != null" ng-click="toggleShowHelp(question)" class="emm-info-circle" ></span>
+										<span id="{{question.INSPQUESTIONNUM}}"></span>
+									</h3>
+									<div class="ui-question">
+										<span class="emm-asterisk ui-required-icon" ng-if="inspection.isRequired(result, question.FIELDRESULT)"></span>{{result.INSPFIELD.DESCRIPTION.split(signatureKey)[0]}}
+									</div>
+								</label>
+								<input
+									type="number" 
+									step="0.01"
+									placeholder="Enter Answer"
+									ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELD.FIELDTYPE && result.INSPFIELD.FIELDTYPE == 'SE'"
+									ng-attr-id="result.INSPFIELD.INSPFIELDNUM" 
+									ng-model="result.INSPFIELDRESULT.NUMRESPONSE"
+									ng-disabled="inspection.isStatusComplete()"
+								/>
+								
+								<textarea 
+									data-control="autoexpand"
+									placeholder="Enter Answer"
+									ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELD.FIELDTYPE && result.INSPFIELD.FIELDTYPE == 'TR' && (result.INSPFIELD.DESCRIPTION == null || result.INSPFIELD.DESCRIPTION.indexOf(signatureKey) < 0)"
+									ng-attr-id="result.INSPFIELD.INSPFIELDNUM" 
+									ng-model="result.INSPFIELDRESULT.TXTRESPONSE" 
+									ng-disabled="inspection.isStatusComplete()"
+								></textarea>
+								
+								<input
+									type="number"
+									step="0.01"
+									placeholder="Enter Answer"
+									ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELD.FIELDTYPE && result.INSPFIELD.FIELDTYPE == 'MM' && result.INSPFIELD.METERTYPE != 'CHARACTERISTIC'" 
+									ng-attr-id="result.INSPFIELD.INSPFIELDNUM" 
+									ng-model="result.INSPFIELDRESULT.NUMRESPONSE" 
+									ng-disabled="inspection.isStatusComplete() || result.INSPFIELD.METERFLAG == true || result.INSPFIELDRESULT.ERRORFLAG == 2"
+								/>
+								
+								<!-- drop down for selection lists with more than 3 options -->
+								<div class="ui-combobox" ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELDOPTION  && result.INSPFIELDOPTION.length > 3">
+									<select ng-attr-id="result.INSPFIELD.INSPFIELDNUM" 
+										ng-model="result.INSPFIELDRESULT.TXTRESPONSE" 
+										ng-options="option as option for option in result.INSPFIELDOPTION"
+										ng-disabled="inspection.isStatusComplete()"
+										>
+										<option value="">-- {{ 'INSPECTION.SELECTVALUE' | translate }} --</option>
+									</select>								
+									<span class="ui-arrow"></span>
+								</div>
+								
+								<!-- add radio buttons for selection lists with 3 or less results -->
+								<ul class="ui-listview ui-radiobutton ui-inset" ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELDOPTION.length > 0 && result.INSPFIELDOPTION.length <= 3 ">
+	                  				<li class="ui-block" ng-repeat="(key, option) in result.INSPFIELDOPTION" ng-class="{'ui-radiobutton ui-radio-readonly' : inspection.isStatusComplete(), 'ui-radiobutton ui-radio-row-selected' : result.INSPFIELDRESULT.TXTRESPONSE == option}"> 
+										<label for="{{$index}}_{{result.INSPFIELD.INSPFIELDNUM}}">{{option}}</label>
+										<input type="radio" id="{{$index}}_{{result.INSPFIELD.INSPFIELDNUM}}" 
+											name="{{result.INSPFIELD.INSPFIELDNUM}}" 
+											ng-model="result.INSPFIELDRESULT.TXTRESPONSE" 
+											ng-value="option" 
+											ng-checked="result.INSPFIELDRESULT.TXTRESPONSE == option" 
+											ng-disabled="inspection.isStatusComplete()"
+											ng-click="radioSelection($event, option, result)"/> 
+									</li>
+	                  			</ul>
+								
+								<div class="ui-combobox" ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELD.FIELDTYPE && result.INSPFIELD.FIELDTYPE == 'MM' && result.INSPFIELD.METERTYPE == 'CHARACTERISTIC'">
+									<select ng-attr-id="result.INSPFIELD.INSPFIELDNUM" 
+										ng-model="result.INSPFIELDRESULT.TXTRESPONSE" 
+										ng-options="option as option for option in result.METERINFO.VALUE"
+										ng-disabled="inspection.isStatusComplete() || result.INSPFIELD.METERFLAG == true || result.INSPFIELDRESULT.ERRORFLAG == 2"
+										>
+										 <option value="">-- {{ 'INSPECTION.SELECTVALUE' | translate }} --</option>
+									</select>								
+									<span class="ui-arrow"></span>
+								</div>
+	
+								<div class="ui-checkbox-field" ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELD.FIELDTYPE && result.INSPFIELD.FIELDTYPE == 'MM' && result.INSPFIELD.METERTYPE == 'CONTINUOUS' && result.METERINFO.ROLLOVER">
+									<label translate="METER.ROLLOVER">Rollover</label>
+									<checkbox ng-model="result.INSPFIELDRESULT.ROLLOVERFLAG" ng-disabled="inspection.isStatusComplete()"/>
+								</div>
+								
+								<!-- OFFLINE ATTACHMENT  -->
+								<!-- List of attachment names as reference -->
+								<span ng-if="result.INSPFIELD.FIELDTYPE == 'FU' && result.DOCLINK">
+									<span style="font-weight:bold; font-style:italic;color:#195ea8;" ng-if="result.INSPFIELD.FIELDTYPE == 'FU' && result.DOCLINK" ng-repeat="row in result.DOCLINK">
+										<p>{{row.DOCUMENT}} <span ng-show="row.DESCRIPTION">({{row.DESCRIPTION}})</span></p>
+									</span>
+								</span>
+								
+								<div class="ui-inset" style="text-align:center;font-style:italic;color: #195ea8;" ng-show="result.INSPFIELD.FIELDTYPE == 'FU' && result.INSPFIELDRESULT.INSPFIELDRESULTID == null ">
+									A sync is required before attachments can be uploaded to this inspection.
+								</div>
+								
+								<span ng-if="result.INSPFIELD.FIELDTYPE == 'FU' && result.INSPFIELDRESULT.INSPFIELDRESULTID" class="ui-attach">
+									<a class="ui-button ui-attach-btn" ng-click="actions.toAttachments(result.INSPFIELDRESULT, result.INSPFIELD, inspection)">
+										<span class="emm-plus"></span> {{ 'INSPECTION.ADDATTACHMENT' | translate }}
+									</a>
+									<a class="ui-button ui-attach-btn" style="color:gray" ng-show="inspection.isStatusComplete()" >
+										<span class="emm-plus" style="color:gray"></span> {{ 'INSPECTION.ADDATTACHMENT' | translate }}
+									</a>
+								</span>
+
+								<!-- OFFLINE SIGNATURE  -->
+								<span ng-if="inspection.STATUS != 'COMPLETED' && ( result.INSPFIELD.FIELDTYPE == 'TR' && result.INSPFIELD.DESCRIPTION.indexOf(signatureKey) > -1 && (result.INSPFIELDRESULT == null || !result.INSPFIELDRESULT.SIGNATURE))">
+									<a class="ui-button" ng-click="actions.toSignature(inspection, result.INSPFIELDRESULT, result.INSPFIELD)">
+										<span class="emm-pencil"></span> {{ 'INSPECTION.ADDSIGNATURE' | translate }}
+									</a>
+								</span>
+
+								<div class="ui-inset" style="text-align: center;" ng-show="result.INSPFIELD.DESCRIPTION.indexOf(signatureKey) > -1 && result.INSPFIELDRESULT.SIGNATURE">
+									<img style="max-height: 300px; max-width: 300px;" ng-src="{{result.INSPFIELDRESULT.SIGNATURE}}" />
+								</div>
+								
+								<!-- Message for invalid signature -->
+								<div class="ui-inset" style="text-align: center;" ng-show="result.INSPFIELD.DESCRIPTION.indexOf(signatureKey) > -1 && result.INSPFIELDRESULT.TXTRESPONSE && !result.INSPFIELDRESULT.SIGNATURE">
+									This signature format is not supported in EZMaxMobile. Please review this inspection answer in Maximo.
+								</div>
+
+								<span ng-if="result.METERINFO.HISTORY">
+									<button class="ui-button ui-btn-toggle" href=".{{result.INSPFIELD.INSPFIELDNUM}}{{result.INSPFIELD.METERTYPE}}">
+										<span class="emm-history"></span> {{ 'INSPECTION.METERHISTORY' | translate }}
+									</button>	
+									<ul class="ui-listview ui-hidden {{result.INSPFIELD.INSPFIELDNUM}}{{result.INSPFIELD.METERTYPE}}">							
+										<li class="ui-accessory" ng-repeat="(key, history) in result.METERINFO.HISTORY">
+											<span>
+												<h3 ng-if="result.INSPFIELD.METERTYPE!='CHARACTERISTIC'">{{ 'INSPECTION.READING' | translate }}: {{history.READING | number:2}}</h3>
+												<h3 ng-if="result.INSPFIELD.METERTYPE=='CHARACTERISTIC'">{{ 'INSPECTION.OBSERVATION' | translate }}: {{history.OBSERVATION}}</h3>
+												<p>{{ 'INSPECTION.INSPECTION' | translate }}: {{history.INSPECTOR}}</p>
+												<p>{{ 'INSPECTION.READINGDATE' | translate }}: {{history.READINGDATE | date}}</p>									
+											</span>
+										</li>
+									</ul>
+								</span>
+
+								<datepicker 
+									date-format="date"
+									placeholder="Date"
+									ng-model="result.INSPFIELDRESULT.DATERESPONSE" 
+									ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELD.FIELDTYPE && (result.INSPFIELD.FIELDTYPE == 'DO' || result.INSPFIELD.FIELDTYPE == 'DT')" 
+									id="{{result.INSPFIELD.INSPFIELDNUM}}"
+									disabled="true"
+									ng-readonly="inspection.isStatusComplete()" 
+								/>
+							</li>
+							
+							<li class="ui-row" ng-if="result.INSPFIELD.INSPQUESTIONNUM == question.INSPQUESTIONNUM && result.INSPFIELD.FIELDTYPE && (result.INSPFIELD.FIELDTYPE == 'DT' || result.INSPFIELD.FIELDTYPE == 'TO')" >
+								<datepicker 
+									date-format="time"
+									placeholder="Time"
+									ng-model="result.INSPFIELDRESULT.TIMERESPONSE" 
+									id="{{result.INSPFIELD.INSPFIELDNUM}}_time"
+									disabled="true"
+									ng-readonly="inspection.isStatusComplete()" 
+								/>
+							</li>
+						</ul>
+					</li>
+				</ul>
+	
+				<emm:include value="actions.htm"/>			
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+			function MainController($scope, inspectorService) {
+				var viewName = 'offline/inspector/inspresultlist.htm',
+					queryName = 'INSPECTIONRESULTLIST',
+					appName = 'INSPECTOR';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				//Customized configuration to add signature to inspection
+				$scope.signatureKey = '[EMM_SIGN]';
+				
+				// Init services
+				inspectorService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName : 'INSPFIELDRESULT'
+				});
+				
+				$scope.actions = inspectorService.actions;
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+
+				var inspResult = EMMServer.DB.getQueryResult("INSPECTIONRESULT");
+				// Checks if record exists in case where autosync has been triggered
+				if (!inspResult || !inspResult[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					inspectorService.actions.toStatuslist("INPROG");
+					return false;
+				}
+				
+
+				var questionResult = EMMServer.DB.getQueryResult("INSPQUESTION");
+				// get InspFieldResult mbo
+				var inspfieldResult = EMMServer.DB.getQueryResult("INSPFIELD");
+				var fieldresultResult = EMMServer.DB.getQueryResult('INSPFIELDRESULT');	
+				var optionResult = EMMServer.DB.getQueryResult("INSPFIELDOPTION");
+				var doclinksResult = EMMServer.DB.getQueryResult("DOCLINKS");
+				var meterResult = EMMServer.DB.getQueryResult("METER");
+				var meterReadingResult = EMMServer.DB.getQueryResult("METERREADING");
+				var measurementResult = EMMServer.DB.getQueryResult("MEASUREMENT");
+				var meterList = [], meterHistoryList = {};
+				if (meterResult) {
+					$scope.actions.getMeterList(meterResult, meterList);
+					$scope.actions.getMeterHistory(meterReadingResult, measurementResult, meterHistoryList);
+				}
+				var parentOthers = EMMServer.DB.getQueryResult("PARENTOTHERS");
+				var parent = EMMServer.DB.getQueryResult("PARENT");
+				var fupReset = EMMServer.DB.getQueryResult("FOLLOWUPS");
+				$scope.followups = null;
+				if (fupReset && fupReset[0]){
+					$scope.followups = fupReset;
+				}
+				
+				// Merge question and field result
+				$scope.inspection = new Inspection(inspResult[0]);
+				$scope.actions.mergeInspectionResult($scope.inspection, questionResult, inspfieldResult, fieldresultResult, optionResult, doclinksResult, meterList, meterHistoryList);
+				$scope.inspection.init();
+				
+				// *Important* to set app name
+				$scope.inspection.mbo.appName(appName);
+				
+				$scope.goBack = function() {
+					// Clear any changes and remove from session
+					$scope.inspection.session.remove();
+					
+					var returnPage = EMMServer.Session.getItem('FROM_PAGE');
+					if (returnPage){	
+						EMMServer.DB.Select().go(returnPage);
+					} else {
+						inspectorService.toList(null,true, null, inspResult[0].STATUS);
+					}
+				};
+				
+				
+				$scope.completeInspection = function( ) {
+					if (!parentOthers || !parentOthers[0]){
+						inspectorService.actions.completeInspection($scope.inspection, parent[0]);
+					} else {
+						inspectorService.actions.completeInspection($scope.inspection);
+					}
+				}
+				
+				// show informational instruction on group and invidivual question level
+			    $scope.toggleShowHelp = function(question){	
+			    	var id = 'help_' + question.INSPQUESTIONNUM;
+			    	if ($('#' + id).length > 0) {
+			    		$('#'  + question.INSPQUESTIONNUM).empty();
+			    	} else {
+				    	$('#' + question.INSPQUESTIONNUM).append("<textarea data-htmleditor='true' readonly='true' id='" + id + "'></textarea>");
+				    	$('#' + id).val(question.LONGDESCRIPTION);
+				    	$('#' + id).htmlEditor();
+				    	$('iframe').ready( function() {
+					        $('#' + question.INSPQUESTIONNUM + ' iframe').contents().find("head").append($("<style type='text/css'>  body{background-color:white;}  </style>"));
+					        $('#' + question.INSPQUESTIONNUM + ' iframe').css('margin-top', '10px');
+					    });
+			    	}
+			    }
+				
+				// select and deselect Radio button
+			    $scope.radioSelection = function(e, value, rlt) { 	
+			    	var el = e.srcElement ? angular.element(e.srcElement) : angular.element(e.target);	
+			    	id = el.attr('id');
+			    	
+					if (rlt.INSPFIELDRESULT.TXTRESPONSE != null && rlt.INSPFIELDRESULT.TXTRESPONSE === value ){
+		 				rlt.INSPFIELDRESULT.TXTRESPONSE = null;
+		 				$( "span[name='" + id + "']" ).removeClass('ui-radiobutton-on');
+						$('#'+el.attr('id')).parent().removeClass('ui-radio-row-selected');
+						
+		 			} else {
+		 				rlt.INSPFIELDRESULT.TXTRESPONSE = value;
+		 				$('#'+el.attr('id')).parent().addClass('ui-radio-row-selected');					
+						$('#'+el.attr('id')).parent().siblings().removeClass('ui-radio-row-selected');
+			   		} 
+			    }
+			}
+		</script>
+	</body>
+</html>

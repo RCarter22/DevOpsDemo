@@ -2,18 +2,23 @@
 	<h1 class="ui-title">
 		<span style="float:left;text-align:left;width:70%;display:inline-block;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;" id="userid_main_menu"></span>
 	</h1>
-	<a id="btn_main_menu" href="#main_menu" class="ui-btn-toggle"><span class="ui-arrow"></span><span translate="GOTO">Go To</span></a>
+	<a id="btn_main_menu" href="#main_menu" class="ui-btn-toggle ui-hamburger">
+		  <span></span>
+		  <span></span>
+		  <span></span>
+		  <span></span>		
+	</a>
 </div>
 <ul id="main_menu" class="ui-listview ui-panel-content" style="z-index:99999999" ng-controller="MenuController">
 	<li class="ui-divider" translate="APPS">Apps</li>
 	<li ng-show="UserInfo.nativeAppSettings.offlineStartCenterEnabled && UserInfo.nativeAppSettings.sqliteEnabled">
-		<a ng-click="goToStartCenter()"><img ng-src="../../images/startcenter.png"/>
+		<a ng-click="goToStartCenter()"><span class="emm-startcenter"></span>
 			<h3 translate="STARTCENTER">Start Center</h3>
 		</a>
 	</li>
 	<li class="ui-divider" ng-show="UserInfo.nativeAppSettings.offlineStartCenterEnabled && UserInfo.nativeAppSettings.sqliteEnabled"></li>
 	<li ng-repeat-start="a in userApps" ng-if="a.type==='APP'">
-     	<a ng-click="goToApp(a.app)"><img ng-src="../../images/{{a.imageName}}"/>
+     	<a ng-click="goToApp(a.app)"><span class="{{a.imageName}}"></span>
 			<h3>{{a.title}}</h3>
     	</a>    	
 	</li>
@@ -22,21 +27,21 @@
 	<li class="ui-divider" translate="SYNCHRONIZATION">Synchronization</li>	
 	<li>
 		<a emm-sync>
-			<img src="../../images/sync.png" />
+			<span class="emm-sync"></span>
 			<h3 translate="SYNCSERVER">Sync with Server</h3>
-			<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+			<span ng-if="DOCREQUEST"><span class="ui-attachment-request emm-download-1"></span></span>
 			<span class="ui-badge ui-badge-b">{{TXNCOUNT}}</span>
 		</a>	
 	</li>
 	<li>
 		<a emm-online>
-			<img src="../../images/online.png" />
+			<span class="emm-online"></span>
 			<h3 translate="GOONLINE">Go Back Online</h3>
 		</a>
 	</li>
 	<li>
 		<a emm-online="txntrack/main.action">
-			<img src="../../images/map.png" />
+			<span class="emm-stack-records"></span>
 			<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
 			<span class="ui-badge ui-badge-a">{{TXNERRORCOUNT}}</span>
 		</a>

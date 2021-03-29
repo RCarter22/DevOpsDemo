@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-header ui-header-b">
+<!-- 				<h3 class="ui-title">Search Results</h3> -->
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+<!-- 			<div class="ui-statusbar ui-statusbar-c" ng-hide="workorders && srs && assets && locations && labors"> -->
+<!-- 				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3> -->
+<!-- 			</div> -->
+			<div class="ui-content">
+
+				<ul class="ui-listview" ng-repeat="q in QueryIds">
+					<li class="ui-divider">
+						<img ng-if="q=='DS_WORKORDERS'" src="../../images/pins/wo.png" width="16" height="20">
+						<img ng-if="q=='DS_SRS'" src="../../images/pins/sr.png" width="16" height="20">
+						<img ng-if="q=='DS_ASSETS'" src="../../images/pins/asset.png" width="16" height="20">
+						<img ng-if="q=='DS_LOCATIONS'" src="../../images/pins/location.png" width="16" height="20">
+						<img ng-if="q=='DS_LABORS'" src="../../images/pins/bill.png" width="16" height="20">
+						<img ng-if="q!='DS_WORKORDERS' && q!='DS_SRS' && q!='DS_ASSETS' && q!='DS_LOCATIONS' && q!='DS_LABORS'" src="../../images/pins/droppedpin.png" width="16" height="20">
+						&nbsp;{{q}}
+					</li>
+					<li ng-switch="q" ng-repeat="mp in mapObjs(q)">
+						<a ng-switch-when="DS_WORKORDERS" ng-click="map(q, 'WORKORDERID', mp.WORKORDERID, 'offline/map/wopin.htm')">
+							<p><strong>{{mp.WONUM}} ({{mp.STATUS}})</strong></p>
+							<h3>{{mp.DESCRIPTION}}</h3>
+							<p>({{mp.LATITUDEY}},{{mp.LONGITUDEX}})</p>
+							<div class="ui-row-4">
+								<div class="ui-column">
+									<strong>{{ 'WORKORDER.LOCATION' | translate }}</strong>: {{mp.LOCATION}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'WORKORDER.LEAD' | translate }}</strong>: {{mp.LEAD}}
+								</div>
+							</div>
+							<span class="ui-arrow"></span>
+						</a>
+						<a ng-switch-when="DS_SRS" ng-click="map(q, 'TICKETUID', mp.TICKETUID, 'offline/map/srpin.htm')">
+							<p><strong>{{mp.TICKETID}} ({{mp.STATUS}})</strong></p>
+							<h3 class="ui-wrap">{{mp.DESCRIPTION}}</h3>
+							<p>({{mp.LATITUDEY}},{{mp.LONGITUDEX}})</p>	
+							<div class="ui-row-4">
+								<div class="ui-column">
+									<strong>{{ 'SR.REPORTEDBY' | translate }}</strong>: {{mp.REPORTEDBY}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'SR.REPORTEDEMAIL' | translate }}</strong>: {{mp.REPORTEDEMAIL}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'SR.REPORTEDPHONE' | translate }}</strong>: {{mp.REPORTEDPHONE}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'SR.AFFECTEDPERSON' | translate }}</strong>: {{mp.AFFECTEDPERSON}}		
+								</div>
+							</div>
+							<span class="ui-arrow"></span>
+						</a>
+						<a ng-switch-when="DS_ASSETS" ng-click="map(q, 'ASSETUID', mp.ASSETUID, 'offline/map/assetpin.htm')">
+							<p><strong>{{mp.ASSETNUM}} ({{mp.SERIALNUM}})</strong></p>
+							<h3 class="ui-wrap">{{mp.DESCRIPTION}}</h3>
+							<p>({{mp.LATITUDEY}},{{mp.LONGITUDEX}})</p>		
+							<p>{{ 'ASSET.LOCATION' | translate }}: {{mp.LOCATION}}</p>
+							<span class="ui-arrow"></span>
+							<span class="ui-arrow"></span>
+						</a>
+						<a ng-switch-when="DS_LOCATIONS" ng-click="map(q, 'LOCATIONSID', mp.LOCATIONSID, 'offline/map/locpin.htm')">
+							<p><strong>{{mp.LOCATION}} ({{mp.STATUS}})</strong></p>
+							<h3 class="ui-wrap">{{mp.DESCRIPTION}}</h3>
+							<p>({{mp.LATITUDEY}},{{mp.LONGITUDEX}})</p>	
+							<span class="ui-arrow"></span>
+						</a>
+						<a ng-switch-default ng-click="mapEsri(mp.emmmap_y, mp.emmmap_x, 14, 'offline/map/droppedpin.htm', mp, 'DROPPED_PIN')">
+							<h3 class="ui-wrap">{{mp.OBJECTID}}</h3>
+							<p>({{mp.emmmap_y}},{{mp.emmmap_x}})</p>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, $window) {
+				var viewName = 'offline/map/list.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+// 				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+// 				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+// 				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+				$scope.QueryIds = EMMServer.DB.getQueryIds();
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				$scope.mapObjs = function(mapDataSrcId) {
+					return EMMServer.DB.getQueryResult(mapDataSrcId);
+				};
+				
+				$scope.map = function(dataSrc, uniqueCol, uniqueColId, url){
+					emm.maps.zoomTo(dataSrc, uniqueCol, uniqueColId, url);
+				}
+				
+				$scope.mapEsri = function(latitudey, longitudex, zoomLevel, url, mp, key){	
+					emm.maps.zoomToPoint(new emm.maps.LatLng(latitudey, longitudex), zoomLevel, zoomLevel, url, mp, key);
+				}
+			}
+		</script>		
+	</body>
+</html>

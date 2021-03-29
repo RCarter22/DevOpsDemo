@@ -1,0 +1,65 @@
+	
+<div id="ACTIONS" class="ui-sidebar" >
+	<p class="ui-section" translate="ACTIONS">Actions</p>
+	<ul class="ui-listview">
+		<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
+		<li>
+			<a emm-sync>
+				<span class="emm-sync"></span>
+				<h3 translate="SYNCSERVER">Sync with Server</h3>
+				<span ng-if="DOCREQUEST"><span class="ui-attachment-request emm-download-1"></span></span>
+				<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a emm-online="inspector/inspresultlist.action?id={{inspection.INSPECTIONRESULTID}}">
+				<span class="emm-online"></span>
+				<h3 translate="GOONLINE">Go Back Online</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li>
+			<a emm-sync-res>
+				<span class="emm-stack-records"></span>
+				<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
+				<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+		<li ng-repeat="q in inspection.getTopLevelQuestions()" ng-hide="q.TOTALCOUNT == 0">
+			<a scroll-to="#groupseq{{q.GROUPSEQ}}">
+				<span ng-class="[q.COMPLETECOUNT == q.TOTALCOUNT ? 'emm-check-circle complete' : 'emm-circle-o incomplete']"></span>
+				<h3 class="ui-wrap" style="padding-right:10px;">{{q.GROUPSEQ + '. ' + q.DESCRIPTION}}</h3>
+				<span class="ui-bubble" style="font-size:17px; -webkit-border-radius: 10px;">								
+					{{q.COMPLETECOUNT}} / {{q.TOTALCOUNT}}
+				</span>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li class="ui-divider ui-divider-c"></li>
+		<li ng-show="inspection.isStatusComplete() && (inspection.FUPOBJECT || followups != null || inspection.DEFICIENCYLIST != null)" >  
+			<a ng-click="actions.toFuplist(inspection)">
+				<i class="emm-workorder"></i>
+				<h3 translate="INSPECTION.INSPFOLLOWUP">Inspection Followup</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li ng-show="inspection.isStatusComplete() && !inspection.FUPOBJECT && followups == null && inspection.DEFICIENCYLIST == null" >  
+			<a ng-click="actions.createWorkOrderWithResults(inspection)">
+				<i class="emm-workorder"></i>
+				<h3 translate="INSPECTION.CREATEWORKORDER">Create a Work Order</h3>
+				<span class="ui-arrow"></span>
+			</a>
+			
+		</li>
+		<li ng-show="inspection.isStatusComplete() && inspection.ASSET" >
+			<a ng-click="actions.viewAssetDetails(inspection)">
+				<i class="emm-asset"></i>
+				<h3 translate="INSPECTION.VIEWASSETDETAILS">View Asset Details</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>	
+	</ul>
+</div>

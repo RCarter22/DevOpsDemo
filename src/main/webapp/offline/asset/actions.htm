@@ -1,84 +1,92 @@
-<div class="ui-sidebar" ng-hide="asset.mbo.isNew()">
+<div id="ACTIONS" class="ui-sidebar" ng-hide="asset.mbo.isNew()">
 	<p class="ui-section" translate="ACTIONS">Actions</p>
 	<ul class="ui-listview ui-inset">
 		<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
 		<li>
 			<a emm-sync>
-				<img src="../../images/sync.png">
+				<span class="emm-sync"></span>
 				<h3 translate="SYNCSERVER">Sync with Server</h3>
-				<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+				<span ng-if="DOCREQUEST"><span class="ui-attachment-request emm-download-1"></span></span>
 				<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a emm-online="asset/view.action?id={{asset.ASSETUID}}">
-				<img src="../../images/online.png">
+				<span class="emm-online"></span>
 				<h3 translate="GOONLINE">Go Back Online</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a emm-sync-res>
-				<img src="../../images/map.png" />
+				<span class="emm-stack-records"></span>
 				<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
 				<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
+		<li ng-show="userInfo.nativeAppSettings.emmMapEnabled">
+			<a data-control="map" data-modules='["DS_ASSETS"]' data-datasources='{{dataSources}}' data-zoom='["DS_ASSETS", "ASSETUID", "{{asset.ASSETUID}}", "{{asset.LATITUDEY}}", "{{asset.LONGITUDEX}}"]'>
+				<span class="emm-map-location"></span>
+				<h3 translate="OPENMAP">Open Map</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>
+		<li class="ui-divider ui-divider-c"></li>		
 		<li>
 			<a ng-click="actions.toSpareParts(asset)">
-				<img src="../../images/inventory.png">
+				<span class="emm-inventory"></span>
 				<h3 translate="SPAREPARTS">Spare Parts</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>		
 		<li>
 			<a ng-click="actions.toMeterList(asset)">
-				<img src="../../images/meter.png">
+				<span class="emm-meter"></span>
 				<h3 translate="METERREADINGS">Enter Meter Readings</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a data-control="dialog" href="#createsrdialog">			
-				<img src="../../images/addfollowup.png">
+				<span class="emm-add-new"></span>
 				<h3 translate="CREATESR">Create Service Request</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a data-control="dialog" href="#createwodialog">
-				<img src="../../images/addfollowup.png">
+				<span class="emm-add-new"></span>
 				<h3 translate="CREATEWO">Create Work Order</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a ng-click="actions.toAttachments(asset)">
-				<img src="../../images/attachment.png">
+				<span class="emm-attachments"></span>
 				<h3 translate="ATTACHMENTS">Attachments</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
-<!-- 		<li>
+		<li>
 			<a ng-click="actions.toClassify(asset)">
-				<img src="../../images/classification.png">
-				<h3 translate="CLASSIFICATION">Classification</h3>
+				<span class="emm-classification"></span>
+				<h3 translate="SPECIFICATION">Specification</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
- -->		<li>
+		<li>
 			<a ng-click="actions.toMoveAsset(asset)">
-				<img src="../../images/assetmove.png">
+				<span class="emm-move-asset"></span>
 				<h3 translate="ASSET.MOVEASSET">Move Asset</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a ng-click="actions.reportDowntime(asset)">
-				<img src="../../images/downtime.png" />
+				<span class="emm-downtime"></span>
 				<h3 translate="REPDOWNTIME">Report Downtime</h3>
 				<span class="ui-arrow"></span>
 			</a>

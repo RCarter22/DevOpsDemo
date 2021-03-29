@@ -33,7 +33,6 @@ Asset.prototype.createNew = function(obj){
 		this.STATUSDATE = now;
 		this.CHANGEDATE = now;
 		this.CHANGEBY = EMMServer.DB.getUserInfo().personId;
-
 	}
 	
 	// Set flags

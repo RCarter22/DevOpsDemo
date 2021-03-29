@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page" ng-show="workorder != null">		
+			<div class="ui-content">
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+				<div class="section-header section-header-c">
+<!-- 					<button class="section-back-button" ng-click="goBack()"> -->
+<!-- 						<span class="emm-chevron-left section-center-image"></span> -->
+<!-- 					</button> -->
+					<div>
+						<h1 class="section-header-title"><label translate="WORKORDER.WONUM">Work Order</label> {{workorder.WONUM}}</h1>
+						<h2 class="section-header-subtitle">{{workorder.DESCRIPTION}}</h2>
+					</div>	
+				</div>
+			</div>
+			<div class="section-action section-border-bottom">
+				<button class="section-action-button" ng-click="showDetail(workorder)">
+					<span class="section-action-button-icon emm-share-square-o"></span>
+					<span class="section-action-button-text" translate="DETAILS">Details</span>
+				</button>
+				<button class="section-action-button" ng-if="labtransInfo && labtransInfo.TIMERSTATUS != 'ACTIVE'" ng-show="workorder.canAddActuals() && !workorder.isInHistory()" ng-click="actions.startTimer(workorder, labtransInfo)">
+					<span class="section-action-button-icon emm-clock-o"></span>
+					<span class="section-action-button-text" translate="STARTTIMER">Start Timer</span>
+				</button>		
+				<button class="section-action-button" ng-if="labtransInfo && labtransInfo.TIMERSTATUS == 'ACTIVE'" ng-show="workorder.canAddActuals() && !workorder.isInHistory()" ng-click="actions.stopTimer(workorder, labtransInfo)">
+					<span class="section-action-button-icon emm-clock-o"></span>
+					<span class="section-action-button-text" translate="STOPTIMER">Stop Timer</span>
+				</button>
+				<button class="section-action-button ui-btn-save" ng-click="actions.saveWorkOrder(workorder)">
+					<span class="section-action-button-icon  emm-check-circle" ng-class="{'section-button-red' : workorder.mbo.toBeSaved()}"></span>
+					<span class="section-action-button-text" translate="SAVE" ng-class="{'section-button-red' : workorder.mbo.toBeSaved()}">Save</span>
+				</button>
+				<button class="section-action-button" ng-click="openDialog()">
+					<span class="section-action-button-icon emm-camera"></span>
+					<span class="section-action-button-text" translate="TAKEPHOTO">Take Photo</span>
+				</button>
+			</div>
+			<div class="section section-border-bottom">
+				<a class="ui-image-detail section-center-image">
+					<div class="section-block">	
+						<img ng-src="{{docurlname}}" onerror="$(this).closest('.section').hide()">
+					</div>
+				</a>					
+			</div>
+			<div class="section section-border-bottom">
+				<div class="section-line">
+					<span class="section-icon"><img src="../../images/pins/wo.png" width="25" height="31.25"></span>
+					<span class="section-text">({{jsonParam.LATITUDEY}},{{jsonParam.LONGITUDEX}})</span>
+				</div>
+				<div class="section-line">
+					<span class="section-icon section-icon-c emm-fire-extinguisher"></span>
+					<span class="section-text">{{extra.ASSETDESC}}</span>
+				</div>
+				<div class="section-line">
+					<span class="section-icon section-icon-c emm-building"></span>
+					<span class="section-text">{{extra.LOCDESC}}</span>
+				</div>
+			</div>
+			<div class="section section-border-bottom">
+				<div class="section-line section-line-c">
+					<label translate="WORKORDER.LEAD">Lead</label>
+				</div>
+				<div class="section-line">
+					<span class="section-icon section-icon-c emm-user"></span>
+					<span class="section-text">{{workorder.LEAD}}</span>
+				</div>				
+			</div>
+			<div class="section section-border-bottom">
+				<div class="section-line section-line-c">
+					<label translate="WORKORDER.STATUS">Status</label>
+					<span class="section-text">{{workorder.STATUS}} ({{workorder.STATUSDATE | date:'short'}})</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="WORKORDER.SITEID">Site</label>
+					<span class="section-text">{{workorder.SITEID}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="WORKORDER.WORKTYPE">Work Type</label>
+					<span class="section-text">{{workorder.WORKTYPE}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="WORKORDER.WOPRIORITY">Priority</label>
+					<span class="section-text">{{workorder.WOPRIORITY}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="WORKORDER.SCHEDSTART">Scheduled Start</label>
+					<span style="padding-right:10px" class="section-text">{{workorder.SCHEDSTART | date:'short'}}</span>
+					<input hidden type="text" disabled="true" name="SCHEDSTART" id="SCHEDSTART" ng-model="workorder.SCHEDSTART" ng-change="workorder.mbo.onChange('SCHEDSTART')"></input>
+					<a class="section-icon-calendar emm-calendar" data-control="datepicker" data-datetype="datetime" data-input="SCHEDSTART"></a>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="WORKORDER.SCHEDFINISH">Scheduled Finish</label>
+					<span style="padding-right:10px" class="section-text">{{workorder.SCHEDFINISH | date:'short'}}</span>
+					<input hidden type="text" disabled="true" name="SCHEDFINISH" id="SCHEDFINISH" ng-model="workorder.SCHEDFINISH" ng-change="workorder.mbo.onChange('SCHEDFINISH')"></input>
+					<a class="section-icon-calendar emm-calendar" data-control="datepicker" data-datetype="datetime" data-input="SCHEDFINISH"></a>
+				</div>
+			</div>	
+			<div class="section section-border-bottom" ng-if="workorder.LONGDESCRIPTION && workorder.LONGDESCRIPTION != ''">
+				<div class="section-block">
+					<textarea data-htmleditor="true" ng-model="workorder.LONGDESCRIPTION"></textarea>
+				</div>				
+			</div>
+		</div>
+		<div id="doctypedialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="SELECTFOLDER">Select Folder</h1>
+				</div>
+				<div class="ui-content">			
+					<ul class="ui-listview ui-radiobutton">	
+						<li ng-repeat="d in doctypes track by $index">
+							<label for="{{'check' + $index}}">{{d.DOCTYPE}}</label>
+							<input type="radio" id="{{'check' + $index}}" name="doctype" ng-checked="d.DOCTYPE === doctype" ng-click="setDoctype(d.DOCTYPE)">
+						</li>
+					</ul>	
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" href="#" data-dismiss="modal" translate="CANCEL">Cancel</a>
+						<a class="ui-btn-a" href="#" ng-click="takePhoto()" data-dismiss="modal" translate="OK">OK</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, $window, wotrackService, doclinksService, mapService) {
+				var appName = 'WOTRACK';
+				var viewName = 'offline/map/wopin.htm';
+
+// 				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				// $scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+				// $scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+				// $scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+// 				$scope.QueryIds = EMMServer.DB.getQueryIds();
+
+				$scope.jsonParam = EMMServer.Session.getItem('JSONPARAM_DATA');
+				
+				// Init services
+				wotrackService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+				});
+				
+				mapService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName: "WORKORDER"
+				});
+				
+				doclinksService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName: "WORKORDER"
+				});
+				
+				$scope.actions = mapService.actions;
+				
+				// Get Work Order object data
+				var resultSet = EMMServer.DB.getQueryResult("WORKORDER");
+				if (resultSet && resultSet[0]){
+					$scope.workorder = new WorkOrder(resultSet[0]);
+					// *Important* to set app name
+					$scope.workorder.mbo.appName(appName);
+					// Have to multiply the coordinates first by 1 to convert to a number
+					// 7 decimal places for ease of viewing
+					$scope.jsonParam.LONGITUDEX = ($scope.jsonParam.LONGITUDEX*1).toFixed(7);
+					$scope.jsonParam.LATITUDEY = ($scope.jsonParam.LATITUDEY*1).toFixed(7);
+				}
+				
+				var statusList = EMMServer.DB.getQueryResult("WOSTATUS");
+				if (statusList){
+					$scope.workorder.mbo.applyMaxStatusValue(statusList);
+				}
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+				
+				var extra = EMMServer.DB.getQueryResult("EXTRA");
+				if (extra && extra[0]) {
+					extra = extra[0];
+					$scope.extra = extra;
+					$scope.labtransInfo = {
+						LABTRANSID : extra.TIMERLABTRANSID,
+						LABORCODE : extra.TIMERLABORCODE,
+						CRAFT : extra.TIMERCRAFT,
+						TIMERSTATUS : extra.TIMERSTATUS
+					}
+				}
+
+				var doctypes = EMMServer.DB.getQueryResult("APPDOCTYPE");
+				if (doctypes && doctypes[0]) {
+					$scope.doctypes = doctypes;
+					$scope.doctype = $scope.doctypes[0].DOCTYPE;
+				}
+				
+				var docurlname = EMMServer.DB.getMapDocUrl();
+				if (docurlname && docurlname[0]) {
+					$scope.docurlname = docurlname;
+				}							
+
+				$scope.showDetail = function() {
+					$scope.workorder.session.remove();
+					wotrackService.showDetail($scope.workorder, undefined, true);				
+				}
+				
+				$scope.takePhoto = function(){
+					$scope.workorder.session.remove();
+					doclinksService.createNew("WORKORDER", $scope.workorder.WORKORDERID, $scope.doctype);
+				}
+				
+				$scope.openDialog = function() {
+					emm.util.dialog("#doctypedialog");
+				}
+				
+				$scope.setDoctype = function(doctype){
+					$scope.doctype = doctype;
+				}
+				
+				// Callback should be declared on the $window, this overrides the doclinksSerice recordSaved so it redirects to the map instead
+				$window.recordSaved = function(result) {
+					EMMServer.DB.Select()
+					.addMessage(getText('RECORDSAVED', null, 'Record Saved'))
+					// New map DB select option, allows the native app to copy over the right attachment for viewing on the pin page
+					.mapOfflineAttachment($scope.workorder.WORKORDERID, "WORKORDER")
+					.go("offline/map/wopin.htm");
+				}
+  
+			}
+		</script>
+	</body>
+</html>

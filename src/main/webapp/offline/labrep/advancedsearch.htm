@@ -8,7 +8,7 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="ADVANCEDSEARCH">Advanced Search</h3>
 			</div>
 			<div class="ui-content">
@@ -57,7 +57,7 @@
 						<label translate="TO">To</label>
 						<input id="STARTDATETO" type="text" ng-model="labtrans.STARTDATETO"/>
 						<a data-input="STARTDATETO" data-datetype="date" data-control="datepicker" class="ui-datepicker"></a>
-					</li>																
+					</li>										
 				</ul>		
 			</div>
 			<div class="ui-btn-container">
@@ -84,7 +84,6 @@
 				$scope.labtrans = new LabTrans(resultSet[0]); // labor reporting is a labtrans object underneath 
 				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
 				$scope.labtrans.mbo.appName(appName);
-				
 				
 				// Init services
 				// Set the return page so all lookups return to this page

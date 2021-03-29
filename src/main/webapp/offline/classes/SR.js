@@ -92,6 +92,9 @@ SR.prototype.isReadOnly = function(attr){
 		GLACCOUNT: function(){
 			return true;
 		},
+		ASSETORGID: function(){
+			return true;
+		},
 		ASSETSITEID : function(){
         	if($.inArray(self.mbo._srStatusMaxValue, ['CLOSED']) > -1)
         		return true;
@@ -210,13 +213,17 @@ SR.prototype.lookup = function(attr, options){
 			return new Domain(o);
 		},
 		ASSETSITEID: function(opt){
+			var where = "1=1";
+			if (self.ASSETORGID)
+				where = "SITEID IN (SELECT SITEID FROM ASSET WHERE ORGID = '" + self.ASSETORGID + "')";	
 			var o = {
-				display: "SITEID, DESCRIPTION",
+				display: "ORGID, SITEID, DESCRIPTION",
 				field: "ASSETSITEID",
 				source: "SITEID",
+				crossovers: "ORGID",
 				table: "SITE",
-				searchFields : "SITEID,DESCRIPTION",
-				where: "1=1",
+				searchFields : "ORGID,SITEID,DESCRIPTION",
+				where: where,
 				orderby: null
 			};
 			$.extend(o, opt);
@@ -227,7 +234,7 @@ SR.prototype.lookup = function(attr, options){
 				display: "ASSETNUM, DESCRIPTION, SITEID",
 				field: "ASSETNUM",
 				source: "ASSETNUM",
-				crossovers: "LOCATION,SITEID",
+				crossovers: "LOCATION,SITEID,ORGID",
 				searchFields : "ASSETNUM,DESCRIPTION,SITEID",
 				table: "ASSET",
 				where: "1=1",
@@ -249,7 +256,7 @@ SR.prototype.lookup = function(attr, options){
 				display : "LOCATION,DESCRIPTION,SITEID",
 				field : "LOCATION",
 				source : "LOCATION",
-				crossovers: "SITEID",
+				crossovers: "SITEID,ORGID",
 				searchFields : "LOCATION,DESCRIPTION,SITEID",
 				table: "LOCATIONS",
 				where: where,
@@ -263,6 +270,7 @@ SR.prototype.lookup = function(attr, options){
 				display: "SITEID,DESCRIPTION",
 				field: "SITEID",
 				source: "SITEID",
+				crossovers: "ORGID",
 				table: "SITE",
 				searchFields : "SITEID,DESCRIPTION",
 				where: "1=1",
@@ -321,6 +329,7 @@ SR.prototype.onChange = function(attr, crossovers){
         	if(crossovers){
         		self.LOCATION = crossovers.LOCATION;
         		self.ASSETSITEID = crossovers.SITEID;
+        		self.ASSETORGID = crossovers.ORGID;
         	}
         	return true;
         },
@@ -328,9 +337,24 @@ SR.prototype.onChange = function(attr, crossovers){
         	self.ASSETNUM = null;
         	if(crossovers){
         		self.ASSETSITEID = crossovers.SITEID;
+        		self.ASSETORGID = crossovers.ORGID;
         	}        	
         	return true;
         },
+		ASSETSITEID: function () {
+			self.ASSETNUM = null;
+			self.LOCATION = null;
+			if (crossovers){
+				self.ASSETORGID = crossovers.ORGID;
+			}
+        	return true;
+		},
+		SITEID: function () {
+			if (crossovers){
+				self.ORGID = crossovers.ORGID;
+			}
+        	return true;
+		},
         OWNER : function(){
         	self.OWNERGROUP = null;    	
         	return true;

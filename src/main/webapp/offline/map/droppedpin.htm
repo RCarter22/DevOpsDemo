@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<div class="ui-content">
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+				<div class="section-header section-header-c">
+<!-- 					<button class="section-back-button" ng-click="goBack()"> -->
+<!-- 						<span class="emm-chevron-left section-center-image"></span> -->
+<!-- 					</button> -->
+					<div>
+						<h1 class="section-header-title" translate="DROPPEDPIN">Dropped Pin</h1>
+						<h2 class="section-header-subtitle"></h2>
+					</div>
+				</div>
+				<div class="section-action section-border-bottom">
+					<button class="section-action-button" ng-click="actions.createNewWorkOrder(droppedPin)">
+						<span class="section-action-button-icon emm-workorder"></span>
+						<span class="section-action-button-text" translate="CREATEWO">Create New Work Order</span>
+					</button>
+					<button class="section-action-button" ng-click="actions.createNewSR(droppedPin)">
+						<span class="section-action-button-icon emm-service-request"></span>
+						<span class="section-action-button-text" translate="CREATESR">Create New Service Request</span>
+					</button>
+				</div>
+				<div class="section section-border-bottom">
+					<div class="section-line">
+						<span class="section-icon"><img src="../../images/pins/droppedpin.png" width="25" height="31.25"></span>
+						<span class="section-text">({{droppedPin.emmmap_y}},{{droppedPin.emmmap_x}})</span>
+					</div>
+				</div>
+				<!-- IF ESRI -->
+					<!-- IF WIFI LOCATIONS -->
+						<div class="section section-border-bottom" ng-if="droppedPin.DATASOURCEID == 'Lines_Sync'">
+							<div class="section-line section-line-c">
+								<label>OBJECTID</label>
+								<span class="section-text">{{droppedPin.objectid}}</span>
+							</div>
+							<div class="section-line section-line-c">
+								<label>Description</label>
+								<span class="section-text">{{droppedPin.description}}</span>
+							</div>
+						</div>
+					<!-- END IF -->
+					<!-- IF HUBWAY STATION -->
+<!-- 						<div class="section section-border-bottom"> -->
+<!-- 							<div class="section-line section-line-c"> -->
+<!-- 								<label>OBJECTID</label> -->
+<!-- 								<span class="section-text"></span> -->
+<!-- 							</div> -->
+<!-- 							<div class="section-line section-line-c"> -->
+<!-- 								<label>Name</label> -->
+<!-- 								<span class="section-text"></span> -->
+<!-- 							</div> -->
+<!-- 							<div class="section-line section-line-c"> -->
+<!-- 								<label>Terminal Name</label> -->
+<!-- 								<span class="section-text"></span> -->
+<!-- 							</div> -->
+<!-- 							<div class="section-line section-line-c"> -->
+<!-- 								<label>Install Date</label> -->
+<!-- 								<span class="section-text"></span> -->
+<!-- 							</div> -->
+<!-- 						</div> -->
+					<!-- END IF -->
+				<!-- END IF -->
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, mapService) {
+				var viewName = 'offline/map/droppedpin.htm';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+// 				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+// 				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+// 				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+
+				mapService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName: "DROPPED_PIN"
+				});
+
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+
+
+				var resultSet = EMMServer.DB.getQueryResult("DROPPED_PIN");
+				// Checks if record exists in case where autosync has been triggered
+				if (!resultSet || !resultSet[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					return false;
+				}
+				
+				// Have to multiply the coordinates first by 1 to convert to a number
+				// 7 decimal places for ease of viewing
+				$scope.droppedPin = resultSet[0];
+				$scope.droppedPin.emmmap_x = ($scope.droppedPin.emmmap_x*1).toFixed(7);
+				$scope.droppedPin.emmmap_y = ($scope.droppedPin.emmmap_y*1).toFixed(7);
+				
+				$scope.actions = mapService.actions;				
+
+			}
+		</script>
+	</body>
+</html>

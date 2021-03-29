@@ -92,8 +92,8 @@ WorkOrder.prototype.isReadOnly = function(attr){
         	if (self.isInHistory())
         		return true;
         	return false;
-        },
-        REPAIRFACILITY: function(){
+		},
+		REPAIRFACILITY: function(){
         	if (self.isInHistory())
         		return true;
         	return false;
@@ -188,8 +188,8 @@ WorkOrder.prototype.isReadOnly = function(attr){
         	if (($.inArray(self.mbo.maxStatusValue(), ['INPRG', 'COMP']) > -1)|| (self.isInHistory()))
         		return true;
         	return false;
-        },
-        AEPUSINGDEPARTMENT: function(){
+		},
+		AEPUSINGDEPARTMENT: function(){
             if (($.inArray(self.mbo.maxStatusValue(), ['INPRG', 'COMP']) > -1)|| (self.isInHistory()))
                 return true;
             return false;
@@ -224,10 +224,11 @@ WorkOrder.prototype.isRequired = function(attr){
         },
         TASKID: function(){
         	return true;
-        },
-        AEPUSINGDEPARTMENT: function(){
-        	if(self.ISTASK == 0)
-        	return true;
+		},
+		AEPUSINGDEPARTMENT: function(){
+        	if(self.ISTASK == 0){
+				return true;
+			}    	
         },
         DESCRIPTION: function(){
         	if(self.ISTASK == 1){
@@ -442,6 +443,27 @@ WorkOrder.prototype.lookup = function(attr, options){
 			$.extend(o, opt);
 			return new Domain(o);
 		},
+		ASSETNUM: function(opt){
+			var where = "SITEID = '" + self.SITEID + "'";
+			
+			var o = {
+					display: "ASSETNUM, DESCRIPTION, LOCATION",
+					field: "ASSETNUM",
+					source: "ASSETNUM",
+					searchFields : "ASSETNUM,DESCRIPTION,LOCATION",
+					table: "ASSET",
+					orderby: null
+			};
+						
+			if(opt != null && opt.isAdvanced != null && opt.isAdvanced == '1')
+				where = "1=1";				
+			else
+				o.crossovers = "LOCATION";
+			
+			o.where = where;
+			$.extend(o, opt);
+			return new Domain(o);
+		},
 		LOCATION: function(opt){
 			var where = "SITEID = '" + self.SITEID + "'";
 			
@@ -506,13 +528,12 @@ WorkOrder.prototype.lookup = function(attr, options){
 		},
 		CLASSSTRUCTUREID: function(opt){
 			var whereclause = "OBJECTVALUE = 'WORKORDER' AND (SITEID = '" + self.SITEID + "' OR SITEID IS NULL)";
-			
+
 			if(self.PLUSPCUSTOMER){
 				whereclause += " and ( exists (select 1 from pluspcustomer,pluspcustassoc where pluspcustomer.customer = '" + self.PLUSPCUSTOMER + "'";
 				whereclause += " and (pluspcustomer.customer = pluspcustassoc.customer or pluspcustomer.parent = pluspcustassoc.customer)";
 				whereclause += " and pluspcustassoc.ownertable = 'CLASSSTRUCTURE' and pluspcustassoc.ownerid = classstructure.classstructureuid ))";
 			}
-			
 			var o = {
 					display: "CLASSIFICATIONID, DESCRIPTION, CLASSSTRUCTUREID",
 					field: "CLASSSTRUCTUREID",
@@ -523,7 +544,6 @@ WorkOrder.prototype.lookup = function(attr, options){
 					orderby: null
 			}
 			$.extend(o, opt);
-			
 			return new Domain(o);
 		}
 	};
@@ -582,7 +602,7 @@ WorkOrder.prototype.onChange = function(attr, crossovers){
         	return true;
         },
         ASSETNUM : function(){
-            if(crossovers){
+        	if(crossovers){
                 self.LOCATION = crossovers.LOCATION;
                 self.PLUSPCUSTOMER = crossovers.PLUSPCUSTOMER;
                 self.ALIAS = crossovers.ALIAS;
@@ -601,10 +621,9 @@ WorkOrder.prototype.onChange = function(attr, crossovers){
             }
             return true;
         },
-
         LOCATION : function(){
-        	self.ASSETNUM = null;
-        	self.ALIAS = null;
+			self.ASSETNUM = null;
+			self.ALIAS = null;
         	self.AEPUSINGDEPARTMENT = null;
         	if(crossovers){
         		self.PLUSPCUSTOMER = crossovers.PLUSPCUSTOMER;
@@ -716,5 +735,20 @@ WorkOrder.prototype.isInHistory = function(){
 	// Determine if a work order is in History Mode
 	if (this.HISTORYFLAG == 1)
 		return true;
+	return false;
+}
+WorkOrder.prototype.canChangeStatus = function(status){
+	var statusList = {
+            WAPPR: ['WAPPR', 'APPR', 'INPRG', 'COMP', 'WMATL', 'WSCH'],
+            APPR: ['APPR', 'WAPPR', 'INPRG', 'COMP'],
+            INPRG : ['INPRG', 'WAPPR', 'COMP', 'WMATL'],
+            WMATL : ['WMATL', 'WAPPR', 'INPRG', 'COMP'],
+            WSCH : ['WSCH', 'WAPPR', 'APPR', 'INPRG', 'WMATL', 'COMP'],
+            COMP : ['COMP']
+        };
+	if(statusList[this.STATUS].indexOf(status) > -1)
+		return true;
+	
+	this.mbo.message("Cannot change status from {0} to {1}".format(this.STATUS, status));
 	return false;
 }

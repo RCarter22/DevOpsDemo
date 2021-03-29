@@ -106,7 +106,7 @@ angular.module('emm').factory('labrepService', function(domainService) {
 			var startdateto = labtrans.STARTDATETO.toDate().toISOString().substring(0,10);
 			query += " AND date(STARTDATE) <= date('" + startdateto + "')";
 		}
-		
+
 		
 		query += " ORDER BY LABORCODE ASC";
 		
@@ -118,8 +118,7 @@ angular.module('emm').factory('labrepService', function(domainService) {
 	PUBLIC.toList = function(searchValue, goBack, query) {
 		var viewName = 'offline/labrep/list.htm';
 		if(String.isNullOrEmpty(query))
-			query = "SELECT * FROM LABTRANS "
-
+			query = "SELECT * FROM LABTRANS";
 		
 		if(searchValue && (typeof searchValue) === 'string') {
 			query += (query.toUpperCase().indexOf("WHERE") > 0 ? " AND " : " WHERE ");

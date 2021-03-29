@@ -9,9 +9,10 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="EZMAXMOBILE.ASSET">Asset</h3>
-				<a ng-click="actions.saveAsset(asset)" class="ui-btn-right" ng-class="{'ui-btn-c' : asset.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-click="actions.saveAsset(asset)" class="ui-btn-right" ng-class="{'ui-btn-c' : asset.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
+				<a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !asset.mbo.isDirty(), 'ui-statusbar-c': asset.mbo.isDirty()}">
@@ -155,7 +156,7 @@
 		</div>
 		
 		<script type="text/javascript">
-			function MainController($scope, domainService, assetService, classificationService) {
+			function MainController($scope, domainService, assetService, classificationService, mapService) {
 				var appName = 'ASSET';
 				var viewName = 'offline/asset/asset.htm';
 				
@@ -178,11 +179,18 @@
 					userInfo : $scope.userInfo,
 					viewName : viewName
 				});
+				mapService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName : 'ASSET'
+				});
 				
 				$scope.domain = domainService.domain;
 				$scope.locationDrilldown = domainService.locationDrilldown;
 				
 				$scope.actions = assetService.actions;
+				
+				$scope.dataSources = mapService.getOptions().dataSources;
 
 				var messages = EMMServer.DB.getQueryResult("MESSAGE");
 				if (messages)
@@ -204,7 +212,14 @@
 				$scope.goBack = function() {
 					// Clear any changes and remove from session
 					$scope.asset.session.remove();
-					assetService.toList(null,true);
+					
+					var returnPage = EMMServer.Session.getItem('FROM_PAGE');
+					if (returnPage){
+						EMMServer.Session.removeItem('FROM_PAGE');	
+						EMMServer.DB.Select().go(returnPage);
+					} else {
+						assetService.toList(null,true);
+					}
 				};
 			}
 		</script>

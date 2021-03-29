@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a class="ui-btn-left" href="" ng-click="goBack()"><span class="emm-chevron-left"></span></a>
+				<h3 class="ui-title" translate="EZMAXMOBILE.INSPECTION">Inspection</h3>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+            <div class="ui-content">
+				<ul id="taskdetails" class="ui-listview">				
+                   <li class="ui-field">
+	                   <label translate="WORKORDER.WONUM">Work Order</label>
+	                   <input ng-model="workorder.WONUM" ng-readonly="true"/>
+                   	</li>
+                   	<li class="ui-field-block">
+	                    <label translate="WORKORDER.DESCRIPTION">Description</label>
+	                    <textarea maxlength="100" ng-model="workorder.DESCRIPTION" ng-readonly="true"></textarea>
+                   	</li>
+                   	<li class="ui-divider ui-divider-c" translate="INSPECTION.RELATEDINSPECTIONS">Related Inspections</li>
+                   	
+                   	<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+            		<li ng-repeat="ir in inspectionresults">
+            			<a ng-click="ir.STATUS == 'PENDING' ? startInspection(ir) : showDetail(ir) ">
+            				<span class="ui-accessory-left" ng-if="ir.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+	            			<span>
+	            				<p class="ui-aside">{{ir.STATUS}}</p>	
+	            				<p><strong>{{ir.RESULTNUM}}</strong></p>
+								<h3>{{ir.NAME}}</h3>
+	                            <p ng-show="ir.ASSET!=null && ir.ASSET != ''">{{ 'EZMAXMOBILE.ASSET' | translate }}: {{ir.ASSET}}</p>
+								<p ng-show="ir.ASSET!=null && ir.ASSET != ''">{{ 'INSPECTION.DESCRIPTION' | translate }}: {{ir.ASSETDESC}}</p>
+								<p ng-show="ir.LOCATION!=null && ir.LOCATION != ''">{{ 'EZMAXMOBILE.LOCATION' | translate }}: {{ir.LOCATION}}</p>
+								<p ng-show="ir.LOCATION!=null && ir.LOCATION != ''">{{ 'INSPECTION.DESCRIPTION' | translate }}: {{ir.LOCDESC}}</p>
+								<p>{{ 'INSPECTION.REFERENCEOBJECT' | translate }}: {{ir.REFERENCEOBJECT}}</p>
+								<p>{{ 'INSPECTION.CREATEDATE' | translate }}: {{ir.CREATEDATE | date : 'short'}}</p>
+								<span class="ui-arrow"></span>
+	            			</span>
+	            		</a>
+					</li>
+            		<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				</ul>
+			</div>
+		</div>
+		<script type="text/javascript">
+		function MainController ($scope, $window, $filter, inspectorService, paginationService, applicationService){
+				var viewName = 'offline/inspector/woinsplist.htm',
+					queryName = 'INSPECTIONRESULTLIST',
+					appName = 'INSPECTOR';
+
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				var woSet = EMMServer.DB.getQueryResult("WORKORDER");
+				// Checks if record exists in case where autosync has been triggered
+				if (!woSet || !woSet[0]){
+					alert(getText('NORECORDEXIST', null, 'No record found or no longer exist'));
+					inspectorService.actions.toStatuslist("INPROG");
+					return false;
+				}
+				$scope.workorder = new WorkOrder(woSet[0]);
+				
+				var parentResult = EMMServer.DB.getQueryResult("PARENT");
+				$scope.parent = null;
+				if (parentResult && parentResult[0]){
+					$scope.parent = new InspectionResult(parentResult[0]);
+				}
+				$scope.inspectionresults = EMMServer.DB.getMboSet('InspectionResult', queryName);
+
+				paginationService.init({
+					pagination : $scope.inspectionresults.getPagination(),
+					queryName : queryName,
+					viewName : viewName
+				});
+				$scope.pageService = paginationService;
+				
+				inspectorService.init({
+					userInfo : $scope.userInfo
+				});
+				
+				$scope.actions = inspectorService.actions;
+				$scope.showDetail = inspectorService.showDetail;
+
+				$scope.startInspection = function (inspresult){		
+					emm.util.confirm({
+						title: getText('EMMGB1005I', null, 'Confirm'),
+						message: getText('INSPECTION.STARTINSPECTION', null, 'Start an Inspection?'), yes: function(){
+							$scope.actions.startInspection(inspresult, $scope.parent);
+					 },
+					  yesText: getText('EMMGB1006I', null, 'Yes')
+					});
+				} 
+				
+				$scope.goBack = function(){
+					EMMServer.Session.removeItem('FROM_PAGE');	
+					var pageData = EMMServer.Session.getItem('INSP_DATA');
+					if (pageData) {
+						// Go back to the original workorder
+						$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey); 
+						var inspectionresultSql = "SELECT * FROM INSPECTIONRESULT WHERE REFERENCEOBJECTID = '" + $scope.mboObject.WONUM +
+							"' AND REFERENCEOBJECT = 'PARENTWO' AND SITEID ='" + $scope.mboObject.SITEID + "'";
+
+						EMMServer.Session.removeItem('INSP_DATA');	
+						if ($scope.mboObject) {
+							EMMServer.DB.Select()
+								.addQuery(pageData.entityName, $scope.mboObject.toSql())
+								.addQuery("INSPECTIONRESULT", inspectionresultSql)
+								.submit(pageData.returnPage, true);
+						}
+					} else {
+						inspectorService.toList(null,true, null, $scope.parent.STATUS);
+					}
+				}
+			}
+		</script>
+	</body>
+</html>

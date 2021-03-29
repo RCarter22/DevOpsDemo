@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
-				<h3 class="ui-title">Classification</h3>
-				<a class="ui-btn-right" ng-click="actions.saveClassification(mboObject, Specs, AssetAttributes)" ng-class="{'ui-btn-c' : mboObject.mbo.toBeSaved() || Specs.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
+				<h3 class="ui-title" translate="SPECIFICATION">Specification</h3>
+				<a class="ui-btn-right" ng-click="actions.saveClassification(mboObject, Specs, AssetAttributes)" ng-class="{'ui-btn-c' : mboObject.mbo.toBeSaved() || Specs.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 			</div>
 			<div class="ui-statusbar ui-statusbar-f">
 				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
@@ -34,7 +34,7 @@
 				<p class="ui-section">Specifications</p>
 				<ul class="ui-listview" ng-repeat="s in Specs track by $index" ng-show="!mboObject.mbo.toBeSaved()">
 					<li class="ui-field">
-						<label>{{s.ASSETATTRID}}</label>
+						<label>{{s.ASSETATTRID}} - {{s.ASSETATTRIDDESC}}</label>
 	                    <input type="text" ng-show="s.DATATYPE == 'NUMERIC' && !(s.DOMAINID)" ng-model="s.NUMVALUE" ng-required="s.mbo.isRequired('NUMVALUE')" placeholder="NUMERIC" ng-blur="setValue(s)"/>
 	                    <input type="text" disabled="true" ng-show="s.DATATYPE == 'NUMERIC' && s.DOMAINID" ng-model="s.NUMVALUE" ng-required="s.mbo.isRequired('NUMVALUE')"/>
 						<input type="text" ng-show="s.DATATYPE == 'ALN' && !(s.DOMAINID)" ng-model="s.ALNVALUE" ng-required="s.mbo.isRequired('ALNVALUE')" placeholder="ALN" ng-blur="setValue(s)"/>

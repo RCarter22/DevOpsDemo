@@ -8,16 +8,15 @@
 	<div class="ui-page ui-inset">
 		<emm:include value="../common/menu.htm"/>
 		<div class="ui-header ui-header-b">
-			<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+			<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title">Report Downtime</h3>
-			<a ng-click="actions.saveDowntime(downtime, asset, mode)" class="ui-btn-right ui-btn-c" translate="SAVE">Save</a>
+			<a ng-click="actions.saveDowntime(downtime, asset, mode)" class="ui-btn-right ui-btn-c"><span class="emm-floppy-o"></span></a>
 		</div>
 		<ul class="ui-navbar">
 			<li style="margin-right:-5px"><a ng-click="viewTab('CHANGESTATUS')" ng-class="{'ui-active' : mode == 'CHANGESTATUS'}"  translate="CHANGESTATUS">Change Status</a></li>
 			<li><a ng-click="viewTab('REPORTDOWNTIME')" ng-class="{'ui-active' : mode == 'REPORTDOWNTIME'}"  translate="REPDOWNTIME">Report Down Time</a></li>
 		</ul>
 		<div class="ui-content">
-			<s:include value="../common/statusbar.jsp"/>
 			<ul class="ui-listview">
 			    <li class="ui-field">
 					<label>Asset</label>

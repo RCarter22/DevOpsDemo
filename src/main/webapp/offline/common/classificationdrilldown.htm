@@ -7,7 +7,7 @@
 	<body>
 		<div class="ui-page">
 			<div class="ui-header ui-header-b">
-				<a ng-click="cancel()" class="ui-btn-left" translate="CANCEL">Cancel</a>
+				<a ng-click="cancel()" class="ui-btn-left"><span class="emm-times-circle"></span></a>
 				<h3 class="ui-title" translate="CLASSIFY.DRILLDOWN">Classification Drilldown</h3>
 			</div>
 			<div class="ui-statusbar ui-statusbar-f">
@@ -17,7 +17,7 @@
 				<ul class="ui-listview">
 					<li ng-show="currentClassification">
 						<a ng-click="goToClassification(currentClassification.PARENT)">
-							<img src="../../images/returnarrow.png"/>
+							<span class="emm-return"></span>
 							<p class="ui-aside">{{currentClassification.ORGID}}</p>
 							<h3>{{currentClassification.CLASSIFICATIONID}}</h3>
 							<p>{{currentClassification.DESCRIPTION}}</p>

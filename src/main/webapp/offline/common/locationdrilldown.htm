@@ -7,7 +7,7 @@
 	<body>
 		<div class="ui-page">
 			<div class="ui-header ui-header-b">
-				<a ng-click="cancel()" class="ui-btn-left" translate="CANCEL">Cancel</a>
+				<a ng-click="cancel()" class="ui-btn-left"><span class="emm-times-circle"></span></a>
 				<h3 class="ui-title" translate="LOCATIONDRILLDOWN">Location Drilldown</h3>
 			</div>
 			<div class="ui-statusbar ui-statusbar-f">
@@ -17,7 +17,7 @@
 				<ul class="ui-listview">
 					<li ng-show="currentLocation">
 						<a ng-click="goToLocation(currentLocation.PARENT, true)">
-							<img src="../../images/returnarrow.png"/>
+							<span class="emm-return"></span>
 							<p class="ui-aside">{{currentLocation.ORGID}}</p>
 							<h3>{{currentLocation.LOCATION}}</h3>
 							<p>{{currentLocation.DESCRIPTION}}</p>							

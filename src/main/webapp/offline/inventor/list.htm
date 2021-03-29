@@ -9,9 +9,9 @@
 		<div class="ui-page">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-	            <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+	            <a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 	            <h3 class="ui-title" translate="EZMAXMOBILE.INVENTOR">Inventory</h3>
-	            <a ng-click="barcodeScan()" class="ui-btn-right"><img src="../../images/barcode.png"></a>
+	            <a ng-click="barcodeScan()" class="ui-btn-right"><span class="emm-barcode-3"></span></a>
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
 	        </div>
 	        <div class="ui-statusbar ui-statusbar-f">
@@ -41,7 +41,7 @@
 					<li class="ui-divider ui-divider-c">{{dividerTitle}}</li>
 					<li ng-hide = "isCycle()">
 						<a ng-click="adjustPhysicalCounts()">
-							<img src="../../images/balance.png" />
+							<span class="emm-balance"></span>
 							<h3 class="ui-wrap" translate="INVENTORY.ADJCOUNT" translate-value-count="{{inventory.length}}">Adjust physical counts for these {{inventory.length}} items</h3>
 							<span class="ui-arrow"></span>
 						</a>

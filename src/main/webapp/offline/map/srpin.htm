@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page" ng-show="sr != null">		
+			<div class="ui-content">
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+				<div class="section-header section-header-c">
+<!-- 					<button class="section-back-button" ng-click="goBack()"> -->
+<!-- 						<span class="emm-chevron-left section-center-image"></span> -->
+<!-- 					</button> -->
+					<div>
+						<h1 class="section-header-title"><label translate="SR.SR">Service Request</label> {{sr.TICKETID}}</h1>
+						<h2 class="section-header-subtitle">{{sr.DESCRIPTION}}</h2>
+					</div>	
+				</div>
+			</div>
+			<div class="section-action section-border-bottom">
+				<button class="section-action-button" ng-click="showDetail(sr)">
+					<span class="section-action-button-icon emm-share-square-o"></span>
+					<span class="section-action-button-text" translate="DETAILS">Details</span>
+				</button>
+				<button class="section-action-button" ng-click="actions.takeOwnership(sr)">
+					<span class="section-action-button-icon emm-owner-select-1"></span>
+					<span class="section-action-button-text" translate="TAKEOWNERSHIP">Take Ownership</span>
+				</button>		
+				<button class="section-action-button" ng-click="openDialog()">
+					<span class="section-action-button-icon emm-camera"></span>
+					<span class="section-action-button-text" translate="TAKEPHOTO">Take Photo</span>
+				</button>
+			</div>
+			<div class="section section-border-bottom">
+				<a class="ui-image-detail section-center-image">
+					<div class="section-block">	
+						<img ng-src="{{docurlname}}" onerror="$(this).closest('.section').hide()">
+					</div>
+				</a>					
+			</div>
+			<div class="section section-border-bottom">
+				<div class="section-line">
+					<span class="section-icon"><img src="../../images/pins/sr.png" width="25" height="31.25"></span>
+					<span class="section-text">({{jsonParam.LATITUDEY}},{{jsonParam.LONGITUDEX}})</span>
+				</div>
+				<div class="section-line">
+					<span class="section-icon section-icon-c emm-fire-extinguisher"></span>
+					<span class="section-text">{{extra.ASSETDESC}}</span>
+				</div>
+				<div class="section-line">
+					<span class="section-icon section-icon-c emm-building"></span>
+					<span class="section-text">{{extra.LOCDESC}}</span>
+				</div>
+			</div>
+			<div class="section section-border-bottom">
+				<div class="section-line section-line-c">
+					<label translate="SR.STATUS">Status</label>
+					<span class="section-text">{{sr.STATUS}} ({{sr.STATUSDATE | date:'short'}})</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="SR.ASSETSITEID">Asset Site</label>
+					<span class="section-text">{{sr.ASSETSITEID}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="SR.OWNER">Owner</label>
+					<span class="section-text">{{sr.OWNER}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="SR.REPORTEDPRIORITY">Reported Priority</label>
+					<span class="section-text">{{sr.REPORTEDPRIORITY}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="SR.REPORTEDBY">Reported By</label>
+					<span class="section-text">{{sr.REPORTEDBY}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label translate="SR.AFFECTEDPERSON">Affected Person</label>
+					<span class="section-text">{{sr.AFFECTEDPERSON}}</span>
+				</div>
+			</div>
+			<div class="section section-border-bottom" ng-if="sr.LONGDESCRIPTION && sr.LONGDESCRIPTION != ''">
+				<div class="section-block">
+					<textarea data-htmleditor="true" ng-model="sr.LONGDESCRIPTION"></textarea>
+				</div>				
+			</div>
+		</div>
+		<div id="doctypedialog" class="ui-dialog">
+			<div class="ui-container">
+				<div class="ui-header">
+					<h1 class="ui-title" translate="SELECTFOLDER">Select Folder</h1>
+				</div>
+				<div class="ui-content">			
+					<ul class="ui-listview ui-radiobutton">	
+						<li ng-repeat="d in doctypes track by $index">
+							<label for="{{'check' + $index}}">{{d.DOCTYPE}}</label>
+							<input type="radio" id="{{'check' + $index}}" name="doctype" ng-checked="d.DOCTYPE === doctype" ng-click="setDoctype(d.DOCTYPE)">
+						</li>
+					</ul>	
+					<div class="ui-btn-container">
+						<a class="ui-btn-b" href="#" data-dismiss="modal" translate="CANCEL">Cancel</a>
+						<a class="ui-btn-a" href="#" ng-click="takePhoto()" data-dismiss="modal" translate="OK">OK</a>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, $window, srService, doclinksService, mapService, domainService) {
+				var appName = 'SR';
+				var viewName = 'offline/map/srpin.htm';
+				
+// 				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+// 				$scope.TXNCOUNT = EMMServer.DB.getUserTxnCount();
+// 				$scope.DOCREQUEST = EMMServer.DB.getUserDocRequest();
+// 				$scope.TXNERRORCOUNT = EMMServer.DB.getUserTxnErrorCount();
+// 				$scope.QueryIds = EMMServer.DB.getQueryIds();
+
+				$scope.jsonParam = EMMServer.Session.getItem('JSONPARAM_DATA');
+				
+				// Init services
+				srService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				mapService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName: "SR"
+				});
+				
+				doclinksService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName: "SR"
+				});
+				
+				$scope.actions = mapService.actions;
+				
+				// Get SR object data
+				var resultSet = EMMServer.DB.getQueryResult("SR");
+				if (resultSet && resultSet[0]){
+					$scope.sr = new SR(resultSet[0]);
+					// *Important* to set app name
+					$scope.sr.mbo.appName(appName);
+					// Have to multiply the coordinates first by 1 to convert to a number
+					// 7 decimal places for ease of viewing
+					$scope.jsonParam.LONGITUDEX = ($scope.jsonParam.LONGITUDEX*1).toFixed(7);
+					$scope.jsonParam.LATITUDEY = ($scope.jsonParam.LATITUDEY*1).toFixed(7);
+				}
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;		
+				
+				var extra = EMMServer.DB.getQueryResult("EXTRA");
+				if (extra && extra[0])
+					$scope.extra = extra[0];
+				
+				var doctypes = EMMServer.DB.getQueryResult("APPDOCTYPE");
+				if (doctypes && doctypes[0]) {
+					$scope.doctypes = doctypes;
+					$scope.doctype = $scope.doctypes[0].DOCTYPE;
+				}
+				
+				var docurlname = EMMServer.DB.getMapDocUrl();
+				if (docurlname && docurlname[0]) {
+					$scope.docurlname = docurlname;
+				}
+				
+				$scope.showDetail = function() {
+					$scope.sr.session.remove();
+					srService.showDetails($scope.sr, undefined, true);				
+				}
+				
+				$scope.takePhoto = function(){
+					$scope.sr.session.remove();
+					doclinksService.createNew("SR", $scope.sr.TICKETUID, $scope.doctype);
+				}
+
+				$scope.openDialog = function() {
+					emm.util.dialog("#doctypedialog");
+				}
+				
+				$scope.setDoctype = function(doctype){
+					$scope.doctype = doctype;
+				}
+				
+				// Callback should be declared on the $window, this overrides the doclinksSerice recordSaved so it redirects to the map instead
+				$window.recordSaved = function(result) {
+					EMMServer.DB.Select()
+					.addMessage(getText('RECORDSAVED', null, 'Record Saved'))
+					// New map DB select option, allows the native app to copy over the right attachment for viewing on the pin page
+					.mapOfflineAttachment($scope.sr.TICKETUID, "SR")
+					.go("offline/map/srpin.htm");
+				}
+			}
+		</script>
+	</body>
+</html>

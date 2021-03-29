@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="LABORTRANS">Labor Transactions</h3>
-				<a ng-show="labtrans.mbo.isNew() || labtrans.TIMERSTATUS == 'COMPLETE'" ng-click="actions.saveLabTrans(labtrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : labtrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-show="labtrans.mbo.isNew()" ng-click="actions.saveLabTrans(labtrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : labtrans.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !labtrans.mbo.isDirty(), 'ui-statusbar-c': labtrans.mbo.isDirty()}">
 				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="labtrans.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
@@ -18,7 +18,7 @@
 			<div class="ui-content">
 				<ul class="ui-listview">
 					<li class="ui-field">
-    					<label translate="Work Order">Work Order</label>
+						<label translate="Work Order">Work Order</label>
     					<input disabled="true" ng-model="labtrans.WONUM" ng-required="labtrans.mbo.isRequired('WONUM')" ng-readonly="labtrans.mbo.isReadOnly('WONUM')"/>	
 					</li>	
 					 <li ng-show="labtrans.TIMERSTATUS == 'COMPLETE'" class="ui-field">
@@ -64,8 +64,8 @@
                    	<li class="ui-field">
 						<label translate="LABTRANS.PREMIUMPAYHOURS">Premium Pay Hours</label>
 						<input id="PREMIUMPAYHOURS" type="text" hours-format data-interval="0.25" data-control="spinner" ng-model="labtrans.PREMIUMPAYHOURS" ng-readonly="labtrans.mbo.isReadOnly('PREMIUMPAYHOURS')"></input>
-          	        </li>
-          	        <li class="ui-field">
+					  </li>
+					  <li class="ui-field">
 						<label translate="Type">Type</label>
 						<a class="ui-arrow" ng-click="domain($event,labtrans)" data-field="TRANSTYPE" data-display="VALUE,DESCRIPTION"></a>
           	        </li>
@@ -98,7 +98,7 @@
 
 				$scope.domain = domainService.domain;
 				$scope.actions = labtransService.actions;
-				
+
 				$scope.goBack = function(){
 					// Clear any changes and remove from session
 					$scope.labtrans.session.remove();

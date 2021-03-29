@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
+				<h3 class="ui-title" translate="INSPECTION.CONDUCTINSPECTION">Conduct an Inspection</h3>
+				<a ng-click="barcodeScan()" class="ui-btn-right"><span class="emm-barcode-3"></span></a>
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			
+			<ul class="ui-navbar">
+				<li><a ng-click="statusList('PENDING')" ng-class="status=='PENDING' ? 'ui-active':'' "  translate="INSPECTION.PENDING">Pending</a></li>
+				<li><a ng-click="statusList('INPROG')" ng-class="status=='INPROG' ? 'ui-active':'' " translate="INSPECTION.INPROG">In Progress</a></li>
+				<li><a ng-click="statusList('COMPLETED')" ng-class="status=='COMPLETED' ? 'ui-active':'' " translate="INSPECTION.COMPLETED">Complete</a></li>
+			</ul>	
+			<div class="ui-searchbar">
+				<form ng-submit="quickSearch()">
+					<input type="search" placeholder="{{ 'QUICKSEARCH' | translate }}" ng-model="pageService.search"/>
+				</form>
+			</div>	
+			<div class="ui-statusbar ui-statusbar-c" ng-hide="inspectionresults">
+				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
+			</div>
+			<div class="ui-content">
+				<ul class="ui-listview">
+					<li class="ui-field ui-sort" ng-show="inspectionresults">
+						<label translate="SORTBY">Sort By</label>
+						<select ng-change="pageService.changeSortBy()" ng-model="pageService.sortBy" ng-options="o.label for o in pageService.sortOptions">
+						</select>
+						<a ng-click="pageService.changeSortDirection()" class="ui-btn-sort"><span data-sortorder="{{pageService.sortDirection}}"></span></a>
+					</li>
+				</ul>
+				<ul class="ui-listview" ng-show="inspectionresults">
+					<li class="ui-divider ui-divider-c" translate="LIST">List</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+				
+				<ul class="ui-listview" ng-repeat="ir in inspectionresults track by $index">
+					<li ng-if="ir.REFERENCEOBJECT == 'PARENTWO'">
+						<a ng-click="actions.toWoinsplist(ir)" style="padding-right:40px" >
+							<h3 class="ui-wrap">{{ir.RESULTNUM}} &bull; {{ir.NAME}}</h3>
+							<div class="ui-row-2">
+								<div class="ui-column" ng-show="ir.REFERENCEOIBJECT != 'ASSET' && ir.REFERENCEOIBJECT != 'LOCATION'">
+									<strong>{{ 'WORKORDER.WONUM' | translate }}</strong>: {{ir.REFERENCEOBJECTID}}
+								</div>
+								<div class="ui-column">
+									<strong>Description</strong>: {{ir.WODESC}}
+								</div>
+							</div>
+							<div class="ui-row-2" ng-show="ir.ASSET!=null && ir.ASSET != ''">
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.ASSET' | translate }}</strong>: {{ir.ASSET}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.ASSET' | translate }} {{ 'ASSET.DESCRIPTION' | translate }}</strong>: {{ir.ASSETDESC}}
+								</div>
+							</div>
+							<div class="ui-row-2">
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.LOCATION' | translate }}</strong>: {{ir.LOCATION}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.LOCATION' | translate }} {{ 'LOCATION.DESCRIPTION' | translate }}</strong>: {{ir.LOCDESC}}
+								</div>
+							</div>
+							<div class="ui-row-2">
+								<div class="ui-column">
+									<strong>{{ 'INSPECTION.CREATEDATE' | translate }}</strong>: {{ir.CREATEDATE | date : 'short'}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'INSPECTION.DUEDATE' | translate }}</strong>: {{ir.DUEDATE | date : 'short'}}
+								</div>
+							</div>
+							<span class="position-right emm-related-records"></span>
+						</a>
+					</li>
+					<li ng-if="ir.REFERENCEOBJECT != 'PARENTWO'">
+						<a ng-click="ir.STATUS == 'PENDING' ? startInspection(ir) : showDetail(ir)" style="padding-right:40px">
+							<span class="ui-accessory-left" ng-if="ir.mbo.isDirty()">
+								<span class="ui-circle ui-circle-c"></span>
+							</span>
+							<h3 class="ui-wrap">{{ir.RESULTNUM}} &bull; {{ir.NAME}}</h3>
+							<div class="ui-row-2" ng-show="ir.REFERENCEOIBJECT != 'ASSET' && ir.REFERENCEOIBJECT != 'LOCATION'">
+								<div class="ui-column">
+									<strong>{{ 'WORKORDER.WONUM' | translate }}</strong>: {{ir.REFERENCEOBJECTID}}
+								</div>
+								<div class="ui-column">
+									<strong>Description</strong>: {{ir.WODESC}}
+								</div>
+							</div>
+							<div class="ui-row-2" ng-show="ir.ASSET!=null && ir.ASSET != ''">
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.ASSET' | translate }}</strong>: {{ir.ASSET}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.ASSET' | translate }} {{ 'ASSET.DESCRIPTION' | translate }}</strong>: {{ir.ASSETDESC}}
+								</div>
+							</div>
+							<div class="ui-row-2" ng-show="ir.LOCATION!=null && ir.LOCATION != ''">
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.LOCATION' | translate }}</strong>: {{ir.LOCATION}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'EZMAXMOBILE.LOCATION' | translate }} {{ 'LOCATION.DESCRIPTION' | translate }}</strong>: {{ir.LOCDESC}}
+								</div>
+							</div>
+							<div class="ui-row-2">
+								<div class="ui-column">
+									<strong>{{ 'INSPECTION.CREATEDATE' | translate }}</strong>: {{ir.CREATEDATE | date : 'short'}}
+								</div>
+								<div class="ui-column">
+									<strong>{{ 'INSPECTION.DUEDATE' | translate }}</strong>: {{ir.DUEDATE | date : 'short'}}
+								</div>
+							</div>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
+				</ul>
+				
+			    <ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
+
+			</div>
+		</div>
+		
+		<script type="text/javascript">
+			function MainController ($scope, $window, $filter, inspectorService, paginationService, applicationService){
+				var viewName = 'offline/inspector/insplist.htm',
+					queryName = 'INSPECTIONRESULT',
+					appName = 'INSPECTOR';
+				
+				EMMServer.Offline.setSyncViewName(viewName);
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				$scope.inspectionresults = EMMServer.DB.getMboSet('InspectionResult', queryName);	
+				
+				var status = EMMServer.DB.getQueryResult("STATUS");
+				if (status && status[0]){
+					$scope.status = status[0].STATUS;
+				}else if (EMMServer.Session.getItem('STATUS'))
+					$scope.status = EMMServer.Session.getItem('STATUS');
+				
+				inspectorService.init({
+					userInfo : $scope.userInfo
+				});						
+				
+				paginationService.init({
+					pagination : $scope.inspectionresults.getPagination(),
+					queryName : queryName,
+					viewName : viewName,
+					sortOptions : [
+									{ label : getText('SELECTVALUE', null, 'Select Value'), value : ''},
+									{ label : getText('INSPECTION.ASSET', null, 'Asset'), value : 'ASSET'},
+									{ label : getText('INSPECTION.LOCATION', null, 'Location'), value : 'LOCATION'},
+									{ label : getText('INSPECTION.CREATEDATE', null, 'Create Date'), value : 'CREATEDATE'},
+									{ label : getText('INSPECTION.DUEDATE', null, 'Due Date'), value : 'DUEDATE'}
+								]
+				});
+				$scope.pageService = paginationService;
+				
+				$scope.actions = inspectorService.actions;
+				$scope.showDetail = inspectorService.showDetail;
+				
+				$scope.startInspection = function (inspresult){		
+					emm.util.confirm({
+						title: getText('EMMGB1005I', null, 'Confirm'),
+						message: getText('INSPECTION.STARTINSPECTION', null, 'Start an Inspection?'), yes: function(){
+							$scope.actions.startInspection(inspresult);
+					 },
+					  yesText: getText('EMMGB1006I', null, 'Yes')
+					});
+				} 
+				
+				$scope.statusList = function(status){
+					$scope.pageService.clearCache();					
+					$scope.actions.toStatuslist(status);
+				}
+				
+				$scope.goBack = function(){
+					$scope.pageService.clearCache();					
+					applicationService.goToApp(appName);
+				}
+				
+				$scope.barcodeScan = function (){
+					EMMServer.Barcode.scan('scan');
+				};
+				
+				$window.scan = function(/*Scan Value*/ val){
+					$scope.pageService.search = val;
+					$scope.quickSearch();	
+				}
+				
+				$scope.quickSearch = function() {
+					inspectorService.toList($scope.pageService.search, null, null, $scope.status);
+				}
+				
+				$scope.advancedSearch = inspectorService.toAdvancedSearch;	
+			}
+		</script>		
+	</body>
+</html>

@@ -14,10 +14,10 @@
 			</div>
 			<div class="ui-content ui-content-narrow">				    	
 				<ul class="ui-listview ui-inset ui-radiobutton">			
-					<li ng-repeat="lookup in domainLookups">
-						<label for="radio_{{lookup.VALUE}}">{{lookup.DESCRIPTION || lookup.VALUE}}</label>
-						<input type="radio" name="newStatus" id="radio_{{lookup.VALUE}}" value="{{lookup.VALUE}}"></input>
-					</li>
+     				<li ng-repeat="lookup in domainLookups">
+      					<label for="radio_{{$index}}">{{lookup.DESCRIPTION || lookup.VALUE}}</label>
+      					<input type="radio" name="newStatus" id="radio_{{$index}}" value="{{lookup.VALUE}}"></input>
+     				</li>					
 				</ul>			
 				<div class="ui-btn-container">
 					<a class="ui-btn-b" ng-click="cancel()" translate="CANCEL">Cancel</a>
@@ -66,7 +66,7 @@
 				function doChangeStatus(){
 					var newStatus = $("input:radio[name=newStatus]:checked").val();
 					var currentTime = new Date();
-					
+
 					//AEP custom status change logic for PLUSTWO app
 					//cannot change status to COMP unless the current status of the work order is WCOMP
 					//or
@@ -104,8 +104,8 @@
 							emm.util.alert({'message':getText('EMMAEP1002E', null, 'Primary meter needs to be updated before changing status to WCOMP')});
 							return;
 						}
-					}					
-
+					}
+					
 					// Save it to the MBO object
 					$scope.mboObject[pageData.fieldName] = newStatus;
 					
@@ -121,8 +121,7 @@
 							$scope.mboObject.session.remove();
 							goBack(getText('EMMOF1008I', null, 'Status Successfully Changed'));
 						});
-				
-				}		
+				}			
 			}
 		</script>
 	</body>

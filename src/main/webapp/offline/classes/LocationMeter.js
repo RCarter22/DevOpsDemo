@@ -122,11 +122,10 @@ LocationMeter.prototype.setValue = function(evt, attr, measurePoints){
     		//first make sure the input is valid (i.e. numeric input for a gauge meter)
     		if(String.isNullOrEmpty(self.DOMAINID)){
     			if(!String.isNullOrEmpty(self.READING)){
-	    			var isNumeric =  /^\d+(\.\d+)?$/.test(self.READING);
-	    			if(!isNumeric){
+    				if (!Number.isNumber(self.READING)) {
 	    				self.READING = null;
 	    	    		throw new EMMInputException(evt, 'Invalid numeric input value!', EMMConstants.ERROR); // EMMConstants.ERROR or EMMConstants.WARNING, EMMConstants.INFO
-	    			}
+    				} 
 	    		}
     		}
     		

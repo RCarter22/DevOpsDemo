@@ -8,8 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-	            <a ng-click="goBack(inventory.LOCATION)" class="ui-btn-left" translate="BACK">Back</a>
+	            <a ng-click="goBack(inventory.LOCATION)" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 	            <h3 class="ui-title" translate="INVDETAILS">Inventory Details</h3>
+	            <a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
 	        </div>
 	        <div class="ui-statusbar" ng-class="{'ui-statusbar-f': inventory.mbo.isDirty() === false, 'ui-statusbar-c': inventory.mbo.isDirty()}">

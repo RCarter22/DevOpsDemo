@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+  		<style type="text/css">
+			.sigPad { width: 600px; height: 222px; margin: 0 auto; }
+			.sigWrapper { width: 600px; height: 220px; }
+ 		</style>
+	</head>
+	<body>
+		<div class="ui-page ui-inset">
+			<div class="ui-header ui-header-b">
+				<a ng-click="cancel()" class="ui-btn-left"><span class="emm-times-circle"></span></a>
+				<a id="clearButton" ng-click="clear()" style="right: 75px"><span class="emm-eraser"></span></a>
+				<a ng-click="save()" class="ui-btn-right ui-btn-c"><span class="emm-floppy-o"></span></a>
+				<h3 class="ui-title" translate="OFFLINEAPPS">Offline Applications</h3>	
+			</div>
+			<div class="ui-statusbar ui-statusbar-f">
+				<h5 class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+			<div class="ui-content">
+				<ul id="portrait" class="ui-listview">
+					<li><span><h3 translate="ROTATEDEVICE">Please Rotate Your Device</h3></span></li>
+				</ul>
+			  	<form id="myform" method="post" action="" class="sigPad" enctype="multipart/form-data" style="display: none; touch-action: none;">
+			    	<div class="sig sigWrapper">
+			      		<div class="typed"></div>
+				      	<canvas class="pad" width="600px" height="220px"></canvas>
+				      	<input type="hidden" id="signatureData" name="signatureData">
+				    </div>
+				</form>
+			</div>			
+		</div>
+		<script type="text/javascript"> 
+			function MainController ($scope, $window){
+				var viewName = 'offline/inspector/signature.htm';
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				var pageData = EMMServer.Session.getItem('SIGNATURE_DATA');
+				$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+				
+				var pad = null;
+				
+				$(window).bind('orientationchange', function(e) {
+					if (window.orientation != 0 || $(window).width() > 500){
+						$('#myform, .ui-btn-right, #clearButton').show();
+						$('#portrait').hide();
+					} else {
+						$('#myform, .ui-btn-right, #clearButton').hide();
+						$('#portrait').show();
+					}
+				});
+				
+				$(document).ready(function(){
+					if (window.orientation == 0 && $(window).width() < 500){
+						$('#myform, .ui-btn-right, #clearButton').hide();			
+					} else {
+						$('#myform, .ui-btn-right, #clearButton').show();
+						$('#portrait').hide();
+					}
+					pad = $('.sigPad').signaturePad({drawOnly:true, lineTop: 200});
+				});
+				
+				$window.addSignatureCallback = function(result){
+					$scope.mboObject.session.cache();
+					goBack(getText('EMMES1007I', null, "Signature Added Successfully"));
+				}
+				
+				function goBack(message){
+					EMMServer.Session.removeItem('SIGNATURE_DATA');
+					EMMServer.DB.Select()
+						.addMessage(message)						
+						.go(pageData.returnPage);
+				}
+				
+				$scope.save = function(){
+					var currentTime = new Date();
+					var api = pad || $('.sigPad').signaturePad({drawOnly:true});
+					$('#signatureData').val(api.getSignatureImage());
+
+					var signature = api.getSignatureImage();		
+					if(api.validateForm()){
+						$scope.mboObject[pageData.fieldName] = signature;
+						$scope.mboObject["SIGNEDDATE"] = currentTime;
+						var updateData = {
+								"SIGNEDDATE" : currentTime
+						};
+						updateData[pageData.fieldName] = signature;
+						
+						EMMServer.DB.Insert(pageData.entityName, pageData.action)
+							.addObject($scope.mboObject.getMbo())
+							.submit("addSignatureCallback");
+					}
+				}
+				
+				$scope.clear = function(){
+					var api = pad || $('.sigPad').signaturePad({drawOnly:true});
+					api.clearCanvas();
+				}
+				
+				$scope.cancel = function(){
+					EMMServer.DB.Select()
+						.go(pageData.returnPage); 
+				}
+			}
+		</script>
+	</body>
+</html>

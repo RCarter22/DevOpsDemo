@@ -10,6 +10,10 @@ function LabTrans (){
 
 LabTrans.prototype.createNew = function(obj){
 	if((obj && (!obj.ISADVANCED || obj.ISADVANCED != '1')) || !obj){
+/*		var d = new Date();
+		d.setHours(0,0,0,0);
+		this.STARTDATE = d;
+*/		
 		this.STARTDATE = new Date();
 		this.REGULARHRS = 0;
 		this.TRANSTYPE = 'WORK';
@@ -146,8 +150,8 @@ LabTrans.prototype.isRequired = function(attr){
         },
         TRANSTYPE: function(){
         	return true;
-        },
-        TASKID: function(){
+		},
+		TASKID: function(){
         	if (self.TIMERSTATUS === 'COMPLETE')
         		return true;
         	else
@@ -347,7 +351,7 @@ LabTrans.prototype.lookup = function(attr, options){
 				display : "TASKID,DESCRIPTION,SITEID",
 				searchFields : "TASKID",
 				where:where
-			};	
+			}; 
 			$.extend(o, opt);
 			return new Domain(o);
 		},
@@ -445,9 +449,7 @@ LabTrans.prototype.validate = function(){
 		fields.push(getText('LABTRANS.STARTDATE', null, 'Start Date'));	
 	if (self.mbo.isRequired('REGULARHRS') && Number.getNumber(self.REGULARHRS) == null)
 		fields.push(getText('LABTRANS.REGULARHRS', null, 'Regular Hrs'));
-	/*if (self.mbo.isRequired('TASKID') && Number.getNumber(self.TASKID) == null)
-		fields.push(getText('LABTRANS.TASKID', null, 'Task'));
-	*/
+	
 	if(fields.length>0){	
 		validated = false;
 		self.mbo.message(getText('EMMOF1005W', [fields.join(', ')], 'Missing required fields'));

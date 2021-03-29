@@ -121,7 +121,7 @@ angular.module('emm').factory('assetService', function(domainService, doclinksSe
 			.submit(viewName, true);								
 	};
 	
-	PUBLIC.showDetail = function(asset, message){
+	PUBLIC.showDetail = function(asset, message, fromMap){
 		// The MBO object should be queried in one SQL clause, this is because when the MBO object is updated, it has a one-to-one mapping to the database
 		var sql = "SELECT * FROM ASSET WHERE ASSETUID = '" + asset.ASSETUID + "'";
 		// All non-MBO related data should be queried separately
@@ -131,6 +131,7 @@ angular.module('emm').factory('assetService', function(domainService, doclinksSe
 			.addQuery("ASSET", sql)
 			// .addQuery("METERS", extraSql)
 			.addMessage(message)
+			.addEZWebMap(fromMap)
 			.submit("offline/asset/asset.htm", true);	
 	};
 	PUBLIC.actions = {
@@ -266,11 +267,11 @@ angular.module('emm').factory('assetService', function(domainService, doclinksSe
 			
 			sr.createNew({
 				REPORTEDBY : options.userInfo.personId,				
-				ORGID: options.userInfo.orgId,
+				// ORGID: options.userInfo.orgId,
 				AFFECTEDPERSON : options.userInfo.personId,
 				ASSETNUM : asset.ASSETNUM,
 				ASSETSITEID : asset.SITEID,
-				SITEID : asset.SITEID,
+				ASSETORGID : asset.ORGID,
 				LOCATION : asset.LOCATION
 				});
 			
@@ -444,7 +445,7 @@ angular.module('emm').factory('assetService', function(domainService, doclinksSe
 				
 			};
 			classificationService.actions.toClassify(asset, classificationObj);
-		}
+		}	
 	};
 	return PUBLIC;
 });

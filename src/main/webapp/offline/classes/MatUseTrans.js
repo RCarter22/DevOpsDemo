@@ -23,8 +23,8 @@ MatUseTrans.prototype.createNew = function(obj){
 	this.QUANTITY = 1;
 	this.UNITCOST = 0;
 	this.STORELOC = EMMServer.DB.getUserInfo().extFields.DEFSTOREROOM;
-
 	
+
 	// Set flags
 	this.mbo.toBeSaved(true);
 	this.mbo.isNew(true);
@@ -211,7 +211,7 @@ MatUseTrans.prototype.lookup = function(attr, options){
 			},
 			STORELOC: function(opt){
 				if(self.ITEMNUM){
-					var where = "SITEID = '" + self.FROMSITEID + "' AND ITEMTYPE = '" 
+					var where = "SITEID = '" + self.SITEID + "' AND ITEMTYPE = '" 
 								+ self.LINETYPE + "' AND ITEMNUM = '" + self.ITEMNUM + "'";
 
 					var o = {
@@ -247,7 +247,7 @@ MatUseTrans.prototype.lookup = function(attr, options){
 					display : "TASKID,DESCRIPTION,SITEID",
 					searchFields : "TASKID",
 					where:where
-				};	
+				}; 
 				$.extend(o, opt);
 				return new Domain(o);
 			},

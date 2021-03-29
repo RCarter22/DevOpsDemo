@@ -8,7 +8,7 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="EZMAXMOBILE.LABREP">Labor Reporting</h3>
 				<a ng-click="actions.saveLabTrans(labtrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : labtrans.mbo.toBeSaved()}" translate="SAVE">Save</a>				
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
@@ -107,7 +107,7 @@
 				<ul class="ui-listview" ng-show="!(labtrans.mbo.isNew())">
 					<li>
 						<a ng-click="enterByLabor(laborInfo)">
-							<img src="../../images/addnew.png">
+							<span class="emm-add-new"></span>
 							<h3 translate="ADDMORE">Add More...</h3>
 						</a>
 					</li>
@@ -190,7 +190,7 @@
 				$scope.goBack = function() {
 					// clear any changes and remove from session
 					$scope.labtrans.session.remove();
-					
+
 					var listView = 'offline/labrep/list.htm';
 					if (EMMServer.DB.Select().getQuery(listView))
 						EMMServer.DB.Select().go(listView);

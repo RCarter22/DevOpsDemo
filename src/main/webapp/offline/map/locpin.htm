@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+	<head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page" ng-show="location != null">		
+			<div class="ui-content">
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+				<div class="section-header section-header-c">
+					<div>
+						<h1 class="section-header-title"><label translate="LOCATION.LOCATION">Location</label> {{location.LOCATION}}</h1>
+						<h2 class="section-header-subtitle">{{location.DESCRIPTION}}</h2>
+					</div>	
+				</div>
+			</div>
+			<div ng-if="isLookup == true && mboObject != null" class="section-action section-border-bottom">
+				<button class="section-action-button" ng-click="setValueAndGoBack()">
+					<span class="section-action-button-icon emm-check-circle"></span>
+					<span class="section-action-button-text" translate="SELECTVALUE">Select Value</span>
+				</button>
+			</div>
+			<div class="section section-border-bottom">
+				<div class="section-line">
+					<span class="section-icon"><img src="../../images/pins/location.png" width="25" height="31.25"></span>
+					<span class="section-text">({{jsonParam.LATITUDEY}},{{jsonParam.LONGITUDEX}})</span>
+				</div>
+			</div>
+			<div class="section section-border-bottom">
+				<div class="section-line section-line-c">
+					<label  translate="LOCATION.STATUS">Status</label>
+					<span class="section-text">{{location.STATUS}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label  translate="LOCATION.SITEID">Site</label>
+					<span class="section-text">{{location.SITEID}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label  translate="LOCATION.PARENT">Parent</label>
+					<span class="section-text">{{location.PARENT}}</span>
+				</div>
+				<div class="section-line section-line-c">
+					<label  translate="LOCATION.TYPE">Type</label>
+					<span class="section-text">{{location.TYPE}}</span>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, mapService, domainService) {
+				var appName = 'LOCATION';
+				var viewName = 'offline/map/locpin.htm';
+				
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+// 				$scope.QueryIds = EMMServer.DB.getQueryIds();
+				
+				$scope.jsonParam = EMMServer.Session.getItem('JSONPARAM_DATA');
+
+				mapService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName,
+					entityName: "LOCATION"
+				});
+				
+				// Get Location object data
+				var resultSet = EMMServer.DB.getQueryResult("LOCATION");
+				if (resultSet && resultSet[0]){
+					$scope.location = resultSet[0];
+					// Have to multiply the coordinates first by 1 to convert to a number
+					// 7 decimal places for ease of viewing
+					$scope.jsonParam.LONGITUDEX = ($scope.jsonParam.LONGITUDEX*1).toFixed(7);
+					$scope.jsonParam.LATITUDEY = ($scope.jsonParam.LATITUDEY*1).toFixed(7);
+				}
+				
+				// Map Lookup set up
+				var pageData = EMMServer.Session.getItem('LOCATIONMAP_DATA');
+				if (pageData != null) {
+					$scope.mboObject = EMMServer.Session.getMboFromSession(pageData.cacheKey);
+					var returnView = pageData.returnPage;
+					$scope.crossoverFields = pageData.crossovers;
+					
+					// Initilaize domain service, with return page of previous object when lookup
+					domainService.init({
+						userInfo : $scope.userInfo,
+						viewName : returnView
+					});
+					
+					$scope.setValueAndGoBack = function() {
+						domainService.mapLookup($scope.mboObject, "LOCATION", $scope.location, $scope.crossoverFields);
+					}
+				}
+			
+				var isLookup = EMMServer.Session.getItem('ISLOOKUP_DATA');
+				if (isLookup != null) {
+					$scope.isLookup = isLookup;
+				}
+				
+				var messages = EMMServer.DB.getQueryResult("MESSAGE");
+				if (messages)
+					$scope.message = messages[0].DISPLAYMESSAGE;
+			}
+		</script>
+	</body>
+</html>

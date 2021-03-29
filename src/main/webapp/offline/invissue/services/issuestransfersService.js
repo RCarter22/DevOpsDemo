@@ -71,7 +71,7 @@ angular.module('emm').factory('issuestransfersService', function() {
 	
 	PUBLIC.actions = {
 		toIssue : function(storeroom, message, lastscannedID){
-			var sql = "SELECT * FROM MATUSETRANS WHERE (ISSUETYPE IN ('ISSUE', 'RETURN')) AND ISDIRTY = '1' AND STORELOC = (select defstoreroom from maxuser where userid=  '" + options.userInfo.personId + "'and siteid = 'CORP') ORDER BY TRANSDATE DESC";
+			var sql = "SELECT * FROM MATUSETRANS WHERE (ISSUETYPE IN ('ISSUE', 'RETURN')) AND ISDIRTY = '1' AND STORELOC = '" + storeroom.LOCATION + "' ORDER BY TRANSDATE DESC";
 			var summarySql = "SELECT ITEMNUM, LINETYPE, DESCRIPTION, SUM(CASE ISSUETYPE WHEN 'ISSUE' THEN QUANTITY ELSE 0 END) AS ISSUES, " +
 							"SUM(CASE ISSUETYPE WHEN 'RETURN' THEN QUANTITY ELSE 0 END) AS RETURNS FROM MATUSETRANS " +
 							"WHERE ISDIRTY = '1' AND STORELOC = '" + storeroom.LOCATION + "' GROUP BY ITEMNUM";

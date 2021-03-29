@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="INVENTORY">Inventory</h3>
-				<a ng-show="matusetrans.mbo.isNew()" ng-click="actions.confirmBalanceOnSave(matusetrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : matusetrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-show="matusetrans.mbo.isNew()" ng-click="actions.confirmBalanceOnSave(matusetrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : matusetrans.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !matusetrans.mbo.isDirty(), 'ui-statusbar-c': matusetrans.mbo.isDirty()}">
 				<h5 class="ui-title">{{'OFFLINEMODE' | translate}}<span ng-show="matusetrans.mbo.isDirty()">{{'SYNCNEEDED' | translate}}</span></h5>
@@ -18,7 +18,7 @@
 			<div class="ui-content">
 				<ul class="ui-listview">
 				<li class="ui-field">
-    					<label translate="Work Order">Work Order</label>
+						<label translate="Work Order">Work Order</label>
     					<input disabled="true" ng-model="matusetrans.WONUM" ng-required="matusetrans.mbo.isRequired('WONUM')" ng-readonly="matusetrans.mbo.isReadOnly('WONUM')"/>	
 					</li>	
 					<!-- <li class="ui-field">
@@ -66,7 +66,7 @@
 					</li>						
 					<li class="ui-field">
 						<label translate="MATUSETRANS.UNITCOST">Unit Cost</label>
-    					<input type="text" ng-model="matusetrans.UNITCOST" ng-required="matusetrans.mbo.isRequired('UNITCOST')" ng-readonly="matusetrans.mbo.isReadOnly('UNITCOST')"></input>
+    					<input data-interval="0.25" data-control="spinner" type="text" ng-model="matusetrans.UNITCOST" ng-required="matusetrans.mbo.isRequired('UNITCOST')" ng-readonly="matusetrans.mbo.isReadOnly('UNITCOST')"></input>
 					</li>
 					<li class="ui-field">
     					<label translate="MATUSETRANS.ISSUETYPE">Transaction Type</label>

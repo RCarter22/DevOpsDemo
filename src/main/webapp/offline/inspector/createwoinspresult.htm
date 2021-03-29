@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html ng-app="emm" ng-controller="MainController" ng-cloak>
+    <head>
+		<title>EZMaxMobile - Offline</title>
+		<emm:include value="../common/includes.htm"/>
+	</head>
+	<body>
+		<div class="ui-page">
+			<emm:include value="../common/menu.htm"/>
+			<div class="ui-header ui-header-b">		
+				<a class="ui-btn-left" ng-click="goBack()"><span class="emm-chevron-left"></span></a>
+				<h3 class="ui-title" translate="INSPECTION.CREATEWORKORDER">Create a Work Order</h3>
+				<a class="ui-btn-right ui-btn-c" ng-click="createWorkOrder()"><span class="emm-floppy-o"></span></a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
+			</div>
+			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
+				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
+			</div>
+		
+			<div class="ui-content">
+				<div class="ui-message ui-message-b" style="text-align:center;">
+					<h3 translate="INSPECTION.SELECTHELP">Select each Inspection Result that requires a follow-up or deficiency notes</h3>
+				</div>
+
+				<ul insp-pagination class="ui-listview" ></ul>
+				
+				<ul class="ui-listview" id="inspresult">
+					<li style="background: #e8e8e8;">
+						<a ng-click="toggleAllSelections()" style="float:right;margin:5px 20px 5px 0px; padding:0 !important;"><span class="emm-check-square-o"></span></a>
+					</li>
+				
+					<li ng-repeat="row in inspresultlist track by $index" id="{{$index}}" ng-show="$index >= pagination.fromIndex() && $index <= pagination.toIndex()">
+						<a ng-click="toggleSelection(row)" style="padding-right:18%">
+							<p class="ui-wrap"><big>{{row.INSPQUESTION}}</big></p>							
+							<h3 class="ui-wrap">{{row.RESPONSE}}</h3>
+						</a>
+						<a class="ui-checklistbutton" ng-class="{'ui-checklistbutton-on' : row.REQUESTED == 1, 'ui-checklistbutton-off' : row.REQUESTED == 0}" data-checked="{{row.REQUESTED == 1}}" ng-click="toggleSelection(row)"></a>					
+					</li>
+				</ul>
+				
+				<ul insp-pagination class="ui-listview" ></ul>
+				
+			</div>
+		</div>
+		<script type="text/javascript">
+			function MainController($scope, inspectorService, paginationService) {
+				var queryName = 'CREATEWORESULTLIST',
+				viewName = "offline/inspector/createwoinspresult.htm";
+			
+				EMMServer.Offline.setSyncViewName(viewName);
+				$scope.userInfo = EMMServer.DB.getUserInfo();
+				
+				var pageData = EMMServer.Session.getItem('INSPECTION_DATA');
+				$scope.inspection = pageData.cacheSession;
+				
+				$scope.inspresultlist = [];
+				angular.forEach($scope.inspection.INSPQUESTION, function(iq, iqIndex) {
+					var desc = iq.GROUPSEQ + " " + iq.DESCRIPTION + " ";
+					angular.forEach(iq.FIELDRESULT, function(fr, frIndex) {
+						if (fr.INSPFIELDRESULT && (String.isNullOrEmpty(fr.INSPFIELD.DESCRIPTION) || fr.INSPFIELD.DESCRIPTION.indexOf('EMM_SIG') < 0)
+								&& (!String.isNullOrEmpty(fr.INSPFIELDRESULT.TXTRESPONSE) || !String.isNullOrEmpty(fr.INSPFIELDRESULT.NUMRESPONSE) )) {
+							if (!String.isNullOrEmpty(fr.INSPFIELD.DESCRIPTION) )
+								desc += "(" + fr.INSPFIELD.DESCRIPTION + ")";
+								
+							var inspresult={};
+							inspresult.INSPFIELDRESULTID = fr.INSPFIELDRESULT.INSPFIELDRESULTID;
+							inspresult.INSPQUESTION = desc;
+							inspresult.RESPONSE = (!String.isNullOrEmpty(fr.INSPFIELDRESULT.TXTRESPONSE)) ? fr.INSPFIELDRESULT.TXTRESPONSE : fr.INSPFIELDRESULT.NUMRESPONSE;
+							inspresult.REQUESTED = 0;
+							$scope.inspresultlist.push(inspresult);
+						}
+					});
+		 		});
+				
+				inspectorService.init({
+					userInfo : $scope.userInfo,
+					viewName : viewName
+				});
+				
+				paginationService.init({
+					pagination : $scope.inspresultlist,
+					queryName : queryName,
+					viewName : viewName
+				});
+				
+				$scope.pageService = paginationService;
+				
+				$scope.actions = inspectorService.actions;				
+				
+				$scope.toggleSelection = function (inspresult) {
+					inspresult.REQUESTED = (inspresult.REQUESTED === '1') ? '0' : '1';
+				}
+				
+				$scope.toggleAllSelections = function() {
+					var checkAll = true;
+					angular.forEach($scope.inspresultlist, function(ir, irIndex) {
+						if (ir.REQUESTED == '0')
+							checkAll = false;
+					});
+
+					angular.forEach($scope.inspresultlist, function(ir, irIndex) {
+						ir.REQUESTED = (checkAll) ? '0' : '1';
+					});
+				}
+				
+				$scope.createWorkOrder = function() {
+					var valueList = [];
+		 			angular.forEach($scope.inspresultlist, function(ir, irIndex) {
+		 				if (ir.REQUESTED == '1') {
+		 					valueList.push(ir);
+		 				}
+					});	               
+		 			inspectorService.actions.createWorkOrder($scope.inspection, valueList);
+				}
+				
+				$scope.goBack = function(){
+					EMMServer.DB.Select()
+						.go(pageData.returnPage);
+				}
+				
+				$scope.pagination = {
+					currentPageNum: 1,
+					pageSize: 20,
+					total: $scope.inspresultlist.length,
+					totalPageNum: function(){
+						try{
+							return Math.ceil(this.total/this.pageSize);
+						} catch(err) {
+							return 1;
+						}
+					},				
+					prev: function(){
+						this.currentPageNum--;
+					},
+					next: function(){
+						this.currentPageNum++;
+					},
+					hasNext: function(){
+						return (this.currentPageNum + 1) <= this.totalPageNum();
+					},
+					hasPrev: function(){
+						return (this.currentPageNum - 1) > 0;
+					},
+					toIndex: function(){
+						return this.currentPageNum * this.pageSize -1;
+					},				
+					fromIndex: function(){
+						return this.currentPageNum * this.pageSize - this.pageSize;
+					}
+				};
+			}
+			
+			angular.module('emm').directive('inspPagination', function() {
+				return {
+					restrict: 'A',
+					template: "<li class='ui-pagination' ng-show='pagination.totalPageNum() > 1'>" +
+							"<a class='ui-pagination-prev' ng-show='pagination.hasPrev()' ng-click='pagination.prev()'><span class='ui-arrow'></span></a>" +
+							"<h3 class='title' translate='PAGINATION.TITLE' translate-value-from='{{pagination.currentPageNum}}' translate-value-to='{{pagination.totalPageNum()}}' translate-value-total='{{pagination.total}}'>" +
+								"Page {{pagination.currentPageNum}} of {{pagination.totalPageNum()}} - {{pagination.total}} Records" + 
+							"</h3>" +
+							"<a class='ui-pagination-next' ng-show='pagination.hasNext()' ng-click='pagination.next()'><span class='ui-arrow'></span></a>" +
+							"</li>"
+				};
+			});
+		</script>
+	</body>
+</html>

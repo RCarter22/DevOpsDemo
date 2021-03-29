@@ -108,7 +108,7 @@ WPMaterial.prototype.lookup = function(attr, options){
 		},
 		ITEMNUM: function(opt){
 			var where = "ITEMTYPE = 'ITEM' AND SITEID='" + self.SITEID + "' ";
-			if (self.STORELOC != null && self.STORELOC != "")
+			if (self.LOCATION != null && self.LOCATION != "")
 				where += " AND LOCATION='" + self.LOCATION + "'";
 			
 			var o = {

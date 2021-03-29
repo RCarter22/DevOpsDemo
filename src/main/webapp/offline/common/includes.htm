@@ -1,11 +1,13 @@
 <meta content="telephone=no" name="format-detection">
 <meta name="viewport" content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no">
 <meta charset="UTF-8">
-<link type="text/css" rel="stylesheet" href="~/css/ezmaxmobile.ui-full.min.css?v=5.2.1">
+<link type="text/css" rel="stylesheet" href="~/css/ezmaxmobile-font.css">
+<link type="text/css" rel="stylesheet" href="~/css/ezmaxmobile.ui-full.min.css?v=5.4.1">
 <script type="text/javascript" src="~/javascript/jquery.js"></script>
 <script type="text/javascript" src="~/javascript/angular.min.js"></script>
 <script type="text/javascript" src="~/javascript/angular-translate.min.js"></script>
-<script type="text/javascript" src="~/javascript/ezmaxmobile.core-full.min.js?v=5.2.1"></script>
+<script type="text/javascript" src="~/javascript/ezmaxmobile.core-full.min.js?v=5.4.1"></script>
+<script type="text/javascript" src="~/javascript/signature/jquery.signaturepad.min.js"></script>
 
 <script type="text/javascript">
 	// EMM Default Settings
@@ -16,8 +18,34 @@
 </script>
 
 <!-- Localization Files -->
+<emm:include value="../../javascript/localization/ar_KW.js"/>
 <emm:include value="../../javascript/localization/en_US.js"/>
 <emm:include value="../../javascript/localization/en_AU.js"/>
+<emm:include value="../../javascript/localization/en_GB.js"/>
+<emm:include value="../../javascript/localization/cs_CZ.js"/>
+<emm:include value="../../javascript/localization/da_DK.js"/>
+<emm:include value="../../javascript/localization/de_DE.js"/>
+<emm:include value="../../javascript/localization/es_MX.js"/>
+<emm:include value="../../javascript/localization/fi_FI.js"/>
+<emm:include value="../../javascript/localization/fr_CA.js"/>
+<emm:include value="../../javascript/localization/fr_FR.js"/>
+<emm:include value="../../javascript/localization/hu_HU.js"/>
+<emm:include value="../../javascript/localization/it_IT.js"/>
+<emm:include value="../../javascript/localization/ja_JP.js"/>
+<emm:include value="../../javascript/localization/ko_KR.js"/>
+<emm:include value="../../javascript/localization/nl_NL.js"/>
+<emm:include value="../../javascript/localization/no_NO.js"/>
+<emm:include value="../../javascript/localization/pl_PL.js"/>
+<emm:include value="../../javascript/localization/pt_BR.js"/>
+<emm:include value="../../javascript/localization/ro_RO.js"/>
+<emm:include value="../../javascript/localization/ru_RU.js"/>
+<emm:include value="../../javascript/localization/sk_SK.js"/>
+<emm:include value="../../javascript/localization/sv_SE.js"/>
+<emm:include value="../../javascript/localization/th_TH.js"/>
+<emm:include value="../../javascript/localization/tr_TR.js"/>
+<emm:include value="../../javascript/localization/vi_VN.js"/>
+<emm:include value="../../javascript/localization/zh_CN.js"/>
+<emm:include value="../../javascript/localization/zh_TW.js"/>
 
 <!-- Client Side Class Files -->
 <emm:include value="../classes/Directives.js"/>
@@ -51,12 +79,15 @@
 <emm:include value="../classes/Doclinks.js"/>
 <emm:include value="../classes/Downtime.js"/>
 <emm:include value="../classes/AssetStatus.js"/>
-<emm:include value="../classes/Assignment.js"/>
+<emm:include value="../classes/Inspection.js"/>
+<emm:include value="../classes/InspectionResult.js"/>
+<emm:include value="../classes/InspFieldResult.js"/>
 
 <!-- Services -->
 <emm:include value="../services/applicationService.js"/>
 <emm:include value="../services/paginationService.js"/>
 <emm:include value="../services/domainService.js"/>
+<emm:include value="../services/mapService.js"/>
 <emm:include value="../services/exceptionHandlerService.js"/>
 <emm:include value="../doclinks/services/doclinksService.js"/>
 <emm:include value="../labtrans/services/labtransService.js"/>
@@ -79,6 +110,7 @@
 <emm:include value="../startcenter/services/startcenterService.js"/>
 <emm:include value="../query/services/queryService.js"/>
 <emm:include value="../classification/services/classificationService.js"/>
+<emm:include value="../inspector/services/inspectorService.js"/>
 <emm:include value="../plustwo/services/plustwoService.js"/>
 <emm:include value="../plustwo/services/plustmultiassetService.js"/>
 <emm:include value="../plustwo/services/plustassignmentService.js"/>

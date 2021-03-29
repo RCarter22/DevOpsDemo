@@ -8,21 +8,26 @@
 		<div class="ui-page">
 			<emm:include value="../common/menu.htm"/>
             <div class="ui-header ui-header-b">
-                <a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+                <a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
                 <h3 class="ui-title" translate="ATTACHMENTS">Attachments</h3>
-                <a data-control="dialog" href="#doctypedialog" class="ui-btn-right"><img src="../../images/camera.png"></a>
-                <!-- <a ng-click="createNew()" class="ui-btn-right"><img src="../../images/camera.png"></a> -->
+                <a ng-show="drilldowntype == 'DOCLINKS' && !defaultDocType" data-control="dialog" href="#doctypedialog" class="ui-btn-right"><span class="emm-camera"></span></a>
+                <a ng-show="drilldowntype == 'DOCLINKS' && defaultDocType" ng-click="createNew()" class="ui-btn-right"><span class="emm-camera"></span></a>
+                <a ng-show="drilldowntype == 'DOWNLOADABLE'" ng-click="save(downloadable)" class="ui-btn-right" ng-class="{'ui-btn-c' : toBeSaved}"><span class="emm-floppy-o"></span></a>
+				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div> 
             </div>
 			<div id="statusbar" class="ui-statusbar ui-statusbar-f">
 				<h5 id="statusbarmsg" class="ui-title" translate="OFFLINEMODE">Offline Mode</h5>
 			</div>
-			<div class="ui-statusbar ui-statusbar-c" ng-hide="doclinks">
-				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3>
-			</div>
-			<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>             
+			<ul class="ui-navbar">
+				<li style="margin-right:-5px"><a ng-click="viewTab('DOCLINKS')" ng-class="{'ui-active' : drilldowntype == 'DOCLINKS'}" >View</a></li>
+				<li><a ng-click="viewTab('DOWNLOADABLE')" ng-class="{'ui-active' : drilldowntype == 'DOWNLOADABLE'}">Download</a></li>
+			</ul> 
+<!-- 			<div class="ui-statusbar ui-statusbar-c" ng-hide="(drilldowntype == 'DOCLINKS' && !doclinks) || (drilldowntype == 'DOWNLOADABLE' && !downloadable)"> -->
+<!-- 				<h3 class="ui-title" translate="NORECORDS">No Records Found</h3> -->
+<!-- 			</div>            -->
             <div class="ui-content">
-            	<ul class="ui-listview">
-            		<li ng-repeat="doc in doclinks">
+            	<ul class="ui-listview" ng-show="drilldowntype == 'DOCLINKS'">
+            		<li ng-repeat="doc in doclinks" ng-show="doc.isDownloaded() || !doc.DOCINFOID">
 						<a ng-click="showDetail(doc)">
 							<span class="ui-accessory-left" ng-if="doc.ISDIRTY == 1">
 								<span class="ui-circle ui-circle-c"></span>
@@ -32,7 +37,18 @@
 							<span class="ui-arrow"></span>
 						</a>
             		</li>
-            	</ul>			
+            	</ul>
+            	<ul class="ui-listview" ng-show="drilldowntype == 'DOWNLOADABLE'">
+            		<li ng-repeat="d in downloadable">
+           				<span>
+	           				<h3>{{d.DOCUMENT}}</h3>
+	           				<p>{{d.DESCRIPTION}}</p>
+	           				<p style="color:red" ng-show="d.MESSAGE">{{d.MESSAGE}}</p>
+							<span class="ui-arrow"></span>
+						</span>
+						<a class="ui-checklistbutton" ng-class="{'ui-checklistbutton-on' : d.isRequested(), 'ui-checklistbutton-off' : !d.isRequested()}" data-checked="{{d.isRequested() == true}}" ng-click="d.toggleRequest()"></a>
+            		</li>
+            	</ul>		
 			</div>
     	</div>
     	<div id="doctypedialog" class="ui-dialog">
@@ -56,44 +72,70 @@
 		</div>
 		<script type="text/javascript">
 		function MainController($scope, doclinksService) {
-			var queryName = 'DOCLINKS';
+			var queryDoclinks = 'DOCLINKS';
+			var queryDownload = 'DOWNLOADABLE';
 			var viewName = 'offline/doclinks/main.htm';
-
-			$scope.userInfo = EMMServer.DB.getUserInfo();				
-			$scope.doclinks = EMMServer.DB.getQueryResult(queryName);
+			
+			$scope.toBeSaved = false;
+			$scope.drilldowntype = 'DOCLINKS';
+			
+			EMMServer.Offline.setSyncViewName(viewName);
+			
+			$scope.userInfo = EMMServer.DB.getUserInfo();
+			$scope.doclinks = EMMServer.DB.getMboSet('Doclinks', queryDoclinks);
+			$scope.downloadable = EMMServer.DB.getMboSet('Doclinks', queryDownload);
 			$scope.doctypes = EMMServer.DB.getQueryResult("APPDOCTYPE");
 			$scope.doctype = $scope.doctypes[0].DOCTYPE;
+			
+			var drilldowntype = EMMServer.Session.getItem('DOCTAB_DATA');
+			var pageData = EMMServer.Session.getItem('DOCLINKS_DATA');
+			if (pageData.docType)
+				$scope.defaultDocType = pageData.docType;
+			
+			if(drilldowntype)
+				$scope.drilldowntype = drilldowntype;
 			
 			doclinksService.init({
 				userInfo : $scope.userInfo,
 				viewName : viewName
 			});
 			
-			var pageData = EMMServer.Session.getItem('DOCLINKS_DATA');
-			
 			$scope.TXCOUNT = EMMServer.DB.getUserTxnCount();
 			var messages = EMMServer.DB.getQueryResult("MESSAGE") || null;
 			if (messages)
 				$scope.message = messages[0].DISPLAYMESSAGE; 
 			
-			$scope.goBack = function(){
-				EMMServer.DB.Select()
-					.go(pageData.returnPage);
+			$scope.$watch('downloadable', function(newValue, oldValue) {
+				if (newValue !== oldValue){
+					$scope.toBeSaved = true;
+				}
+			},true);
+			
+			$scope.save = doclinksService.save;
+			$scope.showDetail = doclinksService.showDetail;
+			
+			$scope.createNew = function(){
+				if (pageData.docType) {
+					doclinksService.createNew(pageData.entityName, pageData.entityId, pageData.docType);
+				} else 
+					doclinksService.createNew(pageData.entityName, pageData.entityId, $scope.doctype);
 			}
 			
 			$scope.setDoctype = function(doctype){
 				$scope.doctype = doctype;
 			}
-			/* 
-			$scope.createNew = function(){
-				doclinksService.createNew(pageData.entityName, pageData.entityId);
-			} */
 			
-			$scope.createNew = function(){
-				doclinksService.createNew(pageData.entityName, pageData.entityId, $scope.doctype);
+			$scope.viewTab = function(drilldowntype){
+				$scope.drilldowntype = drilldowntype;
+				EMMServer.Session.setItem('DOCTAB_DATA', drilldowntype);
 			}
-			$scope.showDetail = doclinksService.showDetail;
+			
+			$scope.goBack = function(){
+				EMMServer.Session.removeItem('DOCTAB_DATA');
+				EMMServer.DB.Select()
+					.go(pageData.returnPage);
+			}
 		}
 		</script>
 	</body>
-</html>	
+</html>

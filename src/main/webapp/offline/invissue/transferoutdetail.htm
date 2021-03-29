@@ -8,9 +8,9 @@
 		<div class="ui-page ui-inset">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a ng-click="goBack()" class="ui-btn-left" translate="BACK">Back</a>
+				<a ng-click="goBack()" class="ui-btn-left"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="MATRECTRANS.TRANSFEROUT">Transfer Out</h3>
-				<a ng-show="matrectrans.mbo.isNew()" ng-click="actions.confirmTransferOnSave(storeroom, matrectrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : matrectrans.mbo.toBeSaved()}" translate="SAVE">Save</a>
+				<a ng-show="matrectrans.mbo.isNew()" ng-click="actions.confirmTransferOnSave(storeroom, matrectrans)" class="ui-btn-right" ng-class="{'ui-btn-c' : matrectrans.mbo.toBeSaved()}"><span class="emm-floppy-o"></span></a>
 				<div class="ui-statusbar ui-statusbar-d" ng-show="message != null"><h3 class="ui-title">{{message}}</h3></div>
 			</div>
 			<div class="ui-statusbar" ng-class="{'ui-statusbar-f': !matrectrans.mbo.isDirty(), 'ui-statusbar-c': matrectrans.mbo.isDirty()}">
