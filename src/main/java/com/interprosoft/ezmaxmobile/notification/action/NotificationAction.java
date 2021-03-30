@@ -32,6 +32,7 @@ public class NotificationAction extends BaseAction {
 	
 	private long pushId;
     private String APIKey;
+    private String client;
     private String person;
     private String group;
     private String alert;
@@ -92,6 +93,7 @@ public class NotificationAction extends BaseAction {
 			pushUtil.setOpenLink(openLink);
 			pushUtil.setRefNum(refNum);
 			pushUtil.push();
+
 			this.setMessage(new EZMessage(getText("notification.sent"), EMMConstants.SUCCESS));
 			return SUCCESS;
 		} else {
@@ -122,7 +124,7 @@ public class NotificationAction extends BaseAction {
 		{
 			PushUtil pushUtil = new PushUtil();
 			pushUtil.setOffset(offset);
-			result = new ByteArrayInputStream(pushUtil.getHistory(this.refNum).getBytes());
+			result = new ByteArrayInputStream(pushUtil.getHistory(this.refNum).getBytes("UTF-8"));
 			return SUCCESS;
 		} else {
 			this.setMessage(new EZMessage(getText("global.unauthorized"), EMMConstants.ERROR));
@@ -217,5 +219,12 @@ public class NotificationAction extends BaseAction {
 	public void setRefNum(String refNum) {
 		this.refNum = refNum;
 	}
-	
+
+	public String getClient() {
+		return client;
+	}
+
+	public void setClient(String client) {
+		this.client = client;
+	}
 }

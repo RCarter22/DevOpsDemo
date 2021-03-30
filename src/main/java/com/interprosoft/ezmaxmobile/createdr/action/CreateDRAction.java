@@ -54,7 +54,7 @@ public class CreateDRAction extends BaseAction {
 	public String list() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
 				mboSetRemote.reset();
@@ -166,6 +166,30 @@ public class CreateDRAction extends BaseAction {
 		}
 		return SUCCESS;
 	}
+	@Action(value="validateline", results={
+			@Result(name="success",location="mrlines.action",type="redirect",params={"id","${id}"}),
+			@Result(name="error",location="viewline.action",type="redirect",params={"id","${id}"})
+		})
+		public String validateline(){		
+			try {
+				mbo = (MboRemote)this.getSessionObject(OWNERMBO); 
+				//Owner Id
+				long ownerId = mbo.getUniqueIDValue();
+				mbo = this.simpleService.findById(mbo.getMboSet("MRLINE"), id);
+				mbo.validate();
+				id = ownerId;
+			} catch (MXException e) {
+				String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+				setMessage(new EZMessage(msg, EMMConstants.ERROR));
+				this.addActionError(e.getMessage());
+				return ERROR;
+			} catch (Exception e){
+				this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+				this.addActionError(e.getMessage());
+				return ERROR;
+			}
+			return SUCCESS;
+		}
 
 	@Action(value="deleteline", results={
 		@Result(name="success",location="mrlines.action",type="redirect",params={"id","${id}"}),
@@ -177,7 +201,10 @@ public class CreateDRAction extends BaseAction {
 			long tmpId = mbo.getUniqueIDValue();
 			mbo = this.simpleService.findById(mbo.getMboSet("MRLINE"), id);
 			id = tmpId;
-			mbo.delete();
+			if(!mbo.toBeDeleted())
+				mbo.delete();
+			else
+				mbo.undelete();
 		} catch (RemoteException e) {
 			setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			return ERROR;
@@ -207,7 +234,7 @@ public class CreateDRAction extends BaseAction {
 			}
 			// Reset to update count
 			mbo.getMboSet("DOCLINKS").reset();
-			setMboSession("MRLINE",this.mbo);	
+			setMboSession("MRLINE", this.mbo);	
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());

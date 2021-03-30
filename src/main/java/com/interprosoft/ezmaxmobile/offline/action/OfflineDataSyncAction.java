@@ -18,7 +18,7 @@ import org.apache.log4j.Logger;
 import psdi.app.asset.AssetMeterRemote;
 import psdi.app.asset.AssetRemote;
 import psdi.app.asset.AssetSetRemote;
-// import psdi.app.inspection.InspectionResultRemote;
+import psdi.app.inspection.InspectionResultRemote;
 import psdi.app.inventory.InvBalancesRemote;
 import psdi.app.inventory.InventoryRemote;
 import psdi.app.labor.LabTransRemote;
@@ -776,55 +776,54 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 		}
 	}
 	
-	// public void completeAssignment() throws Exception {
-	// 	try {
-	// 		String offlineEntityName = "ASSIGNMENT";
-	// 		JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+	public void completeAssignment() throws Exception {
+		try {
+			String offlineEntityName = "ASSIGNMENT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
 			
-	// 		MboSetRemote mboSetRemote  = this.user.getSession().getMboSet("WORKORDER");
-	// 		mboSetRemote.setQbe("WONUM", jsonOfflineEntity.optString("WONUM"));
-	// 		mboSetRemote.setQbe("SITEID", jsonOfflineEntity.optString("SITEID"));
-	// 		mboSetRemote.setQbe("ORGID", jsonOfflineEntity.optString("ORGID"));
-	// 		mboSetRemote.setQbeExactMatch(true);
+			MboSetRemote mboSetRemote  = this.user.getSession().getMboSet("WORKORDER");
+			mboSetRemote.setQbe("WONUM", jsonOfflineEntity.optString("WONUM"));
+			mboSetRemote.setQbe("SITEID", jsonOfflineEntity.optString("SITEID"));
+			mboSetRemote.setQbe("ORGID", jsonOfflineEntity.optString("ORGID"));
+			mboSetRemote.setQbeExactMatch(true);
 			
-	// 		MboRemote woRemote = mboSetRemote.moveFirst();
+			MboRemote woRemote = mboSetRemote.moveFirst();
 			
-	// 		if(woRemote != null){
+			if(woRemote != null){
 				
-	// 			MboSetRemote assigmentsRemote = woRemote.getMboSet("SHOWASSIGNMENT");
-	// 			assigmentsRemote.setQbe("ASSIGNMENTID", getAutoKeyMap(jsonOfflineEntity, "ASSIGNMENTID"));
-	// 			MboRemote mboRemote = assigmentsRemote.moveFirst();
+				MboSetRemote assigmentsRemote = woRemote.getMboSet("SHOWASSIGNMENT");
+				assigmentsRemote.setQbe("ASSIGNMENTID", getAutoKeyMap(jsonOfflineEntity, "ASSIGNMENTID"));
+				MboRemote mboRemote = assigmentsRemote.moveFirst();
 			
-	// 			if(mboRemote != null){
-	// 				((AssignmentRemote)mboRemote).completeAssignment();
+				if(mboRemote != null){
+					((AssignmentRemote)mboRemote).completeAssignment();
 					
-	// 				assigmentsRemote.save();
-	// 				mboSetRemote.save();
+					assigmentsRemote.save();
+					mboSetRemote.save();
 					
-	// 				this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, mboRemote);
-	// 			}
-	// 			else {
-	// 				// Need to throw exception, otherwise this will be considered a successful transaction
-	// 				throw new Exception("Cannot complete assignment, record not found");	
-	// 			}
-	// 		}
-	// 		else {
-	// 			// Need to throw exception, otherwise this will be considered a successful transaction
-	// 			throw new Exception("Cannot complete assignment, record not found");	
-	// 		}
-	// 	} catch (MXException e) {
-	// 		String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-	// 		log.error("completeassignment:", new Exception(e));
-	// 		throw new OfflineException(msg, e);
-	// 	} catch (RemoteException e) {
-	// 		log.error("completeassignment:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	} catch (Exception e) {
-	// 		log.error("completeassignment:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	}
-	// }
-
+					this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, mboRemote);
+				}
+				else {
+					// Need to throw exception, otherwise this will be considered a successful transaction
+					throw new Exception("Cannot complete assignment, record not found");	
+				}
+			}
+			else {
+				// Need to throw exception, otherwise this will be considered a successful transaction
+				throw new Exception("Cannot complete assignment, record not found");	
+			}
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("completeassignment:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("completeassignment:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("completeassignment:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
 	public void addLabTrans() throws Exception {
 		try {
 			// Get the Offline Entity that was posted here to be processed
@@ -2710,269 +2709,269 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 		}		
 	}
 	
-	// public void updateInspResultStatus() throws Exception {
-	// 	try {
-	// 		// Get the Offline Entity that was posted here to be processed
-	// 		String offlineEntityName = "INSPECTIONRESULT";
-	// 		JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+	public void updateInspResultStatus() throws Exception {
+		try {
+			// Get the Offline Entity that was posted here to be processed
+			String offlineEntityName = "INSPECTIONRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
 			
-	// 		MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
-	// 		// To prevent referencing the local generated IDs (i.e.: LOCAL_1 or OFFLN_1)
-	// 		// If a field is using an autokey, then we need to get the mapped value
-	// 		mboSetRemote.setQbe("INSPECTIONRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPECTIONRESULTID"));
-	// 		mboSetRemote.setQbeExactMatch(true);
-	// 		InspectionResultRemote irRemote = (InspectionResultRemote)mboSetRemote.moveFirst();
+			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+			// To prevent referencing the local generated IDs (i.e.: LOCAL_1 or OFFLN_1)
+			// If a field is using an autokey, then we need to get the mapped value
+			mboSetRemote.setQbe("INSPECTIONRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPECTIONRESULTID"));
+			mboSetRemote.setQbeExactMatch(true);
+			InspectionResultRemote irRemote = (InspectionResultRemote)mboSetRemote.moveFirst();
 			
-	// 		if (irRemote != null) {
-	// 			if (!irRemote.getString("STATUS").equalsIgnoreCase(jsonOfflineEntity.optString("STATUS"))) {
-	// 				((InspectionResultRemote)irRemote).changeResultStatus(jsonOfflineEntity.optString("STATUS"));
-	// 				irRemote.getThisMboSet().save();
+			if (irRemote != null) {
+				if (!irRemote.getString("STATUS").equalsIgnoreCase(jsonOfflineEntity.optString("STATUS"))) {
+					((InspectionResultRemote)irRemote).changeResultStatus(jsonOfflineEntity.optString("STATUS"));
+					irRemote.getThisMboSet().save();
 					
-	// 				if (jsonOfflineEntity.optString("STATUS").equals("INPROG")) {
-	// 					addFUInspFieldResult(irRemote);
-	// 				}
-	// 			}
-	// 		} else {
-	// 			// Need to throw exception, otherwise this will be considered a successful transaction
-	// 			throw new Exception("Cannot change inspectionresult status, record not found");				
-	// 		}
-	// 	} catch (MXException e) {
-	// 		String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-	// 		log.error("updateInspResultStatus:", new Exception(e));
-	// 		throw new OfflineException(msg, e);
-	// 	} catch (RemoteException e) {
-	// 		log.error("updateInspResultStatus:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	} catch (Exception e) {
-	// 		log.error("updateInspResultStatus:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	}
-	// }
+					if (jsonOfflineEntity.optString("STATUS").equals("INPROG")) {
+						addFUInspFieldResult(irRemote);
+					}
+				}
+			} else {
+				// Need to throw exception, otherwise this will be considered a successful transaction
+				throw new Exception("Cannot change inspectionresult status, record not found");				
+			}
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("updateInspResultStatus:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("updateInspResultStatus:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("updateInspResultStatus:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
 	
-	// public void editInspFieldResult() throws Exception {
-	// 	try {
-	// 		String offlineEntityName = "INSPFIELDRESULT";
-	// 		JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+	public void editInspFieldResult() throws Exception {
+		try {
+			String offlineEntityName = "INSPFIELDRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
 			
-	// 		MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPFIELDRESULT");
-	// 		mboSetRemote.setQbe("INSPFIELDRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPFIELDRESULTID"));
-	// 		mboSetRemote.setQbeExactMatch(true);
-	// 		MboRemote ifrRemote = mboSetRemote.moveFirst();
+			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPFIELDRESULT");
+			mboSetRemote.setQbe("INSPFIELDRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPFIELDRESULTID"));
+			mboSetRemote.setQbeExactMatch(true);
+			MboRemote ifrRemote = mboSetRemote.moveFirst();
 			
-	// 		if (ifrRemote != null) {
-	// 			ifrRemote.setValue("ENTEREDBY", this.user.getUserId());
-	// 			setValue(ifrRemote, jsonOfflineEntity, "ENTEREDDATE", Date.class);
+			if (ifrRemote != null) {
+				ifrRemote.setValue("ENTEREDBY", this.user.getUserId());
+				setValue(ifrRemote, jsonOfflineEntity, "ENTEREDDATE", Date.class);
 				
-	// 			if(!isNull(jsonOfflineEntity.opt("TXTRESPONSE"))) {
-	// 				setValue(ifrRemote, jsonOfflineEntity, "TXTRESPONSE");
-	// 			} else {
-	// 				ifrRemote.setValueNull("TXTRESPONSE"); 
-	// 			}
+				if(!isNull(jsonOfflineEntity.opt("TXTRESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "TXTRESPONSE");
+				} else {
+					ifrRemote.setValueNull("TXTRESPONSE"); 
+				}
 				
-	// 			if(!isNull(jsonOfflineEntity.opt("NUMRESPONSE"))) {
-	// 				setValue(ifrRemote, jsonOfflineEntity, "NUMRESPONSE");
-	// 			} else {
-	// 				ifrRemote.setValueNull("NUMRESPONSE"); 
-	// 			}
+				if(!isNull(jsonOfflineEntity.opt("NUMRESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "NUMRESPONSE");
+				} else {
+					ifrRemote.setValueNull("NUMRESPONSE"); 
+				}
 						
-	// 			if(!isNull(jsonOfflineEntity.opt("ROLLOVERFLAG"))) {
-	// 				setValue(ifrRemote, jsonOfflineEntity, "ROLLOVERFLAG"); 
-	// 			}
-	// 			if(!isNull(jsonOfflineEntity.opt("DATERESPONSE"))) {
-	// 				setValue(ifrRemote, jsonOfflineEntity, "DATERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
-	// 			}
-	// 			if(!isNull(jsonOfflineEntity.opt("TIMERESPONSE"))) {
-	// 				setValue(ifrRemote, jsonOfflineEntity, "TIMERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
-	// 			}
+				if(!isNull(jsonOfflineEntity.opt("ROLLOVERFLAG"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "ROLLOVERFLAG"); 
+				}
+				if(!isNull(jsonOfflineEntity.opt("DATERESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "DATERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+				}
+				if(!isNull(jsonOfflineEntity.opt("TIMERESPONSE"))) {
+					setValue(ifrRemote, jsonOfflineEntity, "TIMERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+				}
 				
-	// 			ifrRemote.getThisMboSet().save();
-	// 		} else {
-	// 			// Need to throw exception, otherwise this will be considered a successful transaction
-	// 			throw new Exception("Cannot edit inspfieldresult, record not found");				
-	// 		}
-	// 	} catch (MXException e) {
-	// 		String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-	// 		log.error("editInspFieldResult:", new Exception(e));
-	// 		throw new OfflineException(msg, e);
-	// 	} catch (RemoteException e) {
-	// 		log.error("editInspFieldResult:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	} catch (Exception e) {
-	// 		log.error("editInspFieldResult:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	}
-	// }
+				ifrRemote.getThisMboSet().save();
+			} else {
+				// Need to throw exception, otherwise this will be considered a successful transaction
+				throw new Exception("Cannot edit inspfieldresult, record not found");				
+			}
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("editInspFieldResult:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("editInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("editInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
 	
-	// public void addInspFieldResult() throws Exception {
-	// 	try {
-	// 		String offlineEntityName = "INSPFIELDRESULT";
-	// 		JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+	public void addInspFieldResult() throws Exception {
+		try {
+			String offlineEntityName = "INSPFIELDRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
 			
-	// 		MboRemote ifrRemote = user.getSession().getMboSet("INSPFIELDRESULT").addAtEnd();
-	// 		setValue(ifrRemote, jsonOfflineEntity, "INSPFIELDNUM");
-	// 		setValue(ifrRemote, jsonOfflineEntity, "INSPQUESTIONNUM");
-	// 		setValue(ifrRemote, jsonOfflineEntity, "INSPFORMNUM");
-	// 		setValue(ifrRemote, jsonOfflineEntity, "RESULTNUM");
-	// 		setValue(ifrRemote, jsonOfflineEntity, "REVISION");
-	// 		setValue(ifrRemote, jsonOfflineEntity, "ORGID");
-	// 		setValue(ifrRemote, jsonOfflineEntity, "SITEID");
-	// 		setValue(ifrRemote, jsonOfflineEntity, "ENTEREDDATE", Date.class);
-	// 		ifrRemote.setValue("ENTEREDBY", this.user.getUserId());
+			MboRemote ifrRemote = user.getSession().getMboSet("INSPFIELDRESULT").addAtEnd();
+			setValue(ifrRemote, jsonOfflineEntity, "INSPFIELDNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "INSPQUESTIONNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "INSPFORMNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "RESULTNUM");
+			setValue(ifrRemote, jsonOfflineEntity, "REVISION");
+			setValue(ifrRemote, jsonOfflineEntity, "ORGID");
+			setValue(ifrRemote, jsonOfflineEntity, "SITEID");
+			setValue(ifrRemote, jsonOfflineEntity, "ENTEREDDATE", Date.class);
+			ifrRemote.setValue("ENTEREDBY", this.user.getUserId());
 			
-	// 		if(!isNull(jsonOfflineEntity.opt("TXTRESPONSE"))) {
-	// 			setValue(ifrRemote, jsonOfflineEntity, "TXTRESPONSE"); 
-	// 		}
-	// 		if(!isNull(jsonOfflineEntity.opt("NUMRESPONSE"))) {
-	// 			setValue(ifrRemote, jsonOfflineEntity, "NUMRESPONSE");
-	// 		}
-	// 		if(!isNull(jsonOfflineEntity.opt("METERNAME"))) {
-	// 			setValue(ifrRemote, jsonOfflineEntity, "METERNAME");
-	// 		}
-	// 		if(!isNull(jsonOfflineEntity.opt("ROLLOVERFLAG"))) {
-	// 			setValue(ifrRemote, jsonOfflineEntity, "ROLLOVERFLAG"); 
-	// 		}
-	// 		if(!isNull(jsonOfflineEntity.opt("DATERESPONSE"))) {
-	// 			setValue(ifrRemote, jsonOfflineEntity, "DATERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
-	// 		}
-	// 		if(!isNull(jsonOfflineEntity.opt("TIMERESPONSE"))) {
-	// 			setValue(ifrRemote, jsonOfflineEntity, "TIMERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
-	// 		}
+			if(!isNull(jsonOfflineEntity.opt("TXTRESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "TXTRESPONSE"); 
+			}
+			if(!isNull(jsonOfflineEntity.opt("NUMRESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "NUMRESPONSE");
+			}
+			if(!isNull(jsonOfflineEntity.opt("METERNAME"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "METERNAME");
+			}
+			if(!isNull(jsonOfflineEntity.opt("ROLLOVERFLAG"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "ROLLOVERFLAG"); 
+			}
+			if(!isNull(jsonOfflineEntity.opt("DATERESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "DATERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+			}
+			if(!isNull(jsonOfflineEntity.opt("TIMERESPONSE"))) {
+				setValue(ifrRemote, jsonOfflineEntity, "TIMERESPONSE", Date.class, MboConstants.DELAYVALIDATION);
+			}
 		
-	// 		ifrRemote.getThisMboSet().save();
-	// 		this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, ifrRemote);
-	// 	} catch (MXException e) {
-	// 		String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-	// 		log.error("addInspFieldResult:", new Exception(e));
-	// 		throw new OfflineException(msg, e);
-	// 	} catch (RemoteException e) {
-	// 		log.error("addInspFieldResult:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	} catch (Exception e) {
-	// 		log.error("addInspFieldResult:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	}
-	// }
+			ifrRemote.getThisMboSet().save();
+			this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, ifrRemote);
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("addInspFieldResult:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("addInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("addInspFieldResult:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
 	
-	// public void completeInspection() throws Exception {
-	// 	try {
-	// 		// Get the Offline Entity that was posted here to be processed
-	// 		String offlineEntityName = "INSPECTIONRESULT";
-	// 		JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+	public void completeInspection() throws Exception {
+		try {
+			// Get the Offline Entity that was posted here to be processed
+			String offlineEntityName = "INSPECTIONRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
 			
-	// 		MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
-	// 		// To prevent referencing the local generated IDs (i.e.: LOCAL_1 or OFFLN_1)
-	// 		// If a field is using an autokey, then we need to get the mapped value
-	// 		mboSetRemote.setQbe("INSPECTIONRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPECTIONRESULTID"));
-	// 		mboSetRemote.setQbeExactMatch(true);
-	// 		MboRemote irRemote = mboSetRemote.moveFirst();
+			MboSetRemote mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+			// To prevent referencing the local generated IDs (i.e.: LOCAL_1 or OFFLN_1)
+			// If a field is using an autokey, then we need to get the mapped value
+			mboSetRemote.setQbe("INSPECTIONRESULTID", getAutoKeyMap(jsonOfflineEntity, "INSPECTIONRESULTID"));
+			mboSetRemote.setQbeExactMatch(true);
+			MboRemote irRemote = mboSetRemote.moveFirst();
 			
-	// 		if (irRemote != null) {
-	// 			irRemote.getThisMboSet().save();
-	// 			irRemote.getThisMboSet().reset();
-	// 			updateMeterReading(irRemote);
+			if (irRemote != null) {
+				irRemote.getThisMboSet().save();
+				irRemote.getThisMboSet().reset();
+				updateMeterReading(irRemote);
 
-	// 			Long id = irRemote.getUniqueIDValue();
+				Long id = irRemote.getUniqueIDValue();
 				
-	// 			MboSetRemote fieldresults = this.user.getSession().getMboSet("INSPFIELDRESULT");
-	// 			String where = "siteid= '" + irRemote.getString("SITEID") + "' and orgid= '"
-	// 							+ irRemote.getString("ORGID") + "' and inspformnum= '" 
-	// 							+ irRemote.getString("INSPFORMNUM") + "' and resultnum= '"
-	// 							+ irRemote.getString("RESULTNUM") + "' and METERNAME IS NOT NULL "
-	// 							+ "AND (TXTRESPONSE IS NOT NULL OR NUMRESPONSE IS NOT NULL) AND (ERRORFLAG IS NULL OR ERRORFLAG < 2)";
-	// 			fieldresults.setWhere(where);
-	// 			fieldresults.reset();
+				MboSetRemote fieldresults = this.user.getSession().getMboSet("INSPFIELDRESULT");
+				String where = "siteid= '" + irRemote.getString("SITEID") + "' and orgid= '"
+								+ irRemote.getString("ORGID") + "' and inspformnum= '" 
+								+ irRemote.getString("INSPFORMNUM") + "' and resultnum= '"
+								+ irRemote.getString("RESULTNUM") + "' and METERNAME IS NOT NULL "
+								+ "AND (TXTRESPONSE IS NOT NULL OR NUMRESPONSE IS NOT NULL) AND (ERRORFLAG IS NULL OR ERRORFLAG < 2)";
+				fieldresults.setWhere(where);
+				fieldresults.reset();
 				
-	// 			if (fieldresults == null || fieldresults.count() == 0) {
-	// 				String newStatus = "COMPLETED";
-	// 				mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
-	// 				irRemote = mboSetRemote.getMboForUniqueId(id);
+				if (fieldresults == null || fieldresults.count() == 0) {
+					String newStatus = "COMPLETED";
+					mboSetRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+					irRemote = mboSetRemote.getMboForUniqueId(id);
 	
-	// 				String currentStatus = irRemote.getString("STATUS");
-	// 				if (!currentStatus.equalsIgnoreCase(newStatus)) {
-	// 					Date newStatusDate = DateTimeParser.parseDateTime(jsonOfflineEntity.optString("ENTEREDDATE"));
-	// 					((StatefulMboRemote) irRemote).changeStatus(newStatus, newStatusDate, "");
-	// 					irRemote.getThisMboSet().save();
-	// 				}
-	// 			}
-	// 		} else {
-	// 			// Need to throw exception, otherwise this will be considered a successful transaction
-	// 			throw new Exception("Cannot change inspectionresult status, record not found");				
-	// 		}
-	// 	} catch (MXException e) {
-	// 		String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-	// 		log.error("completeInspection:", new Exception(e));
-	// 		throw new OfflineException(msg, e);
-	// 	} catch (RemoteException e) {
-	// 		log.error("completeInspection:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	} catch (Exception e) {
-	// 		log.error("completeInspection:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	}
-	// }
+					String currentStatus = irRemote.getString("STATUS");
+					if (!currentStatus.equalsIgnoreCase(newStatus)) {
+						Date newStatusDate = DateTimeParser.parseDateTime(jsonOfflineEntity.optString("ENTEREDDATE"));
+						((StatefulMboRemote) irRemote).changeStatus(newStatus, newStatusDate, "");
+						irRemote.getThisMboSet().save();
+					}
+				}
+			} else {
+				// Need to throw exception, otherwise this will be considered a successful transaction
+				throw new Exception("Cannot change inspectionresult status, record not found");				
+			}
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("completeInspection:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("completeInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("completeInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
 	
 	
-	// public void updateMeterReading(MboRemote inspResultMbo) throws RemoteException, MXException {
-	// 	String referenceObj = null;
-	// 	String asset = null;
-	// 	String location = null;
-	// 	String siteid = inspResultMbo.getString("SITEID");
-	// 	String orgid = inspResultMbo.getString("ORGID");
-	// 	String inspformnum = inspResultMbo.getString("INSPFORMNUM");
-	// 	String inspresultnum = inspResultMbo.getString("RESULTNUM");
+	public void updateMeterReading(MboRemote inspResultMbo) throws RemoteException, MXException {
+		String referenceObj = null;
+		String asset = null;
+		String location = null;
+		String siteid = inspResultMbo.getString("SITEID");
+		String orgid = inspResultMbo.getString("ORGID");
+		String inspformnum = inspResultMbo.getString("INSPFORMNUM");
+		String inspresultnum = inspResultMbo.getString("RESULTNUM");
 	
-	// 	 if(!inspResultMbo.getString("ASSET").equals("")){
-	// 		 referenceObj = "ASSET";  
-	// 		 asset = inspResultMbo.getString("ASSET");
-	// 	 }
-	// 	 else if(!inspResultMbo.getString("LOCATION").equals("")){
-	// 		 referenceObj = "LOCATION"; 
-	// 		 location = inspResultMbo.getString("LOCATION");
-	// 	 } 
+		 if(!inspResultMbo.getString("ASSET").equals("")){
+			 referenceObj = "ASSET";  
+			 asset = inspResultMbo.getString("ASSET");
+		 }
+		 else if(!inspResultMbo.getString("LOCATION").equals("")){
+			 referenceObj = "LOCATION"; 
+			 location = inspResultMbo.getString("LOCATION");
+		 } 
 		
-	// 	((InspectionResultRemote)inspResultMbo).updateAssetLocMeter(referenceObj, null, asset, location, siteid, orgid, inspformnum, inspresultnum);
-	// 	 inspResultMbo.getThisMboSet().save();
-	// 	 inspResultMbo.getThisMboSet().reset();
-	// }	
+		((InspectionResultRemote)inspResultMbo).updateAssetLocMeter(referenceObj, null, asset, location, siteid, orgid, inspformnum, inspresultnum);
+		 inspResultMbo.getThisMboSet().save();
+		 inspResultMbo.getThisMboSet().reset();
+	}	
 	
-	// public void createInspWorkOrder() throws Exception {
-	// 	try{
-	// 		// Get the Offline Entity that was posted here to be processed
-	// 		String offlineEntityName = "INSPECTIONRESULT";
-	// 		JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
-	// 		String inspectionresultid = jsonOfflineEntity.optString("INSPECTIONRESULTID");
-	// 		String inspDeficiencyList = jsonOfflineEntity.optString("DEFICIENCYLIST");
+	public void createInspWorkOrder() throws Exception {
+		try{
+			// Get the Offline Entity that was posted here to be processed
+			String offlineEntityName = "INSPECTIONRESULT";
+			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+			String inspectionresultid = jsonOfflineEntity.optString("INSPECTIONRESULTID");
+			String inspDeficiencyList = jsonOfflineEntity.optString("DEFICIENCYLIST");
 			
-	// 		MboSetRemote inspectionResultRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
-	// 		inspectionResultRemote.setQbe("INSPECTIONRESULTID", inspectionresultid);
-	// 		inspectionResultRemote.setQbeExactMatch(true);
-	// 		MboRemote irRemote = inspectionResultRemote.moveFirst();
+			MboSetRemote inspectionResultRemote = this.user.getSession().getMboSet("INSPECTIONRESULT");
+			inspectionResultRemote.setQbe("INSPECTIONRESULTID", inspectionresultid);
+			inspectionResultRemote.setQbeExactMatch(true);
+			MboRemote irRemote = inspectionResultRemote.moveFirst();
 			
-	// 		if (irRemote != null && irRemote.getString("STATUS").equals("COMPLETED") && inspDeficiencyList != null) {
-	// 			JSONArray selectedList  = JSONArray.fromObject(inspDeficiencyList);
-	// 			if (irRemote.getString("REFERENCEOBJECT").equalsIgnoreCase("WORKORDER") ||  irRemote.getString("REFERENCEOBJECT").equalsIgnoreCase("WOACTIVITY"))
-	// 			{	
-	// 				createdeficiencyfollowups(irRemote, selectedList);
-	// 			} else {
-	// 				createfollowupwithtasks(irRemote, selectedList);
-	// 			}
+			if (irRemote != null && irRemote.getString("STATUS").equals("COMPLETED") && inspDeficiencyList != null) {
+				JSONArray selectedList  = JSONArray.fromObject(inspDeficiencyList);
+				if (irRemote.getString("REFERENCEOBJECT").equalsIgnoreCase("WORKORDER") ||  irRemote.getString("REFERENCEOBJECT").equalsIgnoreCase("WOACTIVITY"))
+				{	
+					createdeficiencyfollowups(irRemote, selectedList);
+				} else {
+					createfollowupwithtasks(irRemote, selectedList);
+				}
 				
-	// 		} else {
-	// 			throw new Exception("Cannot create workorder for inspectionresult, status not completed or no deficiencies selected");	
-	// 		}
+			} else {
+				throw new Exception("Cannot create workorder for inspectionresult, status not completed or no deficiencies selected");	
+			}
 		
-	// 	} catch (MXException e) {
-	// 		String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-	// 		log.error("createWOInspection:", new Exception(e));
-	// 		throw new OfflineException(msg, e);
-	// 	} catch (RemoteException e) {
-	// 		log.error("createWOInspection:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	} catch (Exception e) {
-	// 		log.error("createWOInspection:", e);
-	// 		throw new OfflineException(e.getMessage(), e);
-	// 	}
-	// }
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			log.error("createWOInspection:", new Exception(e));
+			throw new OfflineException(msg, e);
+		} catch (RemoteException e) {
+			log.error("createWOInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		} catch (Exception e) {
+			log.error("createWOInspection:", e);
+			throw new OfflineException(e.getMessage(), e);
+		}
+	}
 	
 	public void createdeficiencyfollowups(MboRemote mbo, JSONArray selectedList) throws RemoteException, MXException {	
 		MboSetRemote woSet = null;

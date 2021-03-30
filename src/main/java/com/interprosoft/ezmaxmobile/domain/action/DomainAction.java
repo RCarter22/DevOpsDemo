@@ -4,18 +4,18 @@
  ******************************************************************************/
 package com.interprosoft.ezmaxmobile.domain.action;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.ParentPackage;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.convention.annotation.ResultPath;
+import org.apache.struts2.convention.annotation.Results;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.interprosoft.ezmaxmobile.common.EMMConstants;
 import com.interprosoft.ezmaxmobile.common.model.EZMessage;
-import org.apache.struts2.convention.annotation.*;
 
 @Component
 @Scope("prototype")
@@ -25,19 +25,27 @@ import org.apache.struts2.convention.annotation.*;
 @Results({@Result(name="error", location="/error/error.jsp")})
 public class DomainAction  extends BaseDomainAction {
 	
-	private static Log log = LogFactory.getLog(DomainAction.class);
+	private static Logger log = Logger.getLogger(DomainAction.class);
 	
 	private static final long serialVersionUID = 1L;
 	
 	@Action(value="domain", 
 		results={
 			@Result(name="success", location="/common/domain.jsp"),
+			@Result(name="advanced", location="/common/domainad.jsp"),
 			@Result(name="error", location="${currentAction}", type="redirect")
 		}
 	)
 	public String execute() throws Exception {
 		try {
-			setLookupList(getDomainValueList());
+			if(this.currentAction.contains("advancedsearch")){
+				prepareAdvancedSearchDomainList();
+				return "advanced";
+			} else if (this.currentAction.contains("/inspector/") || (this.fieldName.equalsIgnoreCase("INSPFORMNUM") && this.lookupSourceField.contains("INSPECTIONFORM"))){
+				prepareInspDomainValueList();
+			} else {
+				setLookupList(getDomainValueList());
+			}
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());

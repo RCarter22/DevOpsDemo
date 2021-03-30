@@ -8,8 +8,7 @@ import java.io.ByteArrayInputStream;
 
 import net.sf.json.JSONObject;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -18,9 +17,6 @@ import org.apache.struts2.convention.annotation.ResultPath;
 import org.apache.struts2.convention.annotation.Results;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import psdi.app.doclink.DoclinksRemote;
-import psdi.app.doclink.DoclinksSetRemote;
 
 import com.interprosoft.ezmaxmobile.common.BaseMaximoException;
 import com.interprosoft.ezmaxmobile.common.EMMConstants;
@@ -36,7 +32,7 @@ public class DoclinkAction extends BaseDoclinkAction {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static Log log = LogFactory.getLog(DoclinkAction.class);
+	private static Logger log = Logger.getLogger(DoclinkAction.class);
 	
 	@Action(value="doUploadJSon",
 			results={
@@ -70,7 +66,7 @@ public class DoclinkAction extends BaseDoclinkAction {
 		JSONObject jsonObj = new JSONObject();
 		try {
 			if (this.getMyFile() != null)
-				jsonObj = upload(this.getDocInfo(),this.getMyFileFileName(), this.getOwnerTable(), this.getOwnerId());
+				jsonObj = upload(this.getDocInfo(),this.getMyFileFileName(), this.getOwnerTable(), this.getDocType(), this.getOwnerId());
 			else
 				throw new Exception(getText("global.specifyfile"));
 		}  catch (Exception e){

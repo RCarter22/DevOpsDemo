@@ -111,6 +111,13 @@ public class MatUseTransAction extends BaseAction {
 				return EMMConstants.HOME;
 			populateMbo(currentMbo, this.getSessionValueByName(EMMConstants.CURRENTAPPNAME));
 			mbo = simpleService.add(mbo.getMboSet(OWNERMBO)); 
+
+			// InterPro ticket # - 1185
+			// Limit  the ability to change Transaction type due to Maximo bug.  If user can change to RETURN, mbo will throw a db error
+			// Default to always "ISSUE" from the work order tracking application
+			// Maximo by default is set to "ISSUE".  If not, uncomment below.
+			// mbo.setValue("ISSUETYPE", "ISSUE");
+			
 			id = mbo.getUniqueIDValue();
 			setMboSession(OWNERMBO,this.mbo);
 		} catch (Exception e){

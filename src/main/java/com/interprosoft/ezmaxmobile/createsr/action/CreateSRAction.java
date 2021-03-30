@@ -50,7 +50,7 @@ public class CreateSRAction extends BaseAction {
 		try{	
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			setMboAppName(APPNAME);
 			
 		} catch (RemoteException e) {

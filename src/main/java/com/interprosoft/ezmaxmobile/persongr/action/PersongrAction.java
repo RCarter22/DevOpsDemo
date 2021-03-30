@@ -52,11 +52,7 @@ public class PersongrAction  extends BaseAction {
 		try{	
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);			
-			setMboAppName(APPNAME);
-		} catch (RemoteException e) {
-			setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
-			return ERROR;
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -96,7 +92,7 @@ public class PersongrAction  extends BaseAction {
 	public String list() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
 				mboSetRemote.reset();
@@ -121,7 +117,7 @@ public class PersongrAction  extends BaseAction {
             if(mboSetRemote != null)
                   mboSetRemote.resetQbe();
             if(mboSetRemote == null || (mboSetRemote != null && mboSetRemote.getApp() != null && !mboSetRemote.getApp().equalsIgnoreCase(this.APPNAME))){
-                mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+                mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
       			mboSetRemote.setWhere(mboSetRemote.getUserAndQbeWhere());
       			mboSetRemote.resetQbe();
             }

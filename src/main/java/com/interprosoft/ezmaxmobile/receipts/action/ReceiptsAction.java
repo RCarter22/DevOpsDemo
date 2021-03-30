@@ -8,8 +8,7 @@ package com.interprosoft.ezmaxmobile.receipts.action;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -43,7 +42,7 @@ import com.interprosoft.ezmaxmobile.common.util.MaximoExceptionUtil;
 public class ReceiptsAction extends BaseAction{
 	
 	private static final long serialVersionUID = 1L;
-	private static Log log = LogFactory.getLog(ReceiptsAction.class);
+	private static Logger log = Logger.getLogger(ReceiptsAction.class);
 	
 	private final String APPNAME = "RECEIPTS";
 	private final String OWNERMBO = "PO";
@@ -63,8 +62,9 @@ public class ReceiptsAction extends BaseAction{
 		try {
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
-			setMboAppName(APPNAME);
+			clearadvancedsearch();
+			clearMboSession(EMMConstants.CURRENTWHERECLAUSE);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -85,7 +85,7 @@ public class ReceiptsAction extends BaseAction{
             if(mboSetRemote != null)
                   mboSetRemote.resetQbe();
             if(mboSetRemote == null || (mboSetRemote != null && mboSetRemote.getApp() != null && !mboSetRemote.getApp().equalsIgnoreCase(this.APPNAME))){
-				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
 				mboSetRemote.setQbe("HISTORYFLAG", "0");
 				mboSetRemote.setQbe("SITEID", "="+this.user.getSiteId());
 				mboSetRemote.setWhere(mboSetRemote.getUserAndQbeWhere());
@@ -117,7 +117,8 @@ public class ReceiptsAction extends BaseAction{
 				mbo =  this.simpleService.getZombieMbo(OWNERMBO);
 				setMboAppName(APPNAME);
 				// Set default QBE
-				mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());
+				if(this.user.getSiteId() != null)
+					mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());
 			}
 			this.setMboSession(EMMConstants.ADVANCEDSEARCHMBO, mbo);
 		} catch (Exception e){
@@ -136,20 +137,40 @@ public class ReceiptsAction extends BaseAction{
 	)
 	public String doadvancedsearch() {
 		try{	
-			mbo = (MboRemote) this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
+			mbo = (MboRemote)this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
 			setMboAppName(APPNAME);
-			mboSet = (MboSetRemote) this.getSessionObject(EMMConstants.CURRENTMBOSET);
-			if (mboSet != null)
-				mboSet.resetQbe();
-			else
+			mboSet = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
+			if(mboSet == null || (mboSet != null && mboSet.getApp() != null && !mboSet.getApp().equalsIgnoreCase(this.APPNAME))){
+				this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, "");
 				mboSet = this.user.getSession().getMboSet(OWNERMBO);
-			String[][] qbeSet = mbo.getThisMboSet().getQbe();
-			for (int i = 0; i < qbeSet.length; i++) {
-				mboSet.setQbe(qbeSet[i][0], qbeSet[i][1]);
+				mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+			}else{
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) == null) //Get the initial where clause and save it in session for reuse
+					this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, mboSet.getCompleteWhere());
+				//Combine the initial where clause and the advanced search where clause
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE).toString().equalsIgnoreCase(""))
+					mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+				else
+					mboSet.setWhere(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) + " and " + mbo.getThisMboSet().getCompleteWhere());
 			}
 			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);	
 		} catch (Exception e){
-			e.getStackTrace();
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}	
+	
+	@Action(value="clearadvancedsearch",results={
+			@Result(name="success", location="advancedsearch.action", type="redirect"),
+			@Result(name="error", location="advancedsearch.action", type="redirect")
+		}
+	)
+	public String clearadvancedsearch() {
+		try{
+			this.clearAdvancedSearchSessions();
+		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
 			return ERROR;
@@ -166,7 +187,7 @@ public class ReceiptsAction extends BaseAction{
 	public String list() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			setMboAppName(APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
@@ -264,7 +285,7 @@ public class ReceiptsAction extends BaseAction{
 	
 	@Action(value="selectorderedservice", results={
 			@Result(name="success",location="selectservices.jsp", params={"id","${id}"}),
-			@Result(name="error",location="selectservices.jsp", params={"id","${id}"})
+			@Result(name="error",location="servicereceipts.action",type="redirect",params={"id","${id}"})
 		})
 	public String selectorderedservice(){		
 		try {
@@ -322,7 +343,7 @@ public class ReceiptsAction extends BaseAction{
 	
 	@Action(value="selectordereditem", results={
 			@Result(name="success",location="selectitems.jsp", params={"id","${id}"}),
-			@Result(name="error",location="selectitems.jsp", params={"id","${id}"})
+			@Result(name="error",location="materialreceipts.action",type="redirect",params={"id","${id}"})
 		})
 	public String selectordereditem(){		
 		try {
@@ -378,7 +399,7 @@ public class ReceiptsAction extends BaseAction{
 	
 	@Action(value="selectservicereturn", results={
 			@Result(name="success",location="selectservices.jsp", params={"id","${id}"}),
-			@Result(name="error",location="selectservices.jsp", params={"id","${id}"})
+			@Result(name="error",location="servicereceipts.action",type="redirect",params={"id","${id}"})
 		})
 	public String selectservicereturn(){		
 		try {
@@ -580,7 +601,7 @@ public class ReceiptsAction extends BaseAction{
 	
 	@Action(value="receiverotatingitem", results={
 			@Result(name="success",location="receiverotatingitems.jsp", params={"id","${id}"}),
-			@Result(name="error",location="receiverotatingitems.jsp", params={"id","${id}"})
+			@Result(name="error",location="materialreceipts.action",type="redirect",params={"id","${id}"})
 		})
 	public String receiverotatingitem(){		
 		try {

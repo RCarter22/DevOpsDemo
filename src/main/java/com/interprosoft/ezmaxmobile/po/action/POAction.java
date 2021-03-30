@@ -45,8 +45,9 @@ public class POAction extends BaseAction {
 		try {
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
-			setMboAppName(APPNAME);
+			clearadvancedsearch();
+			clearMboSession(EMMConstants.CURRENTWHERECLAUSE);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -64,7 +65,7 @@ public class POAction extends BaseAction {
 	public String list() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
 				mboSetRemote.reset();
@@ -111,7 +112,7 @@ public class POAction extends BaseAction {
                   mboSetRemote.resetQbe();
             if(mboSetRemote == null || (mboSetRemote != null && mboSetRemote.getApp() != null && !mboSetRemote.getApp().equalsIgnoreCase(this.APPNAME))){
 				// Set default app where clause
-				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
 				mboSetRemote.setQbe("HISTORYFLAG", "0");
 				mboSetRemote.setQbe("SITEID", "="+this.user.getSiteId());
 				mboSetRemote.setWhere(mboSetRemote.getUserAndQbeWhere());
@@ -140,7 +141,8 @@ public class POAction extends BaseAction {
 				mbo =  this.simpleService.getZombieMbo(OWNERMBO);
 				setMboAppName(APPNAME);
 				// Set default QBE
-				mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());
+				if(this.user.getSiteId() != null)
+					mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());
 			}
 			this.setMboSession(EMMConstants.ADVANCEDSEARCHMBO, mbo);
 		} catch (Exception e){
@@ -158,18 +160,39 @@ public class POAction extends BaseAction {
 	)
 	public String doadvancedsearch() {
 		try{	
-			mbo = (MboRemote) this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
+			mbo = (MboRemote)this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
 			setMboAppName(APPNAME);
-			mboSet = (MboSetRemote) this.getSessionObject(EMMConstants.CURRENTMBOSET);
-			if (mboSet != null)
-				mboSet.resetQbe();
-			else
+			mboSet = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
+			if(mboSet == null || (mboSet != null && mboSet.getApp() != null && !mboSet.getApp().equalsIgnoreCase(this.APPNAME))){
+				this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, "");
 				mboSet = this.user.getSession().getMboSet(OWNERMBO);
-			String[][] qbeSet = mbo.getThisMboSet().getQbe();
-			for (int i = 0; i < qbeSet.length; i++) {
-				mboSet.setQbe(qbeSet[i][0], qbeSet[i][1]);
+				mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+			}else{
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) == null) //Get the initial where clause and save it in session for reuse
+					this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, mboSet.getCompleteWhere());
+				//Combine the initial where clause and the advanced search where clause
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE).toString().equalsIgnoreCase(""))
+					mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+				else
+					mboSet.setWhere(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) + " and " + mbo.getThisMboSet().getCompleteWhere());
 			}
-			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);				
+			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);	
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}	
+	
+	@Action(value="clearadvancedsearch",results={
+			@Result(name="success", location="advancedsearch.action", type="redirect"),
+			@Result(name="error", location="advancedsearch.action", type="redirect")
+		}
+	)
+	public String clearadvancedsearch() {
+		try{
+			this.clearAdvancedSearchSessions();
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());

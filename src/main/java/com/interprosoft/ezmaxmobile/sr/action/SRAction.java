@@ -6,6 +6,9 @@ package com.interprosoft.ezmaxmobile.sr.action;
 
 import java.rmi.RemoteException;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -55,8 +58,9 @@ public class SRAction extends BaseAction {
 		try{	
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
-			setMboAppName(APPNAME);
+			clearadvancedsearch();
+			clearMboSession(EMMConstants.CURRENTWHERECLAUSE);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			
 			newSRRemote = this.simpleService.getMboSet(OWNERMBO);
 			newSRRemote.setQbe("STATUS", "NEW");			
@@ -111,7 +115,15 @@ public class SRAction extends BaseAction {
 			{
 				mbo = this.simpleService.findById(OWNERMBO,id);
 			}
-			mbo = (MboRemote)(((SRRemote)mbo).createWorkorder()).get(1);
+			
+			// Fix for InterPro issue #5090
+			// Comment out the following
+			// mbo = (MboRemote)(((SRRemote)mbo).createWorkorder()).get(1);
+
+			// Add the following
+			SRRemote sr = (SRRemote) mbo;
+			mbo = (MboRemote)(sr.createWorkorder()).get(1);
+			sr.getThisMboSet().save();
 			
 			id = mbo.getUniqueIDValue();
 			setMessage(new EZMessage(mbo.getMessage("ticket", "WOCreated", new String[]{mbo.getString("WONUM")}), EMMConstants.SUCCESS));
@@ -225,7 +237,7 @@ public class SRAction extends BaseAction {
 	public String listActive() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = this.simpleService.getMboSet(OWNERMBO);
 			mboSetRemote.setWhere("STATUS NOT IN ('NEW','CLOSED','RESOLVED')");
 			mboSetRemote.reset();			
@@ -249,7 +261,7 @@ public class SRAction extends BaseAction {
 	public String listNew() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = this.simpleService.getMboSet(OWNERMBO);
 			mboSetRemote.setQbe("STATUS", "NEW");			
 			mboSetRemote.setQbeExactMatch(true);
@@ -274,7 +286,7 @@ public class SRAction extends BaseAction {
 	public String list() {
 		try{
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
 				mboSetRemote.reset();
@@ -313,9 +325,27 @@ public class SRAction extends BaseAction {
 		)
 	public String create() {
 		try{
+			this.clearMboSession(OWNERMBO);
 			create(OWNERMBO, APPNAME);
 			// For Location/Asset lookup
 			mbo.setValue("ASSETFILTERBY", "ALL");
+			
+			// NOTE - For mapping - SR based on a dropped pin... show x and y coordinates in description
+			if (jsonParam != null) {
+				JSONObject mapJson = JSONObject.fromObject(jsonParam);
+				if (mapJson != null) {
+					if (mapJson.has("DROPPED_PIN")) {
+						JSONArray dpJsonArray = mapJson.getJSONArray("DROPPED_PIN");
+						if (dpJsonArray != null && dpJsonArray.size() > 0)
+							mapJson = dpJsonArray.getJSONObject(0);
+					}
+				}				
+				if (mapJson != null) {
+					mbo.setValue("DESCRIPTION", "(" + mapJson.getString("emmmap_y") + "," + mapJson.getString("emmmap_x") + ")");
+					mbo.setValue("SERVICEADDRESS.LATITUDEY", mapJson.getString("emmmap_y"));
+					mbo.setValue("SERVICEADDRESS.LONGITUDEX", mapJson.getString("emmmap_x"));
+				}
+			}				
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -337,7 +367,7 @@ public class SRAction extends BaseAction {
                 mboSetRemote.resetQbe();
             if(mboSetRemote == null || (mboSetRemote != null && mboSetRemote.getApp() != null && !mboSetRemote.getApp().equalsIgnoreCase(this.APPNAME))){
 				// Set default app where clause
-				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
 				mboSetRemote.setQbe("HISTORYFLAG", "0");
 				mboSetRemote.setQbe("SITEID", "="+this.user.getSiteId());
 				mboSetRemote.setWhere(mboSetRemote.getUserAndQbeWhere());
@@ -389,18 +419,43 @@ public class SRAction extends BaseAction {
 	)
 	public String doadvancedsearch() {
 		try {
-			mbo = (MboRemote) this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
+			mbo = (MboRemote)this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
 			setMboAppName(APPNAME);
-			mboSet = (MboSetRemote) this.getSessionObject(EMMConstants.CURRENTMBOSET);
-			if (mboSet != null)
-				mboSet.resetQbe();
-			else
+			mboSet = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
+			if(mboSet == null || (mboSet != null && mboSet.getApp() != null && !mboSet.getApp().equalsIgnoreCase(this.APPNAME))){
+				this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, "");
 				mboSet = this.user.getSession().getMboSet(OWNERMBO);
-			String[][] qbeSet = mbo.getThisMboSet().getQbe();
-			for (int i = 0; i < qbeSet.length; i++) {
-				mboSet.setQbe(qbeSet[i][0], qbeSet[i][1]);
+				mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+			}else{
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) == null) //Get the initial where clause and save it in session for reuse
+					this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, mboSet.getCompleteWhere());
+				//Combine the initial where clause and the advanced search where clause
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE).toString().equalsIgnoreCase(""))
+					mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+				else{
+					if(!mbo.getThisMboSet().getCompleteWhere().isEmpty())
+						mboSet.setWhere(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) + " and " + mbo.getThisMboSet().getCompleteWhere());
+					else
+						mboSet.setWhere(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE).toString());
+				}
 			}
-			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);		
+			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);	
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}	
+	
+	@Action(value="clearadvancedsearch",results={
+			@Result(name="success", location="advancedsearch.action", type="redirect"),
+			@Result(name="error", location="advancedsearch.action", type="redirect")
+		}
+	)
+	public String clearadvancedsearch() {
+		try{
+			this.clearAdvancedSearchSessions();
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());

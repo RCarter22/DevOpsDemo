@@ -138,20 +138,20 @@ public class TransactionTrackingAction extends BaseTxnTrackingAction {
 		return SUCCESS;
 	}
 
-	// @Action(value="transaction_doReprocessAllErrors", results={
-	// 	@Result(name="success",location="${currentAction}",type="redirect"),
-	// 	@Result(name="error",location="${currentAction}",type="redirect")
-	// })
-	// public String transaction_doReprocessAllErrors(){
-	// 	try {
-	// 		this.getTransactionService().reprocessErrorTransactions(this.user);
-	// 	} catch(BaseMaximoException ex) {
-	// 		this.setMessage(new EZMessage(ex.getMessage(), EMMConstants.ERROR));
-	// 		this.addActionError(ex.getMessage());
-	// 		return ERROR;
-	// 	}
-	// 	return SUCCESS;
-	// }
+	@Action(value="transaction_doReprocessAllErrors", results={
+		@Result(name="success",location="${currentAction}",type="redirect"),
+		@Result(name="error",location="${currentAction}",type="redirect")
+	})
+	public String transaction_doReprocessAllErrors(){
+		try {
+			this.getTransactionService().reprocessErrorTransactions(this.user);
+		} catch(BaseMaximoException ex) {
+			this.setMessage(new EZMessage(ex.getMessage(), EMMConstants.ERROR));
+			this.addActionError(ex.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}
 	
 	@Action(value="transaction_delete", results={
 		@Result(name="success",location="delete.jsp"),

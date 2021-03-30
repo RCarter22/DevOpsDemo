@@ -58,8 +58,9 @@ public class LocationAction extends BaseAction {
 			clearMboSession(OWNERMBO);
 			clearMboSession("WORKORDER");
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
-			setMboAppName(APPNAME);
+			clearadvancedsearch();
+			clearMboSession(EMMConstants.CURRENTWHERECLAUSE);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -78,7 +79,7 @@ public class LocationAction extends BaseAction {
 		try{
 			clearMboSession(OWNERMBO);
 			clearMboSession("WORKORDER");
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
 				mboSetRemote.reset();
@@ -128,7 +129,7 @@ public class LocationAction extends BaseAction {
             if(mboSetRemote != null)
                   mboSetRemote.resetQbe();
             if(mboSetRemote == null || (mboSetRemote != null && mboSetRemote.getApp() != null && !mboSetRemote.getApp().equalsIgnoreCase(this.APPNAME))){
-				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+				mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
 				mboSetRemote.setQbe("SITEID", "="+user.getSiteId());
 				mboSetRemote.setWhere(mboSetRemote.getUserAndQbeWhere()+ " and (type in ('COURIER' ,'HOLDING' ,'LABOR' ,'OPERATING' ,'REPAIR' , 'SALVAGE' , 'VENDOR'))");
 				mboSetRemote.resetQbe();	
@@ -173,19 +174,23 @@ public class LocationAction extends BaseAction {
 	)
 	public String doadvancedsearch() {
 		try{	
-			mbo = (MboRemote) this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
+			mbo = (MboRemote)this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
 			setMboAppName(APPNAME);
-			mboSet = (MboSetRemote) this.getSessionObject(EMMConstants.CURRENTMBOSET);
-			if (mboSet != null)
-				mboSet.resetQbe();
-			else
+			mboSet = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
+			if(mboSet == null || (mboSet != null && mboSet.getApp() != null && !mboSet.getApp().equalsIgnoreCase(this.APPNAME))){
+				this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, "");
 				mboSet = this.user.getSession().getMboSet(OWNERMBO);
-			String[][] qbeSet = mbo.getThisMboSet().getQbe();
-			for (int i = 0; i < qbeSet.length; i++) {
-				mboSet.setQbe(qbeSet[i][0], qbeSet[i][1]);
+				mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+			}else{
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) == null) //Get the initial where clause and save it in session for reuse
+					this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, mboSet.getCompleteWhere());
+				//Combine the initial where clause and the advanced search where clause
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE).toString().equalsIgnoreCase(""))
+					mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+				else
+					mboSet.setWhere(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) + " and " + mbo.getThisMboSet().getCompleteWhere());
 			}
-			mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere() + " and (type in ('COURIER' ,'HOLDING' ,'LABOR' ,'OPERATING' ,'REPAIR' , 'SALVAGE' , 'VENDOR'))");
-			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);		
+			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);	
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -193,6 +198,22 @@ public class LocationAction extends BaseAction {
 		}			
 		return SUCCESS;
 	}	
+	
+	@Action(value="clearadvancedsearch",results={
+			@Result(name="success", location="advancedsearch.action", type="redirect"),
+			@Result(name="error", location="advancedsearch.action", type="redirect")
+		}
+	)
+	public String clearadvancedsearch() {
+		try{
+			this.clearAdvancedSearchSessions();
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}
 
 	@Action(value="listchildren",
 			results={
@@ -682,6 +703,67 @@ public class LocationAction extends BaseAction {
 			return ERROR;
 		}
 		return SUCCESS;
+	}
+	
+	@Action(value="listpendinginsp",
+			results={
+				@Result(name="success", location="listpendinginsp.jsp"),
+				@Result(name="error", location="listpendinginsp.jsp")
+			}
+		)
+	public String listpendinginsp() {
+		try{				
+			populateMbo(OWNERMBO, this.getSessionValueByName(EMMConstants.CURRENTAPPNAME));
+			mboList = this.simpleService.paginateMboSet(getInspections("PENDING"), pagination);
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}
+	
+	@Action(value="listcompleteinsp",
+			results={
+				@Result(name="success", location="listcompleteinsp.jsp"),
+				@Result(name="error", location="listcompleteinsp.jsp")
+			}
+		)
+	public String listcompleteinsp() {
+		try{				
+			populateMbo(OWNERMBO, this.getSessionValueByName(EMMConstants.CURRENTAPPNAME));
+			mboList = this.simpleService.paginateMboSet(getInspections("COMPLETED"), pagination);
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}
+	
+	@Action(value="listinproginsp",
+			results={
+				@Result(name="success", location="listinproginsp.jsp"),
+				@Result(name="error", location="listinproginsp.jsp")
+			}
+		)
+	public String listinproginsp() {
+		try{				
+			populateMbo(OWNERMBO, this.getSessionValueByName(EMMConstants.CURRENTAPPNAME));
+			mboList = this.simpleService.paginateMboSet(getInspections("INPROG"), pagination);
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}
+  	
+	public MboSetRemote getInspections(String status) throws RemoteException, MXException {
+		MboSetRemote inspResults = mbo.getMboSet("INSPECTIONRESULT");
+		inspResults.setQbe("STATUS", status);
+		inspResults.setOrderBy("DUEDATE, CREATEDATE DESC");
+		return inspResults;
 	}
 	
 	public List<MboRemote> getHierarchyMboList() {

@@ -128,6 +128,7 @@ public class WorklogAction extends BaseAction {
 	}
 	
 	@Action(value="cancel", results={
+			@Result(name="back",location="${currentAction}",type="redirect"),
 			@Result(name="success",location="main.action",type="redirect",params={"id","${id}"}),
 			@Result(name="error",location="main.action",type="redirect",params={"id","${id}"})
 		})
@@ -156,6 +157,8 @@ public class WorklogAction extends BaseAction {
 			this.addActionError(e.getMessage());
 			return ERROR;
 		}
+		if(currentAction !=null && currentAction.length() != 0 )
+			return "back";
 		return SUCCESS;
 	}	
 	
@@ -208,6 +211,7 @@ public class WorklogAction extends BaseAction {
 	}		
 	
 	@Action(value="goback", results={
+			@Result(name="back",location="${currentAction}",type="redirect"),
 			@Result(name="success",location="main.action",type="redirect",params={"id","${id}"}),
 			@Result(name="error",location="main.action",type="redirect",params={"id","${id}"})
 		})
@@ -227,6 +231,8 @@ public class WorklogAction extends BaseAction {
 			this.addActionError(e.getMessage());
 			return ERROR;
 		}
+		if(currentAction !=null && currentAction.length() != 0 )
+			return "back";
 		return SUCCESS;
 	}	
 }

@@ -4,8 +4,7 @@
  ******************************************************************************/
 package com.interprosoft.ezmaxmobile.inventor.action;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.Logger;
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Namespace;
 import org.apache.struts2.convention.annotation.ParentPackage;
@@ -43,7 +42,7 @@ public class InventorAction extends BaseAction {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static Log log = LogFactory.getLog(InventorAction.class);
+	private static Logger log = Logger.getLogger(InventorAction.class);
 	
 	private final String APPNAME = "INVENTOR";
 	private final String OWNERMBO = "INVENTORY";
@@ -60,7 +59,7 @@ public class InventorAction extends BaseAction {
 	 */
 	private MboSetRemote getDefaultMboSet(){
 		try {
-			MboSetRemote mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+			MboSetRemote mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
 			
 			this.storeroom = (String)this.getSessionObject("STOREROOM");
 			if (this.storeroom != null && this.storeroom.length() > 0) {
@@ -76,6 +75,7 @@ public class InventorAction extends BaseAction {
 		    } else if (mboSetRemote instanceof ServiceItemSetRemote){
 		    	mboSetRemote.setRelationship("itemnum in (select itemnum from item where itemtype in (select value from synonymdomain where domainid='ITEMTYPE' and maxvalue = 'STDSERVICE'))");
 		    }		
+		    mboSetRemote.setApp(APPNAME);
 		    return mboSetRemote;
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
@@ -98,7 +98,9 @@ public class InventorAction extends BaseAction {
 			this.setSessionObject("STOREROOM", null);
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			clearadvancedsearch();
+			clearMboSession(EMMConstants.CURRENTWHERECLAUSE);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote storerooms = this.user.getSession().getMboSet("LOCATIONS");
 			storerooms.setQbe("TYPE", "STOREROOM");
 			storerooms.setQbe("SITEID", user.getSiteId());
@@ -124,7 +126,7 @@ public class InventorAction extends BaseAction {
 			this.setSessionObject("STOREROOM", storeroom);
 			this.setSessionObject("CURRENTACTION", "list.action");
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if(mboSetRemote==null){
 				mboSetRemote = getDefaultMboSet();			
@@ -306,7 +308,8 @@ public class InventorAction extends BaseAction {
 				setMboAppName(APPNAME);
 				// Set default QBE
 				mbo.getThisMboSet().setQbe("STATUS", "!=OBSOLETE");
-				mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());	
+				if(this.user.getSiteId() != null)
+					mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());	
 				
 				if (this.storeroom != null && this.storeroom.length() > 0){
 					mbo.getThisMboSet().setQbe("LOCATION", this.storeroom);
@@ -352,13 +355,18 @@ public class InventorAction extends BaseAction {
 			mbo = (MboRemote)this.getSessionObject(EMMConstants.ADVANCEDSEARCHMBO);
 			setMboAppName(APPNAME);
 			mboSet = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
-		    if(mboSet != null)
-		    	mboSet.resetQbe();
-		    else
-		    	mboSet = this.user.getSession().getMboSet(OWNERMBO);
-			String [][] qbeSet = mbo.getThisMboSet().getQbe();
-			for(int i = 0; i < qbeSet.length; i++){
-				mboSet.setQbe(qbeSet[i][0], qbeSet[i][1]);
+			if(mboSet == null || (mboSet != null && mboSet.getApp() != null && !mboSet.getApp().equalsIgnoreCase(this.APPNAME))){
+				this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, "");
+				mboSet = this.user.getSession().getMboSet(OWNERMBO);
+				mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+			}else{
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) == null) //Get the initial where clause and save it in session for reuse
+					this.setSessionObject(EMMConstants.CURRENTWHERECLAUSE, mboSet.getCompleteWhere());
+				//Combine the initial where clause and the advanced search where clause
+				if(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE).toString().equalsIgnoreCase(""))
+					mboSet.setWhere(mbo.getThisMboSet().getCompleteWhere());
+				else
+					mboSet.setWhere(this.getSessionObject(EMMConstants.CURRENTWHERECLAUSE) + " and " + mbo.getThisMboSet().getCompleteWhere());
 			}
 			this.setSessionObject(EMMConstants.CURRENTMBOSET, mboSet);  
 
@@ -372,7 +380,21 @@ public class InventorAction extends BaseAction {
 		return SUCCESS;
 	}                   
 	
-	
+	@Action(value="clearadvancedsearch",results={
+			@Result(name="success", location="advancedsearch.action", type="redirect"),
+			@Result(name="error", location="advancedsearch.action", type="redirect")
+		}
+	)
+	public String clearadvancedsearch() {
+		try{
+			this.clearAdvancedSearchSessions();
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}
 	
 	@Action(value="view", results={
 			@Result(name="success",location="view.jsp"),
@@ -472,12 +494,12 @@ public class InventorAction extends BaseAction {
 
 	@Action(value="createtransfercurrentitem", results={
 			@Result(name="success",location="transfercurrentitem.action",type="redirect",params={"id","${id}"}),
-			@Result(name="error",location="transfercurrentitem.action",type="redirect",params={"id","${id}"})
+			@Result(name="error",location="view.action",type="redirect",params={"id","${id}"})
 		})
 	public String createTransferCurrentItem(){
 		try {
 			mbo = (MboRemote)this.getSessionObject(OWNERMBO);
-			
+			((InventoryRemote)mbo).canTransferCurrentItem();
 			this.setSessionObject("TRANSFERCURITEM", null);
 			MboSetRemote transferSetRemote = (MboSetRemote)mbo.getMboSet("TRANSFERCURITEM");
 			transferSetRemote.clear();
@@ -727,7 +749,7 @@ public class InventorAction extends BaseAction {
 			currentAction = (String) this.getSessionObject("CURRENTACTION");
 			this.setSessionObject("STOREROOM", storeroom);
 			clearMboSession(OWNERMBO);
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if(storeroom == null){
 				storeroom = (String) this.getSessionObject("STOREROOM");
@@ -824,7 +846,8 @@ public class InventorAction extends BaseAction {
 				setMboAppName(APPNAME);
 				// Set default QBE
 				mbo.getThisMboSet().setQbe("STATUS", "!=OBSOLETE");
-				mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());	
+				if(this.user.getSiteId() != null)
+					mbo.getThisMboSet().setQbe("SITEID", "="+this.user.getSiteId());	
 				
 				if (this.storeroom != null && this.storeroom.length() > 0){
 					mbo.getThisMboSet().setQbe("LOCATION", this.storeroom);

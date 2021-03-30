@@ -41,7 +41,6 @@ public class LabTransAction extends BaseAction {
 	private static final long serialVersionUID = 1L;
 
 	public static final String OWNERMBO = "LABTRANS";
-	public static final String APPNAME = "LABTRANS";
 	
 	private String currentWeekRange;
 	
@@ -160,7 +159,7 @@ public class LabTransAction extends BaseAction {
 		}		
 		return SUCCESS;
 	}	
-	
+
 	@Action(value="view",
 			results={
 				@Result(name="success", location="labtrans.jsp"),
@@ -223,7 +222,7 @@ public class LabTransAction extends BaseAction {
 		}		
 		return SUCCESS;
 	}
-	
+
 	@Action(value="add",
 			results={
 				@Result(name="success", type="redirect", location="view.action", params={"id","${id}"}),
@@ -298,6 +297,55 @@ public class LabTransAction extends BaseAction {
 		return SUCCESS;
 	}
 	
+	// ======================================================================================================================	//
+	// NOTE - This is the sample code to address InterPro issue #1982 
+	// This method overwrites the save in the base class
+	// After entering labor start date time and finish date time, a user can enter total labor hours that are not equal to the difference of start and finish date times
+	// Maximo will throw an error in this case, but Mbo does not throw this types of errors to be trapped in EZMaxMobile
+	// The following example tries to catch this scenario and throws error on screen.  This fix is to be applied based on customers' implementations.
+	/*
+	@Action(value="save",
+			results={
+				@Result(name="success", location="${currentAction}", type="redirect"),
+				@Result(name="error",location="${currentAction}",type="redirect")
+			}
+		)
+	public String save() {
+		try {
+			String currentMbo = this.getSessionValueByName(EMMConstants.CURRENTMBONAME);
+			if (currentMbo == null || currentMbo.equalsIgnoreCase(""))
+				return EMMConstants.HOME;
+			this.mbo = (MboRemote)this.getSessionObject(currentMbo);
+			if (this.mbo != null && this.mbo.toBeSaved()) {	
+				Date startDateTime = mbo.getDate("STARTDATETIME");
+				Date finishDateTime = mbo.getDate("FINISHDATETIME");
+				if (startDateTime != null && finishDateTime != null) {
+					float floatRegHrs = mbo.getFloat("REGULARHRS");
+					float floatPremiumHrs = mbo.getFloat("PREMIUMPAYHOURS"); 
+					long totalHoursMsec = (long) (floatRegHrs*1000*60*60L + floatPremiumHrs*1000*60*60L);
+				
+					if ((finishDateTime.getTime() >= startDateTime.getTime()) && (finishDateTime.getTime() - startDateTime.getTime()) < totalHoursMsec)
+						throw new Exception("Regular hours plus overtime duration exceeds duration between start and finish times.");
+				}
+			}
+			super.save();
+		} catch (RemoteException e) {
+			setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			return ERROR;
+		} catch (MXException e) {
+			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+			setMessage(new EZMessage(msg, EMMConstants.ERROR));
+			return ERROR;
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}
+		return SUCCESS;
+	}
+	*/
+	// ======================================================================================================================	//
+	
 	@Action(value="goback", results={
 			@Result(name="success",location="main.action",type="redirect",params={"id","${id}"}),
 			@Result(name="error",location="main.action",type="redirect",params={"id","${id}"})
@@ -336,7 +384,7 @@ public class LabTransAction extends BaseAction {
 		}
 		return SUCCESS;
 	}	
-	
+
 	
 	@Action(value="goback2", results={
 			@Result(name="success",location="main2.action",type="redirect",params={"id","${id}"}),
@@ -423,7 +471,7 @@ public class LabTransAction extends BaseAction {
 			
 			MboSetRemote weeklyLabTransSet = this.user.getSession().getMboSet(OWNERMBO);
 			weeklyLabTransSet.setQbe("LABOR.PERSONID", this.user.getPersonId());
-			weeklyLabTransSet.setWhere("STARTDATE >= " + SqlFormat.getDateFunction(sun.getTime()) +  " AND STARTDATE < " + SqlFormat.getDateFunction(sat.getTime()) +  "");
+			weeklyLabTransSet.setWhere("STARTDATE >= " + SqlFormat.getDateFunction(sun.getTime()) +  " AND STARTDATE <= " + SqlFormat.getDateFunction(sat.getTime()) +  "");
 			weeklyLabTransSet.setOrderBy("STARTDATE DESC");
 			weeklyLabTransSet.setQbeExactMatch(true);
 			weeklyLabTransSet.reset();

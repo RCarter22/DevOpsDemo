@@ -445,11 +445,11 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.orderBy("W.WORKORDERID");
 
 			// If mapping is enabled, get the XY coordinates
-			// if (this.isEmmMapEnabled()) {
-			// 	sql
-			// 		.column("WOSERVICEADDRESS.LATITUDEY", "WOSERVICEADDRESS.LONGITUDEX")
-			// 		.leftJoin("WOSERVICEADDRESS", "W.WONUM = WOSERVICEADDRESS.WONUM AND W.SITEID = WOSERVICEADDRESS.SITEID");
-			// }
+			if (this.isEmmMapEnabled()) {
+				sql
+					.column("WOSERVICEADDRESS.LATITUDEY", "WOSERVICEADDRESS.LONGITUDEX")
+					.leftJoin("WOSERVICEADDRESS", "W.WONUM = WOSERVICEADDRESS.WONUM AND W.SITEID = WOSERVICEADDRESS.SITEID");
+			}
 			
 			jsonObj = getSqlResultJson("WORKORDER", sql, pagination);
 

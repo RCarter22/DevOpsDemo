@@ -397,7 +397,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		 cacheSqlResultJson(CACHE_KEY_PLUSPCUSTASSOC, sqlCache, CACHE_SIZE_PLUSPCUSTASSOC);
 	}
 
-	// #####################################################################################################################################	//
+		// #####################################################################################################################################	//
 	// The Following Section is for Legacy Synchronization Process
 	// #####################################################################################################################################	//
 
@@ -531,19 +531,23 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		return SUCCESS; 
 	}
 
+	// #####################################################################################################################################	//
+	// The Following Section is for Legacy Synchronization Process
+	// #####################################################################################################################################	//
+
 	/**
-	 * Legacy call to get cached Asset Attribute JSON result
+	 * Legacy call to get cached Domain JSON result
 	 * @return
 	 */
-	@Action(value="getLegacyCachedSpecDomainJson",
+	@Action(value="getLegacyCachedDomainJson",
 			results={
 				@Result(name="success", type="stream", params={"inputName", "jsonResult"})
 			}
 		)
-	public String getLegacyCachedSpecDomainJson() {
+	public String getLegacyCachedDomainJson() {
 		JSONObject jsonObj = new JSONObject();
 		try {
-			jsonObj = getCachedSqlResultJson(CACHE_KEY_SPECDOMAIN, pagination);
+			jsonObj = getCachedSqlResultJson(CACHE_KEY_DOMAIN, pagination);
 			// Insert PAGINATION
 			jsonObj.element("PAGINATION", pagination);
 		} catch(Exception ex) {
@@ -556,7 +560,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		}
 		return SUCCESS; 
 	}
-	
+
 	/**
 	 * Legacy call to get cached PersonGroupTeam JSON result
 	 * @return
@@ -708,38 +712,38 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 		cacheSqlResultJson(CACHE_KEY_INSPQUESTION, sqlCache, CACHE_SIZE_INSPQUESTION);
 	}
 	
-	// public void cacheInspfield() throws Exception {
-	// 	SelectQuery sqlCache = new SelectQuery()
-	// 		.column("INSPFIELDID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM","REVISION","ORGID")
-	// 		.column("DESCRIPTION","FIELDTYPE","SEQUENCE","REQUIRED","METERTYPE","METERNAME","DOCTYPE")
-	// 		.from("INSPFIELD");
+	public void cacheInspfield() throws Exception {
+		SelectQuery sqlCache = new SelectQuery()
+			.column("INSPFIELDID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM","REVISION","ORGID")
+			.column("DESCRIPTION","FIELDTYPE","SEQUENCE","REQUIRED","METERTYPE","METERNAME","DOCTYPE")
+			.from("INSPFIELD");
 		
-	// 	if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){
-	// 		sqlCache.column("VISIBLE");
-	// 	}
-	// 	cacheSqlResultJson(CACHE_KEY_INSPFIELD, sqlCache, CACHE_SIZE_INSPFIELD);
-	// }
+		if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){
+			sqlCache.column("VISIBLE");
+		}
+		cacheSqlResultJson(CACHE_KEY_INSPFIELD, sqlCache, CACHE_SIZE_INSPFIELD);
+	}
 	
-	// public void cacheInspfieldoption() throws Exception {
-	// 	SelectQuery sqlCache = new SelectQuery()
-	// 		.column("INSPFIELDOPTIONID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM")
-	// 		.column("REVISION","ORGID","SEQUENCE","DESCRIPTION")
-	// 		.from("INSPFIELDOPTION");
+	public void cacheInspfieldoption() throws Exception {
+		SelectQuery sqlCache = new SelectQuery()
+			.column("INSPFIELDOPTIONID","INSPFIELDNUM","INSPQUESTIONNUM","INSPFORMNUM")
+			.column("REVISION","ORGID","SEQUENCE","DESCRIPTION")
+			.from("INSPFIELDOPTION");
 			
-	// 	cacheSqlResultJson(CACHE_KEY_INSPFIELDOPTION, sqlCache, CACHE_SIZE_INSPFIELDOPTION);		
-	// }
-	// public void cacheInspcascadeoption() throws Exception {
-	// 	SelectQuery sqlCache = null;
-	// 	if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){ 
-	// 		sqlCache = new SelectQuery()
-	// 		.column("INSPCASCADEOPTIONID","INSPCASCADEOPTIONNUM","INSPFORMNUM","REVISION","ORGID","SITEID")
-	// 		.column("SRCQUESTION","TGTQUESTION","SRCFIELD","TGTFIELD","SRCTXTRESPONSE","VISIBLE","REQUIRED")
-	// 		.from("INSPCASCADEOPTION");
+		cacheSqlResultJson(CACHE_KEY_INSPFIELDOPTION, sqlCache, CACHE_SIZE_INSPFIELDOPTION);		
+	}
+	public void cacheInspcascadeoption() throws Exception {
+		SelectQuery sqlCache = null;
+		if (MaximoHelper.getInstance().getMaximoVersion().getPatch() >= 1){ 
+			sqlCache = new SelectQuery()
+			.column("INSPCASCADEOPTIONID","INSPCASCADEOPTIONNUM","INSPFORMNUM","REVISION","ORGID","SITEID")
+			.column("SRCQUESTION","TGTQUESTION","SRCFIELD","TGTFIELD","SRCTXTRESPONSE","VISIBLE","REQUIRED")
+			.from("INSPCASCADEOPTION");
 			
-	// 		cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION, sqlCache, CACHE_SIZE_INSPCASCADEOPTION);	
-	// 	} else{
-	// 		cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION);
-	// 	}		
-	// }
+			cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION, sqlCache, CACHE_SIZE_INSPCASCADEOPTION);	
+		} else{
+			cacheSqlResultJson(CACHE_KEY_INSPCASCADEOPTION);
+		}		
+	}
 	
 }

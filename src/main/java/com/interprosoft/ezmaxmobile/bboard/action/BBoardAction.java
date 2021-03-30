@@ -56,8 +56,7 @@ public class BBoardAction extends BaseAction {
 		try {
 			clearMboSession(this.OWNERMBO);
 			clearAppSessions();
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
-			setMboAppName(APPNAME);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 		} catch (Exception e){
 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
 			this.addActionError(e.getMessage());
@@ -76,7 +75,7 @@ public class BBoardAction extends BaseAction {
 		try{					
 			clearMboSession(OWNERMBO);
 			clearMboSession("BBADDNEW");
-			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			mbo = this.simpleService.getFakeMbo(OWNERMBO, APPNAME);
 			MboSetRemote mboSetRemote = (MboSetRemote)this.getSessionObject(EMMConstants.CURRENTMBOSET);
 			if (mboSetRemote!=null)
 				mboSetRemote.reset();
@@ -318,7 +317,7 @@ public class BBoardAction extends BaseAction {
 	public String doquickSearch() {
 		try{	
 			// Set default app where clause
-			MboSetRemote mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO).getThisMboSet();
+			MboSetRemote mboSetRemote = this.simpleService.getFakeMbo(OWNERMBO, APPNAME).getThisMboSet();
 			mboSetRemote.setWhere(mboSetRemote.getUserAndQbeWhere());
 			mboSetRemote.resetQbe();			
 			this.mboList = simpleService.quickSearch(mboSetRemote, searchFlds, search, pagination);
