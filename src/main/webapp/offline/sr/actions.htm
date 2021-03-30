@@ -1,26 +1,26 @@
-<div class="ui-sidebar" ng-hide="sr.mbo.isNew()">
+<div id="ACTIONS" class="ui-sidebar" ng-hide="sr.mbo.isNew()">
 	<p class="ui-section" translate="ACTIONS">Actions</p>
 	<ul class="ui-listview ui-inset">
 		<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
 		<li>
 			<a emm-sync>
-				<img src="../../images/sync.png">
+				<span class="emm-sync"></span>
 				<h3 translate="SYNCSERVER">Sync with Server</h3>
-				<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+				<span ng-if="DOCREQUEST"><span class="ui-attachment-request emm-download-1"></span></span>
 				<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a emm-online="sr/view.action?id={{sr.TICKETUID}}">
-				<img src="../../images/online.png">
+				<span class="emm-online"></span>
 				<h3 translate="GOONLINE">Go Back Online</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a emm-sync-res>
-				<img src="../../images/map.png" />
+				<span class="emm-stack-records"></span>
 				<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
 				<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
 				<span class="ui-arrow"></span>
@@ -29,29 +29,37 @@
 		<li class="ui-divider ui-divider-c" translate="ACTIONS">Actions</li>
 	    <li>
 	        <a ng-click="actions.toChangeStatus(sr)">
-	        	<img src="../../images/changestatus.png">
+	        	<span class="emm-status"></span>
 	        	<h3 translate="CHANGESTATUS">Change Status</h3>
 	        	<span class="ui-arrow"></span>
 	        </a>
-	    </li>	
+	    </li>
+	    <li ng-show="userInfo.nativeAppSettings.emmMapEnabled" class="ui-divider ui-divider-c"></li>
+	    <li ng-show="userInfo.nativeAppSettings.emmMapEnabled">
+			<a data-control="map" data-modules='["DS_SRS"]' data-datasources='{{dataSources}}' data-zoom='["DS_SRS", "TICKETUID", "{{sr.TICKETUID}}", "{{sr.LATITUDEY}}", "{{sr.LONGITUDEX}}"]'>
+				<span class="emm-map-location"></span>
+				<h3 translate="OPENMAP">Open Map</h3>
+				<span class="ui-arrow"></span>
+			</a>
+		</li>	    
 	    <li class="ui-divider ui-divider-c"></li>				
 		<li>
 			<a ng-click="actions.takeOwnership(sr)">
-				<img src="../../images/takeownership.png">
+				<span class="emm-owner-select-1"></span>
 				<h3 translate="TAKEOWNERSHIP">Take Ownership</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>	
 		<li>
 			<a ng-click="actions.selectOwner(sr)">
-				<img src="../../images/selectowner.png">
+				<span class="emm-owner-select"></span>
 				<h3 translate="SELECTOWNER">Select Owner</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>		
 	    <li>	        
 	        <a data-control="dialog" href="#createwodialog">
-	        	<img src="../../images/addfollowup.png">
+	        	<span class="emm-add-new"></span>
 	        	<h3 translate="CREATEWO">Create Work Order</h3>
 	        	<span class="ui-arrow"></span>
 	        </a>
@@ -59,28 +67,28 @@
 	    <li class="ui-divider ui-divider-c"></li>		
 		<li ng-show="sr.canAddActuals()">
 			<a ng-click="actions.toLabTrans(sr)">
-				<img src="../../images/labor.png">
+				<span class="emm-labor"></span>
 				<h3 translate="LABOR">Labor</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>
 		<li>
 			<a ng-click="actions.toWorkLog(sr)">
-				<img src="../../images/notes.png">
+				<span class="emm-notes"></span>
 				<h3 translate="WORKLOG.NAME">Work Log</h3>
 				<span class="ui-arrow"></span>
 			</a>
 		</li>			
 		<li>
 			<a ng-click="actions.toAttachments(sr)">
-				<img src="../../images/attachment.png">
+				<span class="emm-attachments"></span>
 				<h3 translate="ATTACHMENTS">Attachments</h3>
 				<span class="ui-arrow"></span>
 			</a>			
 		</li>
 		<li>
 			<a ng-click="actions.toClassify(sr)">
-				<img src="../../images/classification.png">
+				<span class="emm-classification"></span>
 				<h3 translate="CLASSIFICATION">Classification</h3>
 				<span class="ui-arrow"></span>
 			</a>

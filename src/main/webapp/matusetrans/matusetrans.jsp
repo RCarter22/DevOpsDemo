@@ -16,13 +16,13 @@
 	<div class="ui-page ui-inset">
 		<div class="ui-header">
 			<s:if test="mbo.toBeAdded() eq true">
-				<a class="ui-btn-left ui-btn-e" href="cancel.action"><s:text name="global.cancel"/></a>
+				<a class="ui-btn-left ui-btn-e" href="cancel.action"><span class="emm-times-circle"></span></a>
 			</s:if>
 			<s:else>
-				<a class="ui-btn-left" href="goback.action"><s:text name="global.back"/></a>
+				<a class="ui-btn-left" href="goback.action"><span class="emm-chevron-left"></span></a>
 			</s:else>
-			<h3 class="ui-title"><s:text name="ezmaxmobile.inventor"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
+			<h3 class="ui-title"><s:text name="ezmaxmobile.matusetrans"/></h3>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><span class="emm-floppy-o"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 	
@@ -32,7 +32,7 @@
 					<label><s:property value="mbo.getMboValueInfoStatic('WONUM').getTitle()" /></label>
 					<input readonly="true" value="<s:property value="mbo.getString('WONUM')"/>"/>
 				</li>
-				<%-- <li class="ui-field">
+				<li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('ACTUALSTASKID').getTitle()" /></label>
 					<input type="text"
 							id="ACTUALSTASKID" 
@@ -42,7 +42,7 @@
 							onchange="emm.core.setValue(this)"
 					/>	
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="ACTUALSTASKID" data-source="TASKID" data-display="TASKID,DESCRIPTION,SITEID" data-search="TASKID,DESCRIPTION,SITEID"></a>
-				</li> 				 --%>
+				</li> 
 				<li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('LINETYPE').getTitle()" /></label>
 					<input type="text"
@@ -114,10 +114,10 @@
 					<input type="text"
 							id="UNITCOST" 
 							required="<s:property value="mbo.getMboValueData('UNITCOST').isRequired()"/>"
-							readonly
+							readonly="<s:property value="mbo.getMboValueData('UNITCOST').isReadOnly()"/>"
 							value="<s:property value="mbo.getString('UNITCOST')"/>"
 							onchange="emm.core.setValue(this)"
-						
+							data-control="spinner" data-interval="0.25"
 					/>
 				</li>
 				<li class="ui-field">
@@ -131,6 +131,19 @@
 					/>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="BINNUM" data-source="BINNUM" data-display="BINNUM,LOTNUM,CONDITIONCODE,CURBAL,ORGID" data-search="BINNUM"></a>
 				</li>				
+<!-- InterPro Ticket # - 1185 : Comment out the ability to change Transaction type due to Maximo bug.  If user can change to RETURN, Maximo mbo will throw a db error. -->
+<!-- Restrict and default to only "ISSUE" in MatUseTransAction.java -->
+<!-- 				<li class="ui-field"> -->
+<%-- 					<label><s:property value="mbo.getMboValueInfoStatic('ISSUETYPE').getTitle()" /></label> --%>
+<!-- 					<input type="text" -->
+<!-- 							id="ISSUETYPE"  -->
+<%-- 							required="<s:property value="mbo.getMboValueData('ISSUETYPE').isRequired()"/>" --%>
+<%-- 							readonly="<s:property value="mbo.getMboValueData('ISSUETYPE').isReadOnly()"/>" --%>
+<%-- 							value="<s:property value="mbo.getString('ISSUETYPE')"/>" --%>
+<!-- 							onchange="emm.core.setValue(this)" -->
+<!-- 					/> -->
+<!-- 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="ISSUETYPE"></a> -->
+<!-- 				</li> -->
 				<li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('ISSUETYPE').getTitle()" /></label>
 					<input type="text"

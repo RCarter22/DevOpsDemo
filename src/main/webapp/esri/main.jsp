@@ -252,8 +252,8 @@
 		</div>		
         <div class="ui-page">
 			<s:include value="../common/menu.jsp"/>
-            <div id="mapheader" class="ui-header"> 
-                  <a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+            <div id="mapheader" class="ui-header">
+            	  <a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a> 
                   <h3 class="ui-title"><s:text name="ezmaxmobile.esri"/></h3>
             </div>
             <div class="ui-content">           

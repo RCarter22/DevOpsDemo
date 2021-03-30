@@ -41,11 +41,10 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="global.advancedsearch"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
-		
 		<div class="ui-content">
 			<ul class="ui-listview">
 				<li class="ui-field">
@@ -55,6 +54,7 @@
 							value="<s:property value="mbo.getThisMboSet().getQbe('ITEMNUM')"/>"
 							maxlength="<s:property value="mbo.getMboValueData('ITEMNUM').getLength()"/>"
 							onchange="emm.core.setValue(this)"
+							data-barcode
 					/>
 					<a class="ui-arrow" onclick="" href="#itemlookupdialog" data-control="dialog"></a>
 				</li>
@@ -74,15 +74,6 @@
 							onchange="emm.core.setValue(this)"
 					/>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="ITEMSETID" data-source="SETID" data-display="SETID,DESCRIPTION" data-search="SETID,DESCRIPTION"></a>
-				</li>	
-				<li class="ui-field">
-					<label><s:property value="mbo.getMboValueInfoStatic('SITEID').getTitle()" /></label>
-					<input type="text"
-							id="SITEID" 
-							value="<s:property value="mbo.getThisMboSet().getQbe('SITEID')"/>"
-							onchange="emm.core.setValue(this)"
-					/>
-					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="SITEID" data-source="SITEID" data-display="SITEID,DESCRIPTION" data-search="SITEID,DESCRIPTION"></a>
 				</li>					
 				<li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('COMMODITYGROUP').getTitle()" /></label>

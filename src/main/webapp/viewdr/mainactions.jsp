@@ -12,7 +12,7 @@
 		<s:if test="mbo.isAPPR() == false">
 			<li>
 				<a href="../createdr/mrlines.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-					<img src="../images/purchase.png" />
+					<span class="emm-purchase"></span>
 					<h3><s:text name="mr.editrequisition"/></h3>
 					<span class="ui-arrow"></span>
 				</a>
@@ -21,7 +21,7 @@
 		<s:else>
 			<li data-visible="<s:property value="mbo.sigopGranted('STATUS')"/>">
 				<a onclick="emm.core.changeStatus()">
-					<img src="../images/changestatus.png" />
+					<span class="emm-status"></span>
 					<h3><s:text name="global.changestatus"/></h3>
 					<span class="ui-arrow"></span>
 				</a>

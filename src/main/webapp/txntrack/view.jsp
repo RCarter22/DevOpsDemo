@@ -16,7 +16,7 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" href="main.action"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" href="main.action"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="txntrack.detail"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -62,13 +62,13 @@
 					<textarea id="transaction.memo" name="transaction.memo" readonly><s:property value="transaction.memo"/></textarea>
 				</li>
 			</ul>
-			<div class="ui-sidebar">
+			<div id="ACTIONS" class="ui-sidebar">
 				<p class="ui-section"><s:text name="global.actions"/></p>
 				<ul class="ui-listview ui-inset">
 					<s:if test="transaction.syncAction neq 'EMM_FILE_UPLOAD'">					
 						<li>
 							<a href="transaction_changestatus.action?transaction.transactionId=<s:property value="transaction.transactionId"/>" onclick="">
-								<img src="../images/changestatus.png" />
+								<span class="emm-status"></span>
 								<h3><s:text name="global.changestatus"/></h3>
 								<span class="ui-arrow"></span>
 							</a>
@@ -76,14 +76,14 @@
 						<s:if test="transaction.status eq 'ERROR'">
 							<li>
 								<a href="transaction_edit.action?transaction.transactionId=<s:property value="transaction.transactionId"/>" onclick="">
-									<img src="../images/notes.png" />
+									<span class="emm-notes"></span>
 									<h3>Edit and Reprocess</h3>
 									<span class="ui-arrow"></span>
 								</a>
 							</li>
 							<li>
 								<a href="transaction_reprocess.action?transaction.transactionId=<s:property value="transaction.transactionId"/>" onclick="">
-									<img src="../images/sync.png" />
+									<span class="emm-sync"></span>
 									<h3>Reprocess</h3>
 									<span class="ui-arrow"></span>
 								</a>
@@ -93,7 +93,7 @@
 					<s:if test="transaction.status neq 'DELETED'">
 						<li>
 							<a href="transaction_delete.action?transaction.transactionId=<s:property value="transaction.transactionId"/>" onclick="">
-								<img src="../images/trash_large.png" />
+								<span class="emm-trashcan"></span>
 								<h3><s:text name="global.delete"/></h3>
 								<span class="ui-arrow"></span>
 							</a>

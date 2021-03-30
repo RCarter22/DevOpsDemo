@@ -16,12 +16,12 @@
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.doclinks"/></h3>
 			<!-- This displays when the client is not from a Native EZMaxMobile App -->
-			<a class="ui-btn-right" href="browser.action"><img src="../images/plus.png" /></a>
-				<a class="ui-btn-right" onclick="emm.core.ezphoto('<s:property value="ezPhotoURL"/>')"><img alt="camera" src="../images/camera.png" /></a>
-			<!-- <a class="ui-btn-right" data-native="true" data-control="dialog" href="#doctypedialog"><img alt="camera" src="../images/camera.png" /></a> -->
+			<a class="ui-btn-right" href="browser.action"><span class="emm-plus"></span></a>
+<%-- 				<a class="ui-btn-right" onclick="emm.core.ezphoto('<s:property value="ezPhotoURL"/>')"><span class="emm-camera"></span></a> --%>
+			<a class="ui-btn-right" data-native="true" data-control="dialog" href="#doctypedialog"><span class="emm-camera"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 	

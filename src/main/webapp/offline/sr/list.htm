@@ -8,7 +8,7 @@
 		<div class="ui-page">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a class="ui-btn-left" ng-click="goBack()" translate="BACK">Back</a>
+				<a class="ui-btn-left" ng-click="goBack()"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="EZMAXMOBILE.SR">Service Requests</h3>	
 			</div>
 			<div class="ui-statusbar ui-statusbar-f">
@@ -34,6 +34,13 @@
 				</ul>
 				<ul class="ui-listview" ng-show="srs">
 					<li class="ui-divider ui-divider-c" translate="LIST">List</li>
+					<li ng-show="userInfo.nativeAppSettings.emmMapEnabled">
+						<a data-control="map" data-modules='["DS_SRS"]' data-datasources='{{dataSources}}'>
+							<span class="emm-map-location"></span>
+							<h3 translate="OPENMAP">Open Map</h3>
+							<span class="ui-arrow"></span>
+						</a>
+					</li>
 				</ul>
 				<ul pagination class="ui-listview" ng-show="pageService.hasPages()"></ul>
 				<ul class="ui-listview" ng-repeat="sr in srs">
@@ -57,7 +64,7 @@
 			</div>
 		</div>
 	<script type="text/javascript">
-		function MainController($scope, applicationService, srService, paginationService){
+		function MainController($scope, applicationService, srService, paginationService, mapService){
 			var viewName = "offline/sr/list.htm",
 				queryName = "SR",
 				appName = "SR";
@@ -88,6 +95,12 @@
 			});
 			$scope.pageService = paginationService;
 			
+			mapService.init({
+				userInfo : $scope.userInfo
+			});
+			
+			$scope.dataSources = mapService.getOptions().dataSources;
+			
 			$scope.showDetails = srService.showDetails;
 			
 			$scope.quickSearch = function() {
@@ -99,8 +112,7 @@
 			$scope.goBack = function(){
 				$scope.pageService.clearCache();
 				applicationService.goToApp(appName);
-			}
-			
+			}			
 		}
 	</script>
 	</body>

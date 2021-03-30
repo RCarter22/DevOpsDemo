@@ -5,6 +5,7 @@
 <%@page contentType="text/html"%>
 <%@page pageEncoding="UTF-8"%>
 <%@ taglib prefix="s" uri="/struts-tags" %>
+<%@ taglib prefix="e" uri="https://www.owasp.org/index.php/OWASP_Java_Encoder_Project" %>
 
 <!DOCTYPE html>
 <html ng-app="notification" ng-controller="NotificationController">
@@ -18,7 +19,7 @@
 			$(".timeago").livequery(function(){$(this).timeago()});
 			
 			// Hide 'back' button if this view is opened from external application
-			$scope.client = '<s:property value="%{#parameters.client}"/>';
+			$scope.client = '<e:forJavaScript value="${client}" />';
 			$scope.loadingVisible = false;
 			
 			function showNotifications(data){
@@ -33,15 +34,18 @@
 				$('.ui-content').prepend('<div class="ui-statusbar ui-statusbar-a"><h3 class="ui-title"><s:text name="global.errordownloading"/></h3></div>');
 			}
 			
-			var url = 'listhistory.action?refNum=<s:property value="refNum"/>&APIKey=<s:property value="APIKey"/>';
+			var url = 'listhistory.action?refNum=<e:forJavaScript value="${refNum}" />&APIKey=<e:forJavaScript value="${APIKey}" />';
 			
-			$http.get(url)
+			$http.get(url,
+					{headers: { 'Accept': 'application/json; application/json; charset=utf-8' }}
+				)
 				.success(showNotifications)
 				.error(onError);			
 			
 			$scope.openDialog = function(e, n){
-				n.time = $.timeago(n.time);
-				$scope.notification = n;				
+				$scope.notification = null;
+                $scope.notification = angular.copy(n);
+				$scope.notification.time = $.timeago($scope.notification.time);
 				if (!n.hasRead){
 					$http.post('markread.action', {pushId:n.id})
 						.success(function(data){
@@ -63,7 +67,7 @@
 <body>
 	<div class="ui-page">
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()" ng-show="client=='emm'"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()" ng-show="client=='emm'"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="notification.history"/></h3>
 			<a class="ui-btn-right" onclick="window.location.reload();"><s:text name="global.refresh"/></a>			
 			<s:include value="../common/statusbar.jsp"/>

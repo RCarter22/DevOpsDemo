@@ -16,9 +16,9 @@
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="" href="main.action"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="" href="main.action"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.locations"/></h3>
-			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="ASSETNUM"><img src="../images/barcode.png"/></a>
+			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="ASSETNUM"><span class="emm-barcode-3"></span></a>
 			<s:include value="../common/statusbar.jsp"/>			
 		</div>
 		<div class="ui-content">

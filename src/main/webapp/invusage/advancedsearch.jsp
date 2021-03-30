@@ -17,7 +17,7 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="global.advancedsearch"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -40,6 +40,7 @@
 							value="<s:property value="mbo.getThisMboSet().getQbe('INVUSELINE.ITEMNUM')"/>"
 							maxlength="<s:property value="mbo.getMboValueData('INVUSELINE.ITEMNUM').getLength()"/>"
 							onchange="emm.core.setValue(this)"
+							data-barcode
 					/>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="INVUSELINE.ITEMNUM" data-source="ITEMNUM" data-display="ITEMNUM,DESCRIPTION" data-search="ITEMNUM,DESCRIPTION"></a>
 				</li>
@@ -58,6 +59,7 @@
 							id="INVUSELINE.ASSETNUM" 
 							value="<s:property value="mbo.getThisMboSet().getQbe('INVUSELINE.ASSETNUM')"/>"
 							onchange="emm.core.setValue(this)"
+							data-barcode
 					/>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="INVUSELINE.ASSETNUM" data-source="ASSETNUM" data-display="ASSETNUM,DESCRIPTION" data-search="ASSETNUM,DESCRIPTION"></a>
 				</li>
@@ -67,6 +69,7 @@
 							id="INVUSELINE.LOCATION" 
 							value="<s:property value="mbo.getThisMboSet().getQbe('INVUSELINE.LOCATION')"/>"
 							onchange="emm.core.setValue(this)"
+							data-barcode
 					/>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="INVUSELINE.LOCATION" data-source="LOCATION" data-display="LOCATION,DESCRIPTION,ORGID" data-search="LOCATION,DESCRIPTION"></a>
 				</li>	

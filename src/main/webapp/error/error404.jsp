@@ -14,13 +14,14 @@
 	<meta charset="UTF-8">
 	<meta content="minimum-scale=1.0, width=device-width, maximum-scale=0.6667, user-scalable=no" name="viewport" />
 	<title>Error 404</title>
+	<link href="<%= url %>/css/ezmaxmobile-font.css" rel="stylesheet" type="text/css" />
 	<link href="<%= url %>/css/ezmaxmobile.ui-full.min.css" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
 	<div class="ui-page">
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="window.history.back();">Back</a>
+			<a class="ui-btn-left" onclick="window.history.back();"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title">Error 404</h3>
 		</div>
 		<div class="ui-content ui-content-narrow">

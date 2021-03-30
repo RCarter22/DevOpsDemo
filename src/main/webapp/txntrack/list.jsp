@@ -80,8 +80,9 @@
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
+			<a class="ui-btn-left" href="../main.action"><span class="emm-home"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.txntrack"/></h3>
+			<a class="ui-btn-right" onclick="emm.util.formPost('transaction_doReprocessAllErrors.action')"><span class="emm-repeat"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
@@ -98,7 +99,7 @@
 			<ul class="ui-listview" data-native="true">
 				<li>
 					<a onclick="goOffline()">
-						<img src="../images/offline.png" />
+						<span class="emm-offline"></span>
 						<h3><s:text name="ezmaxmobile.offline"/></h3>
 					</a>
 				</li>

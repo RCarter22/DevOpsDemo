@@ -11,7 +11,7 @@
 	<ul class="ui-listview ui-inset">
 		<li>
 			<a href="doclinks.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
-				<img src="../images/attachment.png" />
+				<span class="emm-attachments"></span>
 				<h3><s:text name="global.attachments"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('DOCLINKS').count()"/></span>
 				<span class="ui-arrow"></span>

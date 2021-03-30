@@ -11,19 +11,14 @@
 <head>
 	<title>EZMaxMobile</title>
 	<s:include value="../common/includes.jsp"/>
-	<script type="text/javascript">
-		$(function(){
-			console.log(localStorage.history);
-		});
-	</script>
 </head>
 <body>
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" href="main.action"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" href="main.action"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="inventor.cyclecount"/></h3>
-			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="ITEMNUM"><img src="../images/barcode.png"/></a>
+			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="ITEMNUM"><span class="emm-barcode-3"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">

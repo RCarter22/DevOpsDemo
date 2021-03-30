@@ -29,7 +29,7 @@
 	<div class="ui-page">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.labrep"/></h3>			
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -61,7 +61,7 @@
 				<form id="applyLabor" action="applyLabor.action" method="post">
 					<input type="hidden" name="id"/>
 					<input type="hidden" name="currentAction"/>
-				</form> 				
+				</form>					
 			</s:if>
 			<s:else>
 				<div class="ui-statusbar ui-statusbar-c">	

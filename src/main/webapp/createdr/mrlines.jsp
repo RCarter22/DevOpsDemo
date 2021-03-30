@@ -16,7 +16,7 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.createdr"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -27,10 +27,7 @@
 						<span class="ui-arrow"></span>
 					</a>
 					<h3 class="title">
-						<s:text name="global.steps">
-							<s:param>1</s:param>
-							<s:param>2</s:param>
-						</s:text>
+						Step 2 of 2
 					</h3>
 				</li>
 			</ul>
@@ -111,6 +108,7 @@
 								</table>
 								<span class="ui-arrow"></span>
 							</a>
+							<a class="ui-trash-large" href="deleteline.action?id=<s:property value="getUniqueIDValue()"/>"></a>
 						</li>
 					</s:iterator>
 					<s:include value="../common/pagination.jsp"/>
@@ -132,14 +130,14 @@
 			
 				<li data-visible="">
 					<a href="addline.action">
-						<img src="../images/addnew.png" />
+						<span class="emm-add"></span>
 						<h3><s:text name="global.newrow"/></h3>
 						<span class="ui-arrow"></span>
 					</a>
 				</li>	
 				<li data-visible="">
 					<a href="selectspareparts.action">
-						<img src="../images/addnew.png" />
+						<span class="emm-add"></span>
 						<h3><s:text name="global.selectspareparts"/></h3>
 						<span class="ui-arrow"></span>
 					</a>

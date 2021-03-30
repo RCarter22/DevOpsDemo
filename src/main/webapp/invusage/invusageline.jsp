@@ -17,7 +17,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<h3 class="ui-title"><s:text name="invusage.invusageline"/></h3>
-			<a class="ui-btn-right" onclick="emm.core.back()"><s:text name="global.ok"/></a>
+			<a class="ui-btn-right" onclick="emm.core.back()"><span class="emm-check"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">

@@ -11,42 +11,14 @@
 <head>
 	<title>EZMaxMobile</title>
 	<s:include value="../common/includes.jsp"/>
-	<script type="text/javascript">
-		function openMap(){						
-			// Create new Map object
-			var map = new emm.maps.Map();
-			map.setProvider(emm.maps.Providers.GOOGLE);
-			map.setSidebar('wotrack/map/sidebar_workorder.htm'); 			
-			map.addEventListener('onDataSelected', function(data){
-				location.href = "view.action?id="+data.WORKORDERID;
-			});
-			
-			// Data Source
-			var ds = new emm.maps.DataSource();
-			ds.setKey('WORKORDERS');
-			ds.setTitle('Work Orders');
-			ds.setImage('images/pins/wo.png');
-			ds.setCallout('wotrack/map/callout_workorder.htm')
-			ds.setLatLngFields('LATITUDEY', 'LONGITUDEX');
-			ds.addEventListener('onBoundsChanged', function(bounds){
-				return 'wotrack/ws/workorders.action?' + $.param(bounds);
-			});
-			
-			// Add Data Source to Map
-			map.addDataSource(ds);				
-			
-			// Launch Map
-			emm.maps.launchMap(map);
-		}		
-	</script>
 </head>
 <body>
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.wotrack"/></h3>	
-			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="WONUM,DESCRIPTION,ASSETNUM,LOCATION,LEAD"><img src="../images/barcode.png"/></a>		
+			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="WONUM,DESCRIPTION,ASSETNUM,LOCATION,LEAD"><span class="emm-barcode-3"></span></a>		
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
@@ -54,7 +26,7 @@
 				<s:param name="searchFields">WONUM,DESCRIPTION,ASSETNUM,LOCATION,LEAD</s:param>
 			</s:include>
 			<s:if test="mboList.size > 0">
-				<s:if test="pagination.total > 1">					
+				<s:if test="pagination.total > 1">
 					<ul class="ui-listview">
 						<li class="ui-field ui-sort">
 							<label><s:text name="global.sortby"/></label>
@@ -77,17 +49,19 @@
 				</s:if>					
 				<ul class="ui-listview">			
 					<li class="ui-divider"><s:text name="global.list"/></li>
-<!-- 					<li data-native="true"> -->
-<!-- 						<a onclick="openMap()"> -->
-<!-- 							<img src="../images/map.png" /> -->
-<%-- 							<h3><s:text name="global.openmap"/></h3> --%>
-<%-- 							<span class="ui-arrow"></span> --%>
-<!-- 						</a> -->
-<!-- 					</li> -->
+					<s:if test="isEmmMapEnabled()">
+						<li data-native="true">
+							<a data-control="map" data-modules='["DS_WORKORDERS"]'>
+								<span class="emm-map-location"></span>
+								<h3><s:text name="global.openmap"/></h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+					</s:if>					
 					<s:include value="../common/pagination.jsp"/>
 					<s:iterator value="mboList">
 						<li>
-							<a href="view.action?id=<s:property value="getUniqueIDValue()"/>">
+							<a href="view.action?id=<s:property value="getUniqueIDValue()"/>&mboPrevNextVisible=<s:property value="isMboPrevNextVisible()"/>">
 								<p class="ui-aside"><s:property value="getString('SITEID')"/></p>					
 								<p><strong><s:property value="getString('WONUM')"/> (<s:property value="getString('STATUS')"/>)</strong></p>
 								<h3 class="ui-wrap"><s:property value="getString('DESCRIPTION')"/></h3>
@@ -99,14 +73,11 @@
 										<strong><s:property value="getMboValueInfoStatic('ASSETNUM').getTitle()"/></strong>: <s:property value="getString('ASSETNUM')"/>
 									</div>
 									<div class="ui-column">
-										<strong><s:property value="getMboValueInfoStatic('ALIAS').getTitle()"/></strong>: <s:property value="getString('ALIAS)"/>		
+										<strong><s:property value="getMboValueInfoStatic('PERSONGROUP').getTitle()"/></strong>: <s:property value="getString('PERSONGROUP')"/>
 									</div>
-<!-- 		Hide unused fields							<div class="ui-column"> -->
-<%-- 										<strong><s:property value="getMboValueInfoStatic('PERSONGROUP').getTitle()"/></strong>: <s:property value="getString('PERSONGROUP')"/> --%>
-<!-- 									</div> -->
-<!-- 									<div class="ui-column"> -->
-<%-- 										<strong><s:property value="getMboValueInfoStatic('LEAD').getTitle()"/></strong>: <s:property value="getString('LEAD')"/>		 --%>
-<!-- 									</div> -->
+									<div class="ui-column">
+										<strong><s:property value="getMboValueInfoStatic('LEAD').getTitle()"/></strong>: <s:property value="getString('LEAD')"/>		
+									</div>
 								</div>
 								<div class="ui-row-4">
 									<div class="ui-column">
@@ -115,9 +86,9 @@
 									<div class="ui-column">
 										<strong><s:property value="getMboValueInfoStatic('SCHEDSTART').getTitle()"/></strong>: <s:property value="getString('SCHEDSTART')"/>
 									</div>
-<!-- 									<div class="ui-column"> -->
-<%-- 										<strong><s:property value="getMboValueInfoStatic('WOPRIORITY').getTitle()"/></strong>: <s:property value="getString('WOPRIORITY')"/> --%>
-<!-- 									</div> -->
+									<div class="ui-column">
+										<strong><s:property value="getMboValueInfoStatic('WOPRIORITY').getTitle()"/></strong>: <s:property value="getString('WOPRIORITY')"/>
+									</div>
 									<div class="ui-column">
 												
 									</div>

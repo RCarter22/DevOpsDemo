@@ -31,9 +31,9 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
-			<h3 class="ui-title"><s:text name="global.classification"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
+			<h3 class="ui-title"><s:text name="global.specifications"/></h3>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><span class="emm-floppy-o"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 	
@@ -76,7 +76,7 @@
 					<s:iterator value="mboList">
 						<s:if test="getString('CLASSSPEC.ASSETATTRIBUTE.DATATYPE') == 'NUMERIC'">
 							<li class="ui-field">
-								<label><s:property value="getString('ASSETATTRID')" /></label>
+								<label><s:property value="getString('ASSETATTRID')" /> - <s:property value="getString('CLASSSPEC.ASSETATTRIBUTE.DESCRIPTION')" /></label>
 								<input type="text"
 										id="<s:property value="getUniqueIDValue()"/>" 
 										required="<s:property value="getBoolean('CLASSSPEC.CLASSSPECUSEWITH.MANDATORY')"/>"
@@ -94,7 +94,7 @@
 						</s:if>
 						<s:elseif test="getString('CLASSSPEC.ASSETATTRIBUTE.DATATYPE') == 'ALN'">
 							<li class="ui-field">
-								<label><s:property value="getString('ASSETATTRID')" /></label>
+								<label><s:property value="getString('ASSETATTRID')" /> - <s:property value="getString('CLASSSPEC.ASSETATTRIBUTE.DESCRIPTION')" /></label>
 								<input type="text"
 										id="<s:property value="getUniqueIDValue()"/>" 
 										required="<s:property value="getBoolean('CLASSSPEC.CLASSSPECUSEWITH.MANDATORY')"/>"

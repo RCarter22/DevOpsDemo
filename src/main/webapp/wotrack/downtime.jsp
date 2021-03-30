@@ -16,9 +16,10 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title">Report Downtime</h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" href="dodowntime.action"><s:text name="global.save"/></a>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" href="dodowntime.action"><span class="emm-floppy-o"></span></a>
+			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<ul class="ui-navbar">
 			<li>
@@ -44,8 +45,7 @@
 					<s:text name="wotrack.reportdowntime"/>
 				</a>
 		</ul>	
-		<div class="ui-content">
-			<s:include value="../common/statusbar.jsp"/>
+		<div class="ui-content">			
 			<ul class="ui-listview">
 			    <li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('ASSETNUM').getTitle()" /></label>
@@ -194,7 +194,7 @@
 						/>
 					</li>		
 				    <li>
-						<label for="checkdate2">Acual Start Date</label>
+						<label for="checkdate2">Actual Start Date</label>
 						<input type="radio"
 								id="checkdate2"
 								value="ACTSTART"

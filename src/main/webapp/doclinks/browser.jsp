@@ -15,7 +15,7 @@
 <body>
 	<div class="ui-page ui-inset">
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.doclinks"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -24,6 +24,7 @@
 			<s:form name="myform" action="../doclinks/doUpload.action" method="POST" enctype="multipart/form-data">
 				<s:hidden name="ownerId" value="%{mbo.getUniqueIDValue()}"/>
 				<s:hidden name="ownerTable" value="%{mbo.getName()}"/>
+				<s:hidden name="docType"/>
 				<s:hidden name="currentAction"/>
 				<ul class="ui-listview">
 					<li class="ui-field">

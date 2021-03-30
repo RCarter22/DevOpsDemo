@@ -38,11 +38,11 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<!-- <a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a> -->
-			<a class="ui-btn-left" onclick="" href="list.action"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()" ><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.locations"/></h3>
-			<s:if test="currLochHier==null"><a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a></s:if>
-			<s:if test="currLochHier!=null"><a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save('savenewlocationhierachy.action?id=<s:property value="mbo.getUniqueIdValue()"/>&toAdd=<s:property value="toAdd"/>')"><s:text name="global.save"/></a></s:if>
+			<s:if test="currLochHier==null"><a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><span class="emm-floppy-o"></span></a></s:if>
+			<s:if test="currLochHier!=null"><a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save('savenewlocationhierachy.action?id=<s:property value="mbo.getUniqueIdValue()"/>&toAdd=<s:property value="toAdd"/>')"><span class="emm-floppy-o"></span></a></s:if>
+			<a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
@@ -175,7 +175,7 @@
 							<%-- <li>
 								<a href="listparents.action?id=<s:property value='getMboSet("$CHILDRENZ","LOCHIERARCHY",
 											"systemid=:systemid and location=:location").moveFirst().getUniqueIDValue()'/>">
-									<img src="../images/relatedrecords.png" />
+									<span class="emm-related-records"></span>
 									<h3><s:text name="location.parents"/></h3>
 									<span class="ui-bubble"><s:property value="getMboSet('LOCHIERARCHY_PARENTS').count()"/></span>
 									<span class="ui-arrow"></span>
@@ -183,7 +183,7 @@
 							</li> --%>
 							<li>
 								<a href="listparents.action?id=<s:property value='getUniqueIDValue()'/>">
-									<img src="../images/relatedrecords.png" />
+									<span class="emm-related-records"></span>
 									<h3><s:text name="location.parents"/></h3>
 									<span class="ui-bubble"><s:property value="getMboSet('LOCHIERARCHY_PARENTS').count()"/></span>
 									<span class="ui-arrow"></span>
@@ -192,7 +192,7 @@
 							<%-- <li>
 								<a href="listchildren.action?id=<s:property value='getMboSet("$CHILDRENZ","LOCHIERARCHY",
 											"systemid=:systemid and location=:location").moveFirst().getUniqueIDValue()'/>">
-									<img src="../images/relatedrecords.png" />
+									<span class="emm-related-records"></span>
 									<h3><s:text name="location.children"/></h3>
 									<span class="ui-bubble"><s:property value="getMboSet('LOCHIERARCHY_CHILDREN').count()"/></span>
 									<span class="ui-arrow"></span>
@@ -200,7 +200,7 @@
 							</li> --%>
 							<li>
 								<a href="listchildren.action?id=<s:property value='getUniqueIDValue()'/>">											
-									<img src="../images/relatedrecords.png" />
+									<span class="emm-related-records"></span>
 									<h3><s:text name="location.children"/></h3>
 									<span class="ui-bubble"><s:property value="getMboSet('LOCHIERARCHY_CHILDREN').count()"/></span>
 									<span class="ui-arrow"></span>

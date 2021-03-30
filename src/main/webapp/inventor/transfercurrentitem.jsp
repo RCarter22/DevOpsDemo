@@ -16,9 +16,9 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="inventor.transfercurrentitem"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" href="dotransfercurrentitem.action"><s:text name="global.save"/></a>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" href="dotransfercurrentitem.action"><span class="emm-floppy-o"></span></a>
 			<s:include value="../common/statusbar.jsp"/>			
 		</div>
 	

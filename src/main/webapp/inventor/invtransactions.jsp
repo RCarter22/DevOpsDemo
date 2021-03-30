@@ -16,7 +16,7 @@
 	<div class="ui-page">
 		<s:include value="../common/menu.jsp"/>		
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="inventor.viewtransactions"/></h3>
 		</div>
 		<ul class="ui-navbar">
@@ -218,7 +218,7 @@
 									</div>
 									<div class="ui-row-2">
 										<div class="ui-column">
-											<strong><s:property value="getMboValueInfoStatic('MEMO').getTitle()"/></strong>: <s:property value="getString('REFWO')"/>
+											<strong><s:property value="getMboValueInfoStatic('MEMO').getTitle()"/></strong>: <s:property value="getString('MEMO')"/>
 										</div>
 										<div class="ui-column">
 											

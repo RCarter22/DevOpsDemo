@@ -17,13 +17,13 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<s:if test="mbo.toBeAdded() eq true">
-				<a class="ui-btn-left ui-btn-e" href="cancel.action"><s:text name="global.cancel"/></a>
+				<a class="ui-btn-left ui-btn-e" href="cancel.action"><span class="emm-times-circle"></span></a>
 			</s:if>
 			<s:else>
-				<a class="ui-btn-left" href="goback.action"><s:text name="global.back"/></a>
+				<a class="ui-btn-left" href="goback.action"><span class="emm-chevron-left"></span></a>
 			</s:else>	
 			<h3 class="ui-title"><s:text name="ezmaxmobile.meter"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save('saveMeter.action')"><s:text name="global.save"/></a>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save('saveMeter.action')"><span class="emm-floppy-o"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 	
@@ -75,7 +75,7 @@
 									value="<s:property value="mbo.getString('LASTREADING')"/>"
 							/>
 						</li>
-					<%-- 	<li class="ui-field">
+						<%-- 	<li class="ui-field">
 							<label><s:property value="mbo.getMboValueInfoStatic('NEWREADING').getTitle()" /></label>
 							<input type="text"
 									id="NEWREADING" 
@@ -136,7 +136,7 @@
 						<input type="text"
 								id="AVGCALCMETHOD" 
 								required="<s:property value="mbo.getMboValueData('AVGCALCMETHOD').isRequired()"/>"
-								readonly="true"
+								readonly="<s:property value="mbo.getMboValueData('AVGCALCMETHOD').isReadOnly()"/>"
 								value="<s:property value="mbo.getString('AVGCALCMETHOD')"/>"
 								onchange="emm.core.setValue(this)"
 						/>
@@ -158,7 +158,7 @@
 						<input type="text"
 								id="ROLLDOWNSOURCE" 
 								required="<s:property value="mbo.getMboValueData('ROLLDOWNSOURCE').isRequired()"/>"
-								readonly="true"
+								readonly="<s:property value="mbo.getMboValueData('ROLLDOWNSOURCE').isReadOnly()"/>"
 								value="<s:property value="mbo.getString('ROLLDOWNSOURCE')"/>"
 								onchange="emm.core.setValue(this)"
 						/>

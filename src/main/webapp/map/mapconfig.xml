@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<EZMAXMOBILE_MAP_PROPERTIES>
+
+	<MAP_PROVIDER name="ESRI" id="4">
+		<!-- <BASE_MAP_URL key="baseMapUrl">https://services.arcgisonline.com/arcgis/rest/services/Ocean_Basemap/MapServer</BASE_MAP_URL> -->
+		<BASE_MAP_URL key="baseMapUrl"/>
+		<BASE_MAP_URL_OFFLINE key="offlineBaseMapUrl"/>
+		<VECTOR_BASE_MAP>
+			<ONLINE_USE_VECTOR key="isVectorOnline">true</ONLINE_USE_VECTOR>
+			<OFFLINE_USE_VECTOR key="isVectorOffline">true</OFFLINE_USE_VECTOR>
+		</VECTOR_BASE_MAP>
+		<TILE_DOWNLOAD_MB_LIMIT key="tileMbLimit">500</TILE_DOWNLOAD_MB_LIMIT>
+		<SPATIAL_REFERENCE key="spatialReference">4326</SPATIAL_REFERENCE>
+		<!-- 
+			Get the following SPATIAL_EPSG_NAME and SPATIAL_COORD_REF_PARAM strings from Spatial Reference Site:  http://spatialreference.org 
+			Look for "proj4js" format
+			Default Param Value for 4326 is "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs
+		!-->
+		<SPATIAL_EPSG_NAME>EPSG:4326</SPATIAL_EPSG_NAME>
+		<SPATIAL_COORD_REF_PARAM>+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs</SPATIAL_COORD_REF_PARAM>
+		<INITIAL_POINT key="center">
+			<LATITUDE key="latitude"></LATITUDE>
+			<LONGITUDE key="longitude"></LONGITUDE>
+		</INITIAL_POINT>
+		<ZOOM>
+			<!-- Set intial zoom here -->
+			<INIT_LEVEL key="zoom">14</INIT_LEVEL>
+			<REDO_SEARCH_LIMIT key="refreshZoomLimit">10</REDO_SEARCH_LIMIT>
+			<CLUSTER_LEVELS key="clusterLevels">
+				<LEVEL zoom="18" hash="12"/>
+				<LEVEL zoom="17" hash="9"/>
+				<LEVEL zoom="16" hash="7"/>
+				<LEVEL zoom="15" hash="6"/>
+				<LEVEL zoom="14" hash="5"/>
+				<LEVEL zoom="13" hash="4"/>
+				<LEVEL zoom="12" hash="4"/>
+				<LEVEL zoom="11" hash="3"/>
+				<LEVEL zoom="10" hash="3"/>
+			</CLUSTER_LEVELS>
+		</ZOOM>
+		<MAP_LISTVIEWS>
+			<ONLINE_RESULT_LIST key="onlineListView">map/list.action</ONLINE_RESULT_LIST>
+			<OFFLINE_RESULT_LIST key="offlineListView">offline/map/list.htm</OFFLINE_RESULT_LIST>
+			<LIST_RESULT_LIMIT key="listLimit">2000</LIST_RESULT_LIMIT>
+		</MAP_LISTVIEWS>
+		<MAP_SERVICES key="esriMapServers">
+			<MAP_SERVICE>
+				<SERVICE_ID key="esriServerId">BOSTON</SERVICE_ID>
+				<SERVICE_NAME key="displayName">Boston</SERVICE_NAME>
+				<SERVICE_URL key="url">http://gis.cityofboston.gov/arcgis/rest/services/CityServices/OpenData/MapServer</SERVICE_URL>
+				<LAYER_DEFS key="layers">
+					<LAYER objects_retrieval="true">
+						<NAME key="name">WiFi Locations</NAME>
+						<ID key="id">0</ID>
+						<ALIAS key="alias">WiFi Locations</ALIAS>
+						<FIELDS key="fields">
+							<FIELD>OBJECTID</FIELD>
+							<FIELD>Address</FIELD>
+							<FIELD>Connect_from</FIELD>
+							<FIELD>Neighborhood</FIELD>
+						</FIELDS>
+					</LAYER>
+					<LAYER objects_retrieval="false">
+						<NAME key="name">WiFi Collector</NAME>
+						<ID key="id">1</ID>
+						<FIELDS key="fields">
+							<FIELD>OBJECTID</FIELD>
+							<FIELD>Address</FIELD>
+							<FIELD>Notes</FIELD>
+							<FIELD>Neighborhood</FIELD>
+						</FIELDS>
+					</LAYER>
+					<LAYER objects_retrieval="true">
+						<NAME key="name">Hubway Stations</NAME>
+						<ID key="id">4</ID>
+						<ALIAS key="alias">Bike Stations</ALIAS>
+						<FIELDS key="fields">
+							<FIELD>OBJECTID</FIELD>
+							<FIELD>name</FIELD>
+							<FIELD>terminalName</FIELD>
+							<FIELD>installDate</FIELD>
+						</FIELDS>
+					</LAYER>
+				</LAYER_DEFS>
+			</MAP_SERVICE>
+		</MAP_SERVICES>
+		<DATA_SOURCES key="dataSources">
+			<CATEGORIES key="dsCategories">
+				<CATEGORY>
+					<NAME key="category">DS</NAME>
+					<TITLE key="title">Data Source</TITLE>
+					<USE_FOR_OFFLINE key="canBeUsedOffline">true</USE_FOR_OFFLINE>
+				</CATEGORY>
+			</CATEGORIES>
+			<QUERY_LIMIT key="dataQueryLimit">
+				<RADIUS key="radius">20</RADIUS>
+				<!-- unit value is either METER or MILE_US -->
+				<UNIT_MEASURE key="unit">MILE_US</UNIT_MEASURE>
+			</QUERY_LIMIT>
+			<BASE_DATA_SOURCES>
+				<BASE_DATA_SOURCE>
+					<SOURCE_ID key="dataSourceId">DS_WORKORDERS</SOURCE_ID>
+					<!-- Reference the category defined above in the Categories Section -->
+					<CATEGORY key="category">DS</CATEGORY>
+					<TITLE key="title">Work Orders</TITLE>
+					<IMAGE_SRC key="image">images/pins/wo.png</IMAGE_SRC>
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapWoMbo.action</ACTION_ON_BOUNDS_CHANGE>
+					<ONLINE_CALLOUT key="calloutOnline">map/viewWoPin.action</ONLINE_CALLOUT>
+					<OFFLINE_CALLOUT key="calloutOffline">offline/map/wopin.htm</OFFLINE_CALLOUT>
+					<!-- ====================================================================================================== -->
+					<!-- If using Maximo out of the box Service Address, 														-->
+					<!-- we do not need to include the field names of LATITUDE and LONGITUDE within the COORD_FIELD_NAME block. -->					
+	 				<!-- ====================================================================================================== -->
+	 				<!--	<COORD_FIELD_NAME key="latlngMap"> -->
+ 					<!--		<LATITUDE key="latitude">LATITUDEY</LATITUDE> -->
+ 					<!--		<LONGITUDE key="longitude">LONGITUDEX</LONGITUDE> -->
+ 					<!--	</COORD_FIELD_NAME> -->
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">WONUM,STATUS,WOPRIORITY,WORKTYPE</EXACT>
+						<WILD key="wild">DESCRIPTION,LOCATION,ASSETNUM,STATUS</WILD>
+					</SEARCH_FIELDS>
+				</BASE_DATA_SOURCE>
+				<BASE_DATA_SOURCE>
+					<SOURCE_ID key="dataSourceId">DS_SRS</SOURCE_ID>
+					<!-- Reference the category defined above in the Categories Section -->
+					<CATEGORY key="category">DS</CATEGORY>
+					<TITLE key="title">Service Requests</TITLE>
+					<IMAGE_SRC key="image">images/pins/sr.png</IMAGE_SRC>
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapSrMbo.action</ACTION_ON_BOUNDS_CHANGE>
+					<ONLINE_CALLOUT key="calloutOnline">map/viewSrPin.action</ONLINE_CALLOUT>
+					<OFFLINE_CALLOUT key="calloutOffline">offline/map/srpin.htm</OFFLINE_CALLOUT>
+					<!-- ====================================================================================================== -->
+					<!-- If using Maximo out of the box Service Address, 														-->
+					<!-- we do not need to include the field names of LATITUDE and LONGITUDE within the COORD_FIELD_NAME block. -->					
+	 				<!-- ====================================================================================================== -->
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">TICKETID,LOCATION,REPORTEDPRIORITY,STATUS</EXACT>
+						<WILD key="wild">AFFECTEDPERSON,REPORTEDBY,REPORTEDEMAIL,REPORTEDPHONE,DESCRIPTION</WILD>
+					</SEARCH_FIELDS>
+				</BASE_DATA_SOURCE>
+				<BASE_DATA_SOURCE>
+					<SOURCE_ID key="dataSourceId">DS_ASSETS</SOURCE_ID>
+					<!-- Reference the category defined above in the Categories Section -->
+					<CATEGORY key="category">DS</CATEGORY>
+					<TITLE key="title">Assets</TITLE>
+					<IMAGE_SRC key="image">images/pins/asset.png</IMAGE_SRC>
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapAssetMbo.action</ACTION_ON_BOUNDS_CHANGE>					
+					<ONLINE_CALLOUT key="calloutOnline">map/viewAssetPin.action</ONLINE_CALLOUT>
+					<OFFLINE_CALLOUT key="calloutOffline">offline/map/assetpin.htm</OFFLINE_CALLOUT>
+					<!-- ====================================================================================================== -->
+					<!-- If using Maximo out of the box Service Address, 														-->
+					<!-- we do not need to include the field names of LATITUDE and LONGITUDE within the COORD_FIELD_NAME block. -->					
+	 				<!-- ====================================================================================================== -->
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">ASSETNUM,LOCATION</EXACT>
+						<WILD key="wild">SERIALNUM,DESCRIPTION</WILD>
+					</SEARCH_FIELDS>
+				</BASE_DATA_SOURCE>
+				<BASE_DATA_SOURCE>
+					<SOURCE_ID key="dataSourceId">DS_LOCATIONS</SOURCE_ID>
+					<!-- Reference the category defined above in the Categories Section -->
+					<CATEGORY key="category">DS</CATEGORY>
+					<TITLE key="title">Locations</TITLE>
+					<IMAGE_SRC key="image">images/pins/location.png</IMAGE_SRC>
+					<!-- <ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapLocEsriToMax.action</ACTION_ON_BOUNDS_CHANGE> -->
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapLocMbo.action</ACTION_ON_BOUNDS_CHANGE>
+					<ONLINE_CALLOUT key="calloutOnline">map/viewLocPin.action</ONLINE_CALLOUT>
+					<OFFLINE_CALLOUT key="calloutOffline">offline/map/locpin.htm</OFFLINE_CALLOUT>
+					<!-- ====================================================================================================== -->
+					<!-- If using Maximo out of the box Service Address, 														-->
+					<!-- we do not need to include the field names of LATITUDE and LONGITUDE within the COORD_FIELD_NAME block. -->					
+	 				<!-- ====================================================================================================== -->
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">STATUS</EXACT>
+						<WILD key="wild">LOCATION,DESCRIPTION</WILD>
+					</SEARCH_FIELDS>
+				</BASE_DATA_SOURCE>
+<!-- 				<BASE_DATA_SOURCE> -->
+<!-- 					<SOURCE_ID key="dataSourceId">DS_LABORS</SOURCE_ID> -->
+<!-- 					<CATEGORY key="category">DS</CATEGORY> -->
+<!-- 					<TITLE key="title">Labors</TITLE> -->
+<!-- 					<IMAGE_SRC key="image">images/pins/labor.png</IMAGE_SRC> -->
+<!-- 					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapLaborMbo.action</ACTION_ON_BOUNDS_CHANGE> -->
+<!-- 					<ONLINE_CALLOUT key="calloutOnline">map/viewLaborPin.action</ONLINE_CALLOUT> -->
+<!-- 					<OFFLINE_CALLOUT key="calloutOffline"></OFFLINE_CALLOUT> -->
+					<!-- ====================================================================================================== -->
+					<!-- If using Maximo out of the box Service Address, 														-->
+					<!-- we do not need to include the field names of LATITUDE and LONGITUDE within the COORD_FIELD_NAME block. -->					
+	 				<!-- ====================================================================================================== -->
+<!--  					<COORD_FIELD_NAME key="latlngMap"> -->
+<!-- 						<LATITUDE key="latitude">LATITUDEY</LATITUDE> -->
+<!-- 						<LONGITUDE key="longitude">LONGITUDEX</LONGITUDE> -->
+<!-- 					</COORD_FIELD_NAME> -->
+<!-- 					<SEARCH_FIELDS key="search"> -->
+<!-- 						<EXACT key="exact">LABORCODE</EXACT> -->
+<!-- 						<WILD key="wild"></WILD> -->
+<!-- 					</SEARCH_FIELDS> -->
+<!-- 				</BASE_DATA_SOURCE> -->
+			</BASE_DATA_SOURCES>
+			<SUPPORTED_SC_TABLES_SOURCES>
+				<SC_TABLE_SOURCE>
+					<!-- Table name is the name of the MBO MAIN TABLE NAME for the start center app -->
+					<MAIN_TABLE_NAME key="scMainTblName">WORKORDER</MAIN_TABLE_NAME>
+					<IMAGE_SRC key="image">images/pins/wo.png</IMAGE_SRC>
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapScPortlet.action</ACTION_ON_BOUNDS_CHANGE>	
+					<ONLINE_CALLOUT key="calloutOnline">map/viewWoPin.action</ONLINE_CALLOUT>
+					<!-- ====================================================================================================== -->
+					<!-- If using Maximo out of the box Service Address, 														-->
+					<!-- we do not need to include the field names of LATITUDE and LONGITUDE within the COORD_FIELD_NAME block. -->					
+	 				<!-- ====================================================================================================== -->
+					<!-- 	<COORD_FIELD_NAME key="latlngMap"> -->
+					<!-- 		<LATITUDE key="latitude">LATITUDEY</LATITUDE> -->
+					<!-- 		<LONGITUDE key="longitude">LONGITUDEX</LONGITUDE> -->
+					<!-- 	</COORD_FIELD_NAME> -->
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">WONUM,STATUS,WOPRIORITY,WORKTYPE</EXACT>
+						<WILD key="wild">DESCRIPTION,LOCATION,ASSETNUM,STATUS</WILD>
+					</SEARCH_FIELDS>
+				</SC_TABLE_SOURCE>
+				<SC_TABLE_SOURCE>
+					<MAIN_TABLE_NAME key="scMainTblName">SR</MAIN_TABLE_NAME>
+					<IMAGE_SRC key="image">images/pins/sr.png</IMAGE_SRC>
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapScPortlet.action</ACTION_ON_BOUNDS_CHANGE>
+					<ONLINE_CALLOUT key="calloutOnline">map/viewSrPin.action</ONLINE_CALLOUT>
+					<!-- If using Maximo out of the box Service Address, we do not need to include the field names for LATITUDE and LONGITUDE -->					
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">TICKETID,LOCATION,REPORTEDPRIORITY,STATUS</EXACT>
+						<WILD key="wild">AFFECTEDPERSON,REPORTEDBY,REPORTEDEMAIL,REPORTEDPHONE,DESCRIPTION</WILD>
+					</SEARCH_FIELDS>
+				</SC_TABLE_SOURCE>
+				<SC_TABLE_SOURCE>
+					<MAIN_TABLE_NAME key="scMainTblName">ASSET</MAIN_TABLE_NAME>
+					<IMAGE_SRC key="image">images/pins/asset.png</IMAGE_SRC>
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapScPortlet.action</ACTION_ON_BOUNDS_CHANGE>
+					<ONLINE_CALLOUT key="calloutOnline">map/viewAssetPin.action</ONLINE_CALLOUT>
+					<!-- If using Maximo out of the box Service Address, we do not need to include the field names for LATITUDE and LONGITUDE -->					
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">ASSETNUM,LOCATION</EXACT>
+						<WILD key="wild">SERIALNUM,DESCRIPTION</WILD>
+					</SEARCH_FIELDS>
+				</SC_TABLE_SOURCE>
+				<SC_TABLE_SOURCE>
+					<MAIN_TABLE_NAME key="scMainTblName">LOCATIONS</MAIN_TABLE_NAME>
+					<IMAGE_SRC key="image">images/pins/location.png</IMAGE_SRC>
+					<ACTION_ON_BOUNDS_CHANGE key="onBoundsChanged">map/mapScPortlet.action</ACTION_ON_BOUNDS_CHANGE>
+					<ONLINE_CALLOUT key="calloutOnline">map/viewLocPin.action</ONLINE_CALLOUT>
+					<!-- If using Maximo out of the box Service Address, we do not need to include the field names for LATITUDE and LONGITUDE -->					
+					<SEARCH_FIELDS key="search">
+						<EXACT key="exact">STATUS</EXACT>
+						<WILD key="wild">LOCATION,DESCRIPTION</WILD>
+					</SEARCH_FIELDS>
+				</SC_TABLE_SOURCE>
+			</SUPPORTED_SC_TABLES_SOURCES>
+		</DATA_SOURCES>
+		<DROPPED_PINS>
+			<OBJECT_PIN key="featureLayerCallout">
+				<IMAGE_SRC key="image">images/pins/droppedpin.png</IMAGE_SRC>
+				<ONLINE_CALLOUT key="featureLayerCalloutOnline">map/viewDroppedPin.action</ONLINE_CALLOUT>
+				<OFFLINE_CALLOUT key="featureLayerCalloutOffline">offline/map/droppedpin.htm</OFFLINE_CALLOUT>
+			</OBJECT_PIN>
+			<RANDOM_PIN key="pinDropCallout">
+				<IMAGE_SRC key="image">images/pins/droppedpin.png</IMAGE_SRC>
+				<ONLINE_CALLOUT key="pinDropCalloutOnline">map/viewDroppedPin.action</ONLINE_CALLOUT>
+				<OFFLINE_CALLOUT key="pinDropCalloutOffline">offline/map/droppedpin.htm</OFFLINE_CALLOUT>
+			</RANDOM_PIN>
+		</DROPPED_PINS> 
+	</MAP_PROVIDER>
+	
+</EZMAXMOBILE_MAP_PROPERTIES>

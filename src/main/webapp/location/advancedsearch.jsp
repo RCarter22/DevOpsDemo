@@ -17,7 +17,7 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="global.advancedsearch"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -31,6 +31,7 @@
 							value="<s:property value="mbo.getThisMboSet().getQbe('LOCATION')"/>"
 							maxlength="<s:property value="mbo.getMboValueData('LOCATION').getLength()"/>"
 							onchange="emm.core.setValue(this)"
+							data-barcode
 					/>					
 				</li>				
 				<li class="ui-field-block">
@@ -42,15 +43,15 @@
 					><s:property value="mbo.getThisMboSet().getQbe('DESCRIPTION')"/></textarea>
 				</li>
 				<li class="ui-field">
-					<label><s:property value="mbo.getMboValueInfoStatic('LOCHIERARCHY.PARENT').getTitle()" /></label>
+					<label><s:property value="mbo.getMboValueInfoStatic('LOCHIERLOCONLY.PARENT').getTitle()" /></label>
 					<input type="text"
-							id="PARENT" 
-							value="<s:property value="mbo.getThisMboSet().getQbe('LOCHIERARCHY.PARENT')"/>"
+							id="LOCHIERLOCONLY.PARENT" 
+							value="<s:property value="mbo.getThisMboSet().getQbe('LOCHIERLOCONLY.PARENT')"/>"
 							onchange="emm.core.setValue(this)"
 					/>
-					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="LOCHIERARCHY.PARENT" data-source="LOCATION" data-display="LOCATION,DESCRIPTION,TYPE,SITEID" data-search="LOCATION,DESCRIPTION"></a>
+					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="LOCHIERLOCONLY.PARENT" data-source="LOCATION" data-display="LOCATION,DESCRIPTION,TYPE,SITEID" data-search="LOCATION,DESCRIPTION"></a>
 				</li>	
-					<li class="ui-field">
+				<li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('TYPE').getTitle()" /></label>
 					<input type="text"
 							id="TYPE" 

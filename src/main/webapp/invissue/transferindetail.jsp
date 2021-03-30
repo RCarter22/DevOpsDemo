@@ -17,7 +17,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">			
 			<h3 class="ui-title"><s:text name="invissue.transferin"/></h3>
-			<a class="ui-btn-right" href="transferin.action?id=<s:property value="mbo.getMboSet('LOCATIONS').getMbo(0).getUniqueIDValue()"/>"><s:text name="global.ok"/></a>
+			<a class="ui-btn-right" href="transferin.action?id=<s:property value="mbo.getMboSet('LOCATIONS').getMbo(0).getUniqueIDValue()"/>"><span class="emm-check"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">

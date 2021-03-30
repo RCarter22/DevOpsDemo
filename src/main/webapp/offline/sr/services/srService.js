@@ -130,12 +130,13 @@ angular.module('emm').factory('srService', function(doclinksService, wotrackServ
 		
 	};
 	
-	PUBLIC.showDetails = function(sr, message){
+	PUBLIC.showDetails = function(sr, message, fromMap){
 		var statusListSql = "SELECT * FROM DOMAIN WHERE DOMAINID = 'SRSTATUS'";
 		EMMServer.DB.Select()
 			.addQuery("SR", "SELECT * FROM SR WHERE TICKETUID='" + sr.TICKETUID + "'")
 			.addQuery("SRSTATUS", statusListSql)
 			.addMessage(message)
+			.addEZWebMap(fromMap)
 			.submit("offline/sr/sr.htm", true);
 	};
 	
@@ -249,15 +250,19 @@ angular.module('emm').factory('srService', function(doclinksService, wotrackServ
 				return;
 			}			
 			
-			var siteId = sr.SITEID;
-			if(sr.ASSETSITEID)
-				siteId = sr.ASSETSITEID;
-			
-			if (siteId == null || siteId == ''){
-				alert(getText('SITEREQUIRED', null, 'Site is required to create Work Order.'));				
+			// Error out when both SITEID and ASSETSITEID are missing
+			if (!sr.SITEID && !sr.ASSETSITEID){
+				alert(getText('SITEREQUIRED', null, 'Site is required to create Work Order.'));
 				return;
 			}	
-
+				
+			var siteId = sr.SITEID;
+			var orgId = sr.ORGID;
+			if(sr.ASSETSITEID) {
+				siteId = sr.ASSETSITEID;
+				orgId = sr.ASSETORGID;
+			}
+			
 			var wo = new WorkOrder();			
 			
 			wo.createNew({
@@ -269,7 +274,7 @@ angular.module('emm').factory('srService', function(doclinksService, wotrackServ
 				PROBLEMCODE: sr.PROBLEMCODE,
 				FAILURECODE: sr.FAILURECODE,				
 				SITEID: siteId,
-				ORGID: options.userInfo.orgId,
+				ORGID: orgId,
 				ISTASK: '0',
 				ORIGRECORDID: sr.TICKETID,
 				ORIGRECORDCLASS: 'SR'

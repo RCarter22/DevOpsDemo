@@ -8,7 +8,7 @@
 		<div class="ui-page">
 			<emm:include value="../common/menu.htm"/>
 			<div class="ui-header ui-header-b">
-				<a class="ui-btn-left" ng-click="actions.goBack()" translate="BACK">Back</a>
+				<a class="ui-btn-left" ng-click="actions.goBack()"><span class="emm-chevron-left"></span></a>
 				<h3 class="ui-title" translate="EZMAXMOBILE.SR">Service Requests</h3>	
 			</div>
 			<div class="ui-statusbar ui-statusbar-f">
@@ -24,7 +24,7 @@
 				<ul class="ui-listview">
 					<li>
 						<a ng-click="actions.createNew()">
-							<img src="../../images/addnew.png">
+							<span class="emm-add"></span>
 							<h3 translate="CREATESR">Create Service Request</h3>
 							<span class="ui-arrow"></span>
 						</a>
@@ -32,7 +32,7 @@
 					<li class="ui-divider ui-divider-c"></li>			
 					<li>
 						<a ng-click="newList()">
-							<img src="../../images/sr.png">
+							<span class="emm-service-request"></span>
 							<h3 translate="SR.NEWREQS">New Service Requests</h3>
 							<span class="ui-bubble">{{NEWSRTOTAL}}</span>
 							<span class="ui-arrow"></span>
@@ -40,7 +40,7 @@
 					</li>				
 					<li>
 						<a ng-click="activeList()">
-							<img src="../../images/sr.png">
+							<span class="emm-service-request"></span>
 							<h3 translate="SR.ACTIVEREQS">Active Service Requests</h3> 
 							<span class="ui-bubble">{{ACTIVESRTOTAL}}</span>
 							<span class="ui-arrow"></span>
@@ -49,23 +49,23 @@
 					<li class="ui-divider ui-divider-c" translate="SYNCHRONIZATION">Synchronization</li>
 					<li>
 						<a emm-sync>
-							<img src="../../images/sync.png">
+							<span class="emm-sync"></span>
 							<h3 translate="SYNCSERVER">Sync with Server</h3>
-							<span ng-if="DOCREQUEST"><img class="ui-attachment-request" ng-src="../../images/download.png" /></span>
+							<span ng-if="DOCREQUEST"><span class="ui-attachment-request emm-download-1"></span></span>
 							<span class="ui-badge ui-badge-b" ng-show="TXNCOUNT != null">{{TXNCOUNT}}</span>
 							<span class="ui-arrow"></span>
 						</a>
 					</li>
 					<li>
 						<a emm-online>
-							<img src="../../images/online.png">
+							<span class="emm-online"></span>
 							<h3 translate="GOONLINE">Go Back Online</h3>
 							<span class="ui-arrow"></span>
 						</a>
 					</li>
 					<li>
 						<a emm-sync-res>
-							<img src="../../images/map.png" />
+							<span class="emm-stack-records"></span>
 							<h3 translate="EZMAXMOBILE.TXNTRACK">Sync Resolution</h3>
 							<span class="ui-badge ui-badge-a" ng-show="TXNERRORCOUNT != null">{{TXNERRORCOUNT}}</span>
 							<span class="ui-arrow"></span>

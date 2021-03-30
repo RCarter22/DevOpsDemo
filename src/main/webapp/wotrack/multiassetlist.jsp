@@ -16,10 +16,10 @@
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="global.multiassetloc"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
-			<a class="ui-btn-right" href="addmultiasset.action"><img src="../images/plus.png"/></a>				
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><span class="emm-floppy-o"></span></a>
+			<a class="ui-btn-right" href="addmultiasset.action"><span class="emm-plus"></span></a>				
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
@@ -41,7 +41,7 @@
 								<p><s:property value="getMboValueInfoStatic('SEQUENCE').getTitle()"/>: <s:property value="getString('SEQUENCE')"/></p>											
 								<span class="ui-arrow"></span>
 							</a>
-							<a onclick="emm.core.toggleCheck(this)" data-mbo="MULTIASSETLOCCI" data-field="PROGRESS" data-id="<s:property value="getUniqueIDValue()"/>" class="ui-checklistbutton" data-checked="<s:property value="getBoolean('PROGRESS')"/>"></a>
+							<a onclick="emm.core.toggleCheck(this)" data-mbo="MULTIASSETLOCCISET" data-field="PROGRESS" data-id="<s:property value="getUniqueIDValue()"/>" class="ui-checklistbutton" data-checked="<s:property value="getBoolean('PROGRESS')"/>"></a>
 						</li>
 					</s:iterator>
 					<s:include value="../common/pagination.jsp"/>

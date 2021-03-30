@@ -17,13 +17,8 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<h3 class="ui-title"><s:text name="mr.mrline"/></h3>
-			<s:if test="mbo.isNew()">
-				<a class="ui-btn-left" href="deleteline.action?id=<s:property value="mbo.getUniqueIDValue()"/>"><s:text name="global.cancel"/></a>
-			</s:if>
-			<s:else>
-				<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
-			</s:else>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save('validateline.action?id=<s:property value="mbo.getUniqueIDValue()"/>')"><span class="emm-check"></</span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
@@ -116,11 +111,6 @@
 					/>
 				</li>				
 			</ul>
-			<s:if test="!mbo.isNew()">
-				<div class="ui-btn-container">
-					<a class="ui-btn-c" href="deleteline.action?id=<s:property value="mbo.getUniqueIDValue()"/>"><s:text name="global.delete"/></a>
-				</div>
-			</s:if>
 <%-- 			<s:include value="actions.jsp"/> --%>
 		</div>
 	</div>

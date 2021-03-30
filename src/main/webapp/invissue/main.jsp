@@ -34,7 +34,7 @@
 	<div class="ui-page">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
+			<a class="ui-btn-left" href="../main.action"><span class="emm-home"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.invissue"/></h3>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
@@ -44,14 +44,14 @@
 			    <ul class="ui-listview">
 					<li>
 						<a href="myqueries.action">
-							<img src="../images/other.png" />
+							<span class="emm-other"></span>
 							<h3><s:text name="global.mysavedqueries"/></h3>
 							<span class="ui-arrow"></span>
 						</a>				
 					</li>
 					<li>
 						<a href="queries.action">
-							<img src="../images/other.png" />
+							<span class="emm-other"></span>
 							<h3><s:text name="global.allsavedqueries"/></h3>
 							<span class="ui-arrow"></span>
 						</a>				
@@ -81,21 +81,21 @@
 					<li class="ui-divider"><s:text name="global.offlinemode"/></li>
 					<li data-native="true">
 						<a onclick="EMMServer.Offline.sync();">
-							<img src="../images/sync.png" />
+							<span class="emm-sync"></span>
 							<h3><s:text name="global.syncserver"/></h3>
 							<span class="ui-arrow"></span>
 						</a>	
 					</li>
 					<li data-native="true">
 						<a onclick="goOffline()">
-							<img src="../images/offline.png" />
+							<span class="emm-offline"></span>
 							<h3><s:text name="ezmaxmobile.offline"/></h3>
 							<span class="ui-arrow"></span>
 						</a>
 					</li>
 					<li>
 						<a href="../txntrack/main.action">
-							<img src="../images/map.png" />
+							<span class="emm-stack-records"></span>
 							<h3><s:text name="ezmaxmobile.txntrack"/></h3>
 							<span class="ui-badge"><s:property value="getTransactionErrorCount()"/></span>
 							<span class="ui-arrow"></span>

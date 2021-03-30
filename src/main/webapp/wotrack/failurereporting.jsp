@@ -11,18 +11,41 @@
 <head>
 	<title>EZMaxMobile</title>
 	<s:include value="../common/includes.jsp"/>
+	<script type="text/javascript">
+		deleteLine = function(line){
+			$('#saveButton').addClass("ui-btn-c");
+			if(line == 'remedy'){
+				$('#FR2CODE').addClass('ui-tobedeleted');
+				$('#clearFailureFld').val('FR2CODE');
+			}
+			if(line == 'cause'){
+				$('#FR1CODE').addClass('ui-tobedeleted');
+				$('#FR2CODE').addClass('ui-tobedeleted');
+				$('#clearFailureFld').val('FR1CODE');
+			}
+			if(line == 'problem'){
+				$('#PROBLEMCODE').addClass('ui-tobedeleted');
+				$('#FR1CODE').addClass('ui-tobedeleted');
+				$('#FR2CODE').addClass('ui-tobedeleted');
+				$('#clearFailureFld').val('PROBLEMCODE');
+			}
+		}
+	</script>
 </head>
 <body>
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="global.failurecodes"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
+			<a id="saveButton" class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="$('#failurereport').submit()"><span class="emm-floppy-o"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 	
 		<div class="ui-content">
+			<s:form id="failurereport" action="savefailurereport" method="post">
+				   <input type="hidden" id="clearFailureFld" name="clearFailureFld" value="<s:property value="clearFailureFld"/>"/>
+			</s:form>		
 			<ul class="ui-listview">
 			   <li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('FAILURECODE').getTitle()" /></label>
@@ -85,6 +108,7 @@
 								readonly="true"
 								value="<s:property value="mbo.getString('PROBLEMCODE')"/>"
 							/>
+							<a class="ui-trash-large" onclick="deleteLine('problem')"></a>
 						</s:else>
 					</li>
 				</s:if>
@@ -103,6 +127,7 @@
 								readonly="true"
 								value="<s:property value="mbo.getString('FR1CODE')"/>"
 							/>
+							<a class="ui-trash-large" onclick="deleteLine('cause')"></a>
 						</s:else>
 					</li>
 				</s:if>
@@ -121,6 +146,7 @@
 								readonly="true"
 								value="<s:property value="mbo.getString('FR2CODE')"/>"
 							/>
+							<a class="ui-trash-large" onclick="deleteLine('remedy')"></a>
 						</s:else>
 					</li>
 				</s:if>	

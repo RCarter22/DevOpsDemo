@@ -17,7 +17,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">			
 			<h3 class="ui-title"><s:text name="invissue.issueitem"/></h3>
-			<a class="ui-btn-right" href="issue.action?id=<s:property value="mbo.getOwner().getUniqueIDValue()"/>"><s:text name="global.ok"/></a>
+			<a class="ui-btn-right" href="issue.action?id=<s:property value="mbo.getOwner().getUniqueIDValue()"/>"><span class="emm-check"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">

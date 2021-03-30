@@ -10,61 +10,7 @@
 <html>
 <head>
 	<title>EZMaxMobile</title>
-	<s:include value="../common/includes.jsp"/>	
-	<script type="text/javascript">
-		function mapLocationLookup(){			
-			// Create new Map object
-			var map = new emm.maps.Map();
-			map.setProvider(emm.maps.Providers.GOOGLE);
-			map.setSidebar('/wotrack/map/sidebar_location.htm');
-			map.addEventListener('onDataSelected', function(data){
-				$('#LOCATION').val(data.LOCATION).change();
-			});
-			
-			// Data Source
-			var ds = new emm.maps.DataSource();
-			ds.setKey('LOCATIONS');
-			ds.setTitle('Locations');
-			ds.setImage('/images/pins/location.png');
-			ds.setCallout('/wotrack/map/callout_location.htm')
-			ds.setLatLngFields('LATITUDEY', 'LONGITUDEX');
-			ds.addEventListener('onBoundsChanged', function(bounds){
-				return '/wotrack/ws/locationlookup.action?' + $.param(bounds);
-			});
-			
-			// Add Data Source to Map
-			map.addDataSource(ds);				
-			
-			// Launch Map
-			emm.maps.launchMap(map);
-		}		
-		function mapAssetLookup(){			
-			// Create new Map object
-			var map = new emm.maps.Map();
-			map.setProvider(emm.maps.Providers.GOOGLE);
-			map.setSidebar('/wotrack/map/sidebar_asset.htm');			
-			map.addEventListener('onDataSelected', function(data){
-				$('#ASSETNUM').val(data.ASSETNUM).change();
-			});			
-			
-			// Data Source
-			var ds = new emm.maps.DataSource();
-			ds.setKey('ASSETS');
-			ds.setTitle('Assets');
-			ds.setImage('/images/pins/asset.png');
-			ds.setCallout('/wotrack/map/callout_asset.htm')
-			ds.setLatLngFields('LATITUDEY', 'LONGITUDEX');
-			ds.addEventListener('onBoundsChanged', function(bounds){
-				return '/wotrack/ws/assetlookup.action?' + $.param(bounds);
-			});
-			
-			// Add Data Source to Map
-			map.addDataSource(ds);				
-						
-			// Launch Map
-			emm.maps.launchMap(map);
-		}			
-	</script>
+	<s:include value="../common/includes.jsp"/>
 	<s:if test="offlineModeEnabled eq true">
 		<s:if test="!mbo.isNew()">
 			<script type="text/javascript">
@@ -145,27 +91,40 @@
 				});
 			</script>
 		</s:if>			
-	</s:if>	
+	</s:if> 
 </head>
 
 <body>
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-        	<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+        	<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
             <h3 class="ui-title"><s:text name="ezmaxmobile.wotrack"/></h3>
             <%-- <s:if test="!mbo.isNew()">                
-            	<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="saveOrPrepBounce();"><s:text name="global.save"/></a>
+            	<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="saveOrPrepBounce();"><span class="emm-floppy-o"></span></a>
 			</s:if>
             <s:else> --%>
-            	<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><s:text name="global.save"/></a>
+				<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><span class="emm-floppy-o"></span></a>
             <%-- </s:else> --%>
+            <a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>     
+<!-- 	        <div class="ui-subheader" > -->
+<%-- 				<button onclick="emm.core.doChangeStatus('APPR')" title="Approve Work Order"><span class="emm-check-circle-o"></span></button> --%>
+<%-- 				<button onclick="emm.core.doChangeStatus('INPRG')" title="Initiate Work Order"><span class="emm-play-circle"></span></button> --%>
+<%-- 				<button onclick="emm.core.doChangeStatus('COMP')" title="Complete Work Order"><span class="emm-check-circle"></span></button> --%>
+<%-- 				<button onclick="window.location.href='../worklog/add.action'" title="Add Worklog"><span class="emm-files-o"></span></button> --%>
+<%-- 	       		<s:if test="mbo.getMboSet('$MYACTIVETIMER', 'LABTRANS', \"refwo=:wonum and siteid=:siteid and timerstatus in (select value from synonymdomain where domainid = 'TIMERSTATUS' and maxvalue = 'ACTIVE') and laborcode = (select laborcode from labor where personid = :&PERSONID& and orgid = :orgid)\").isEmpty()"> --%>
+<%-- 	        		<button onclick="window.location.href='starttimer.action'" title="Start Timer"><span class="emm-clock-o"></span></button> --%>
+<%-- 	        	</s:if> --%>
+<%-- 	        	<s:else> --%>
+<%-- 					<button class="ui-btn-c" onclick="window.location.href='stoptimer.action'" title="Stop Timer"><span class="emm-clock-o"></span></button> --%>
+<%-- 				</s:else> --%>
+<!-- 	        </div>  -->
             <s:include value="../common/statusbar.jsp"/>
         </div>
 		
 		<div class="ui-content">			
 			
-			<ul class="ui-listview ui-inset" data-visible="<s:property value='!mbo.isNew()'/>">
+			<ul class="ui-listview ui-inset" data-visible="<s:property value='!mbo.isNew() && isMboPrevNextVisible()'/>">
 				<li class="ui-pagination">	
 					<a class="ui-pagination-prev" href="#" onclick="emm.core.movePrev('prevwo.action?id=<s:property value="mbo.getUniqueIDValue()"/>')">	
 						<span class="ui-arrow"></span>							
@@ -412,6 +371,20 @@
 					<p><s:property value="mbo.getString('JOBPLAN.DESCRIPTION')"/></p>
 					<a class="ui-arrow" onclick="emm.core.lookup(this)" data-field="JPNUM" data-source="JPNUM" data-display="JPNUM,DESCRIPTION" data-search="JPNUM,DESCRIPTION"></a>
 				</li>	
+				<s:if test="isInspectionEnabled()">
+					<li class="ui-field ui-field-auto ui-details">
+						<label><s:property value="mbo.getMboValueInfoStatic('INSPFORMNUM').getTitle()" /></label>
+						<input type="text"
+								id="INSPFORMNUM" 
+								required="<s:property value="mbo.getMboValueData('INSPFORMNUM').isRequired()"/>"
+								readonly="<s:property value="mbo.getMboValueData('INSPFORMNUM').isReadOnly()"/>"
+								value="<s:property value="mbo.getString('INSPFORMNUM')"/>"
+								onchange="emm.core.setValue(this)"
+						/>
+						<p><s:property value="mbo.getString('INSPECTIONFORM.NAME')"/></p>
+						<a class="ui-arrow" data-control="dialog" href="#inspectionlookupdialog"></a>
+					</li>
+				</s:if>
 				<li class="ui-field">
 					<label><s:property value="mbo.getMboValueInfoStatic('FAILURECODE').getTitle()" /></label>
 					<input type="text"
@@ -630,6 +603,56 @@
 			</div>
 		</div>
 	</div>
+	<div id="event" class="ui-dialog">
+		<div class="ui-container">
+			<div class="ui-header">
+				<h1 class="ui-title"><s:text name="event.prompt"/></h1>
+			</div>			
+			<div class="ui-content">
+				<form action="addevent.action" method="post">							
+					<ul class="ui-listview">
+						<s:if test="mbo.getString('UXLEAD.PRIMARYEMAIL') == null or mbo.getString('UXLEAD.PRIMARYEMAIL') eq ''">
+							<li class="ui-callout ui-message-a"><s:text name="event.missingemail"/></li>
+						</s:if>
+						<li class="ui-field">
+							<label><s:property value="mbo.getMboValueInfoStatic('LEAD').getTitle()" /></label>
+							<p><s:property value="mbo.getMboSet('$WOLEAD', 'PERSON', 'PERSONID = :LEAD').getMbo(0).getString('DISPLAYNAME')"/></p>
+							<s:if test="mbo.getString('UXLEAD.PRIMARYEMAIL') != null and mbo.getString('UXLEAD.PRIMARYEMAIL') neq ''">
+								<input type="checkbox" name="personOptions"
+									value="<s:property value="mbo.getString('UXLEAD.PRIMARYEMAIL')"/>,<s:property value="mbo.getString('UXLEAD.DISPLAYNAME')"/>,<s:property value="mbo.getString('LEAD')"/>"/>
+							</s:if>
+						</li>
+						<s:if test="mbo.getString('UXSUPERVISOR.PRIMARYEMAIL') == null or mbo.getString('UXSUPERVISOR.PRIMARYEMAIL') eq ''">
+							<li class="ui-callout ui-message-a"><s:text name="event.missingemail"/></li>
+						</s:if>
+						<li class="ui-field">
+							<label><s:property value="mbo.getMboValueInfoStatic('SUPERVISOR').getTitle()" /></label>
+							<p><s:property value="mbo.getString('UXSUPERVISOR.DISPLAYNAME')"/></p>
+							<s:if test="mbo.getString('UXSUPERVISOR.PRIMARYEMAIL') != null and mbo.getString('UXSUPERVISOR.PRIMARYEMAIL') neq ''">
+								<input type="checkbox" name="personOptions"
+									value="<s:property value="mbo.getString('UXSUPERVISOR.PRIMARYEMAIL')"/>,<s:property value="mbo.getString('UXSUPERVISOR.DISPLAYNAME')"/>,<s:property value="mbo.getString('SUPERVISOR')"/>"/>
+							</s:if>
+						</li>
+						<!-- Requester -->
+							<!-- <s:if test="mbo.getString('REPORTEDBY.PRIMARYEMAIL') == null or mbo.getString('REPORTEDBY.PRIMARYEMAIL') eq ''">
+								<li class="ui-callout ui-message-a"><s:text name="event.missingemail"/></li>
+							</s:if> -->
+<!-- 						<li class="ui-field"> -->
+<%-- 							<label><s:property value="mbo.getMboValueInfoStatic('REPORTEDBY').getTitle()" /></label> --%>
+<%-- 							<p><s:property value="mbo.getString('REPORTEDBY.DISPLAYNAME')"/></p> --%>
+								<!-- <s:if test="mbo.getString('REPORTEDBY.PRIMARYEMAIL') != null and mbo.getString('REPORTEDBY.PRIMARYEMAIL') neq ''"> -->
+<!-- 							<input type="checkbox" name="personOptions" -->
+<%-- 								value="<s:property value="mbo.getString('REPORTEDBY.PRIMARYEMAIL')"/>,<s:property value="mbo.getString('REPORTEDBY.DISPLAYNAME')"/>,<s:property value="mbo.getString('REPORTEDBY')"/>"/> --%>
+								<!-- </s:if> -->
+<!-- 						</li>			 -->
+					</ul>	
+					<div class="ui-btn-container">
+						<input class="ui-btn-a" type="submit" value="<s:text name="global.send"/>"/>								
+					</div>
+				</form>	
+			</div>
+		</div>
+	</div>
 	<div id="locationlookupdialog" class="ui-dialog">
 		<div class="ui-container">
 			<div class="ui-header">
@@ -642,9 +665,14 @@
 				<div class="ui-btn-container">
 					<a class="ui-btn-a" onclick="emm.core.locationDrilldown(this)" data-field="LOCATION" data-source="LOCATION" data-display="LOCATION,DESCRIPTION,ORGID"><s:text name="global.drilldown"/></a>
 				</div>
-<!-- 				<div class="ui-btn-container" data-native="true"> -->
-<%-- 					<a class="ui-btn-a" data-dismiss="modal" onclick="mapLocationLookup()"><s:text name="global.map"/></a> --%>
-<!-- 				</div>	 -->
+				<div class="ui-btn-container" data-native="true">
+					<a class="ui-btn-a" data-dismiss="modal"
+						data-control="map"
+						data-modules='[{"dataSourceId":"DS_LOCATIONS","isLookup":true}]'
+					>
+						<s:text name="global.map"/>
+					</a>
+				</div>	
 				<div class="ui-btn-container" data-native="true">
 					<a class="ui-btn-a" onclick="emm.nativeapp.scanBarcode('#LOCATION')" data-dismiss="modal"><s:text name="global.scanbarcode"/></a>
 				</div>
@@ -663,12 +691,33 @@
 				<div class="ui-btn-container">
 					<a class="ui-btn-a" onclick="emm.core.assetDrilldown(this)" data-field="ASSETNUM" data-source="ASSETNUM" data-display="ASSETNUM,DESCRIPTION,ORGID"><s:text name="global.drilldown"/></a>
 				</div>
-<!-- 				<div class="ui-btn-container" data-native="true"> -->
-<%-- 					<a class="ui-btn-a" data-dismiss="modal" onclick="mapAssetLookup()"><s:text name="global.map"/></a> --%>
-<!-- 				</div> -->
+				<div class="ui-btn-container" data-native="true">
+					<a class="ui-btn-a" data-dismiss="modal"
+						data-control="map"
+						data-modules='[{"dataSourceId":"DS_ASSETS","isLookup":true}]'
+					>
+						<s:text name="global.map"/>
+					</a>
+				</div>
 				<div class="ui-btn-container" data-native="true">
 					<a class="ui-btn-a" onclick="emm.nativeapp.scanBarcode('#ASSETNUM')" data-dismiss="modal"><s:text name="global.scanbarcode"/></a>
 				</div>	
+			</div>
+		</div>
+	</div>
+	
+	<div id="inspectionlookupdialog" class="ui-dialog">
+		<div class="ui-container">
+			<div class="ui-header">
+				<h1 class="ui-title"><s:text name="ezmaxmobile.inspection"/></h1>
+			</div>
+			<div class="ui-content">
+				<div class="ui-btn-container">
+					<a class="ui-btn-a" onclick="emm.core.lookup(this)" data-field="INSPFORMNUM" data-source="INSPECTIONFORM.INSPFORMNUM" data-display="INSPECTIONFORM.INSPFORMNUM,INSPECTIONFORM.NAME,INSPECTIONFORM.REVISION" data-search="INSPECTIONFORM.INSPFORMNUM,INSPECTIONFORM.NAME"><s:text name="inspection.recommendedforms"/></a>
+				</div>
+				<div class="ui-btn-container">
+					<a class="ui-btn-a" onclick="emm.core.lookup(this)" data-field="INSPFORMNUM" data-source="INSPFORMNUM" data-display="INSPFORMNUM,NAME,REVISION" data-search="INSPFORMNUM,NAME"><s:text name="inspection.otherforms"/></a>
+				</div>
 			</div>
 		</div>
 	</div>

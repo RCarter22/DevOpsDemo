@@ -18,13 +18,14 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<s:if test="mbo.toBeAdded() eq true">
-				<a class="ui-btn-left ui-btn-e" href="canceltask.action"><s:text name="global.cancel"/></a>
+				<a class="ui-btn-left ui-btn-e" href="canceltask.action"><span class="emm-times-circle"></span></a>
 			</s:if>
 			<s:else>
-				<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+				<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			</s:else>
 			<h3 class="ui-title"><s:text name="wotrack.tasks"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><span class="emm-floppy-o"></span></a>
+			<a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		
@@ -166,13 +167,44 @@
 							onchange="emm.core.setValue(this)"
 					/>
 					<a class="ui-datepicker" data-control="datepicker" data-datetype="datetime" data-input="MEASUREDATE"></a>
-				</li> 				
+				</li>
+				<s:if test="isInspectionEnabled()">
+					<li class="ui-field ui-field-auto ui-details">
+						<label><s:property value="mbo.getMboValueInfoStatic('INSPFORMNUM').getTitle()" /></label>
+						<input type="text"
+								id="INSPFORMNUM" 
+								required="<s:property value="mbo.getMboValueData('INSPFORMNUM').isRequired()"/>"
+								readonly="<s:property value="mbo.getMboValueData('INSPFORMNUM').isReadOnly()"/>"
+								value="<s:property value="mbo.getString('INSPFORMNUM')"/>"
+								onchange="emm.core.setValue(this)"
+						/>
+						<p><s:property value="mbo.getString('INSPECTIONFORM.NAME')"/></p>
+						<a class="ui-arrow" data-control="dialog" href="#inspectionlookupdialog"></a>
+					</li>
+				</s:if>					
 			</ul>
 			
 			<s:if test="!mbo.isNew()">
 				<s:include value="taskactions.jsp"/>			
 			</s:if>
+			
 		</div>
 	</div>	
+	
+	<div id="inspectionlookupdialog" class="ui-dialog">
+		<div class="ui-container">
+			<div class="ui-header">
+				<h1 class="ui-title"><s:text name="ezmaxmobile.inspection"/></h1>
+			</div>
+			<div class="ui-content">
+				<div class="ui-btn-container">
+					<a class="ui-btn-a" onclick="emm.core.lookup(this)" data-field="INSPFORMNUM" data-source="INSPECTIONFORM.INSPFORMNUM" data-display="INSPECTIONFORM.INSPFORMNUM,INSPECTIONFORM.NAME,INSPECTIONFORM.REVISION" data-search="INSPECTIONFORM.INSPFORMNUM,INSPECTIONFORM.NAME"><s:text name="inspection.recommendedforms"/></a>
+				</div>
+				<div class="ui-btn-container">
+					<a class="ui-btn-a" onclick="emm.core.lookup(this)" data-field="INSPFORMNUM" data-source="INSPFORMNUM" data-display="INSPFORMNUM,NAME,REVISION" data-search="INSPFORMNUM,NAME"><s:text name="inspection.otherforms"/></a>
+				</div>
+			</div>
+		</div>
+	</div>
 </body>
 </html>

@@ -16,9 +16,9 @@
 	<div class="ui-page">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.cancel"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-times-circle"></span></a>
 			<h3 class="ui-title"><s:text name="global.availablelabor"/></h3>
-			<a class="ui-btn-right" href="saveavailablelabor.action?id=<s:property value="mbo.getOwner().getUniqueIDValue()"/>"><s:text name="global.ok"/></a>	
+			<a class="ui-btn-right" href="saveavailablelabor.action?id=<s:property value="mbo.getOwner().getUniqueIDValue()"/>"><span class="emm-check"></span></a>	
 			<s:include value="../common/statusbar.jsp"/>			
 		</div>
 		<div class="ui-content">		

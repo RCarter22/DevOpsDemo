@@ -15,9 +15,9 @@
 	<div class="ui-page" data-rememberscroll="true">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.asset"/></h3>
-			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="ASSETNUM,DESCRIPTION"><img src="../images/barcode.png"/></a>
+			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="ASSETNUM,DESCRIPTION"><span class="emm-barcode-3"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
@@ -41,6 +41,16 @@
 					</ul>
 				</s:if>		
 			    <ul class="ui-listview">
+   					<li class="ui-divider"><s:text name="global.list"/></li>
+   					<s:if test="isEmmMapEnabled()">
+						<li data-native="true">
+							<a data-control="map" data-modules='["DS_ASSETS"]'>
+								<span class="emm-map-location"></span>
+								<h3><s:text name="global.openmap"/></h3>
+								<span class="ui-arrow"></span>
+							</a>
+						</li>
+					</s:if>
 			    	<s:include value="../common/pagination.jsp"/>
 					<s:iterator value="mboList">
 						<li>

@@ -18,10 +18,10 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">			
 			<s:if test="mbo.toBeAdded() eq true">
-				<a class="ui-btn-left ui-btn-e" href="cancelmove.action"><s:text name="global.cancel"/></a>
+				<a class="ui-btn-left ui-btn-e" href="cancelmove.action"><span class="emm-times-circle"></span></a>
 			</s:if>
 			<s:else>
-				<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+				<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			</s:else>
 			<h3 class="ui-title"><s:text name="global.moveswap"/></h3>
 			<s:include value="../common/statusbar.jsp"/>

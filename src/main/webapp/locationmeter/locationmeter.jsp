@@ -17,13 +17,13 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<s:if test="mbo.toBeAdded() eq true">
-				<a class="ui-btn-left ui-btn-e" href="cancel.action"><s:text name="global.cancel"/></a>
+				<a class="ui-btn-left ui-btn-e" href="cancel.action"><span class="emm-times-circle"></span></a>
 			</s:if>
 			<s:else>
-				<a class="ui-btn-left" href="goback.action"><s:text name="global.back"/></a>
+				<a class="ui-btn-left" href="goback.action"><span class="emm-chevron-left"></span></a>
 			</s:else>	
 			<h3 class="ui-title"><s:text name="ezmaxmobile.meter"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save('saveMeter.action')"><s:text name="global.save"/></a>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save('saveMeter.action');"><span class="emm-floppy-o"></span></a>
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 	

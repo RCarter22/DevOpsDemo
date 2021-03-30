@@ -16,10 +16,10 @@
 	<div class="ui-page ui-inset">
 		<div class="ui-header">
 			<s:if test="mbo.toBeAdded() eq true">
-				<a class="ui-btn-left ui-btn-e" href="cancel.action"><s:text name="global.cancel"/></a>
+				<a class="ui-btn-left ui-btn-e" href="cancel.action"><span class="emm-times-circle"></span></a>
 			</s:if>
 			<s:else>
-				<a class="ui-btn-left" href="goback.action"><s:text name="global.back"/></a>
+				<a class="ui-btn-left" href="goback.action"><span class="emm-chevron-left"></span></a>
 			</s:else>	
 			<h3 class="ui-title"><s:text name="ezmaxmobile.commlog"/></h3>
 			<s:if test="mbo.toBeAdded() eq true">

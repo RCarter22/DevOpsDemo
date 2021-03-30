@@ -39,9 +39,10 @@
 	<div class="ui-page ui-inset">
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-chevron-left"></span></a>
 			<h3 class="ui-title"><s:text name="ezmaxmobile.inventor"/></h3>
-			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
+			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save();"><span class="emm-floppy-o"></span></a>
+			<a class="ui-btn-right" data-scrollto="#ACTIONS"><span class="emm-ellipsis-v"></span></a>
 			<s:include value="../common/statusbar.jsp"/>	
 		</div>		
 		<div class="ui-content">
@@ -246,7 +247,7 @@
 								<h3><s:property value="getMboValueInfoStatic('CURBAL').getTitle()"/>: <s:property value="getString('CURBAL')"/></h3> 
 								<h3><s:property value="getMboValueInfoStatic('PHYSCNT').getTitle()"/>: <s:property value="getString('PHYSCNT')"/></h3>
 								<p><s:property value="getMboValueInfoStatic('PHYSCNTDATE').getTitle()"/>: <s:property value="getString('PHYSCNTDATE')"/></p>
-								<p><s:property value="getMboValueInfoStatic('RECONCILED').getTitle()"/>: <s:property value="getBoolean('RECONCILED')"/></p>
+								<p><s:property value="getMboValueInfoStatic('RECONCILED').getTitle()"/>: <s:if test="mbo.getBoolean('RECONCILED')">Yes</s:if><s:else>No</s:else></p>
 								<p><s:property value="getMboValueInfoStatic('USEBY').getTitle()"/>: <s:property value="getString('USEBY')"/></p>	
 							</span>
 						 	<a href="deletebalance.action?id=<s:property value="getUniqueIDValue()"/>" class="ui-trash-large"></a> 			

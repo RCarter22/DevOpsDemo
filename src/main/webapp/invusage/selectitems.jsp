@@ -15,7 +15,7 @@
 <body>
 	<div class="ui-page">
 		<div class="ui-header ui-header-b">
-			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.cancel"/></a>
+			<a class="ui-btn-left" onclick="emm.core.back()"><span class="emm-times-circle"></span></a>
 			<h3 class="ui-title">
 				<s:if test="relationship eq 'INVBALANCESOUT'">
 					<s:text name="invusage.selectitems"/>				
@@ -30,7 +30,7 @@
 					<s:text name="invusage.spareparts"/>
 				</s:elseif>								
 			</h3>
-			<a class="ui-btn-right" href="saveselecteditems.action?id=<s:property value="mbo.getOwner().getUniqueIDValue()"/>&relationship=<s:property value="relationship"/>"><s:text name="global.ok"/></a>	
+			<a class="ui-btn-right" href="saveselecteditems.action?id=<s:property value="mbo.getOwner().getUniqueIDValue()"/>&relationship=<s:property value="relationship"/>"><span class="emm-check"></span></a>	
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">
