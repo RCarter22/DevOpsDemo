@@ -535,31 +535,6 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 	// The Following Section is for Legacy Synchronization Process
 	// #####################################################################################################################################	//
 
-	/**
-	 * Legacy call to get cached Domain JSON result
-	 * @return
-	 */
-	@Action(value="getLegacyCachedDomainJson",
-			results={
-				@Result(name="success", type="stream", params={"inputName", "jsonResult"})
-			}
-		)
-	public String getLegacyCachedDomainJson() {
-		JSONObject jsonObj = new JSONObject();
-		try {
-			jsonObj = getCachedSqlResultJson(CACHE_KEY_DOMAIN, pagination);
-			// Insert PAGINATION
-			jsonObj.element("PAGINATION", pagination);
-		} catch(Exception ex) {
-			jsonObj.element("errMsg", ex.getMessage());
-		}
-		
-		jsonResult = new ByteArrayInputStream(jsonObj.toString().getBytes());
-		if (log.isDebugEnabled()) {
-			log.debug("json: " + jsonObj.toString());
-		}
-		return SUCCESS; 
-	}
 
 	/**
 	 * Legacy call to get cached PersonGroupTeam JSON result

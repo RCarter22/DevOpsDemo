@@ -1563,11 +1563,11 @@ public class WOTrackAction  extends BaseAction {
 		})	
 	public String saveassignment(){
 		try {
-			// Fix for InterPro Issue #5049 - Assignments at the task level do not function correctly.
+			// Fix for InterPro Issue #5049 - Assignments
 			// Comment out super.save()
 			// super.save();
 			mbo = (MboRemote)this.getSessionObject(OWNERMBO);
-			// Fix for InterPro Issue #5049 - Assignments at the task level do not function correctly.  
+			// Fix for InterPro Issue #5049 - Assignment
 			// Add the following line
 			mbo.getThisMboSet().save();
 

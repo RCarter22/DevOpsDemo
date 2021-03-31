@@ -776,54 +776,55 @@ public class OfflineDataSyncAction extends BaseOfflineSyncAction {
 		}
 	}
 	
-	public void completeAssignment() throws Exception {
-		try {
-			String offlineEntityName = "ASSIGNMENT";
-			JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
+	// public void completeAssignment() throws Exception {
+	// 	try {
+	// 		String offlineEntityName = "ASSIGNMENT";
+	// 		JSONObject jsonOfflineEntity = getUploadedEntityJson(offlineEntityName);
 			
-			MboSetRemote mboSetRemote  = this.user.getSession().getMboSet("WORKORDER");
-			mboSetRemote.setQbe("WONUM", jsonOfflineEntity.optString("WONUM"));
-			mboSetRemote.setQbe("SITEID", jsonOfflineEntity.optString("SITEID"));
-			mboSetRemote.setQbe("ORGID", jsonOfflineEntity.optString("ORGID"));
-			mboSetRemote.setQbeExactMatch(true);
+	// 		MboSetRemote mboSetRemote  = this.user.getSession().getMboSet("WORKORDER");
+	// 		mboSetRemote.setQbe("WONUM", jsonOfflineEntity.optString("WONUM"));
+	// 		mboSetRemote.setQbe("SITEID", jsonOfflineEntity.optString("SITEID"));
+	// 		mboSetRemote.setQbe("ORGID", jsonOfflineEntity.optString("ORGID"));
+	// 		mboSetRemote.setQbeExactMatch(true);
 			
-			MboRemote woRemote = mboSetRemote.moveFirst();
+	// 		MboRemote woRemote = mboSetRemote.moveFirst();
 			
-			if(woRemote != null){
+	// 		if(woRemote != null){
 				
-				MboSetRemote assigmentsRemote = woRemote.getMboSet("SHOWASSIGNMENT");
-				assigmentsRemote.setQbe("ASSIGNMENTID", getAutoKeyMap(jsonOfflineEntity, "ASSIGNMENTID"));
-				MboRemote mboRemote = assigmentsRemote.moveFirst();
+	// 			MboSetRemote assigmentsRemote = woRemote.getMboSet("SHOWASSIGNMENT");
+	// 			assigmentsRemote.setQbe("ASSIGNMENTID", getAutoKeyMap(jsonOfflineEntity, "ASSIGNMENTID"));
+	// 			MboRemote mboRemote = assigmentsRemote.moveFirst();
 			
-				if(mboRemote != null){
-					((AssignmentRemote)mboRemote).completeAssignment();
+	// 			if(mboRemote != null){
+	// 				((AssignmentRemote)mboRemote).completeAssignment();
 					
-					assigmentsRemote.save();
-					mboSetRemote.save();
+	// 				assigmentsRemote.save();
+	// 				mboSetRemote.save();
 					
-					this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, mboRemote);
-				}
-				else {
-					// Need to throw exception, otherwise this will be considered a successful transaction
-					throw new Exception("Cannot complete assignment, record not found");	
-				}
-			}
-			else {
-				// Need to throw exception, otherwise this will be considered a successful transaction
-				throw new Exception("Cannot complete assignment, record not found");	
-			}
-		} catch (MXException e) {
-			String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
-			log.error("completeassignment:", new Exception(e));
-			throw new OfflineException(msg, e);
-		} catch (RemoteException e) {
-			log.error("completeassignment:", e);
-			throw new OfflineException(e.getMessage(), e);
-		} catch (Exception e) {
-			log.error("completeassignment:", e);
-			throw new OfflineException(e.getMessage(), e);
-		}
-	}
+	// 				this.saveAutoKeyMap(offlineEntityName, jsonOfflineEntity, mboRemote);
+	// 			}
+	// 			else {
+	// 				// Need to throw exception, otherwise this will be considered a successful transaction
+	// 				throw new Exception("Cannot complete assignment, record not found");	
+	// 			}
+	// 		}
+	// 		else {
+	// 			// Need to throw exception, otherwise this will be considered a successful transaction
+	// 			throw new Exception("Cannot complete assignment, record not found");	
+	// 		}
+	// 	} catch (MXException e) {
+	// 		String msg = MaximoExceptionUtil.getMessage(this.user.getSession(), e);
+	// 		log.error("completeassignment:", new Exception(e));
+	// 		throw new OfflineException(msg, e);
+	// 	} catch (RemoteException e) {
+	// 		log.error("completeassignment:", e);
+	// 		throw new OfflineException(e.getMessage(), e);
+	// 	} catch (Exception e) {
+	// 		log.error("completeassignment:", e);
+	// 		throw new OfflineException(e.getMessage(), e);
+	// 	}
+	// }
+	
 	public void addLabTrans() throws Exception {
 		try {
 			// Get the Offline Entity that was posted here to be processed
