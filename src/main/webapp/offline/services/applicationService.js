@@ -83,7 +83,7 @@ angular.module('emm').factory('applicationService', function(){
 						['PLUSPASSET',getText('EZMAXMOBILE.PLUSPASSET', null, 'Asset (SP)'),'emm-asset'],
 		         		['DIVIDER'],
 						 ['INVENTOR',getText('EZMAXMOBILE.INVENTOR', null, 'Inventory'),'emm-inventory'],
-						 ['PLUSTINV',getText('EZMAXMOBILE.PLUSTINV', null, 'Inventory (Tr)'),'emm-inventory'],
+						 ['PLUSTINV',getText('EZMAXMOBILE.INVENTOR', null, 'Inventory (Tr)'),'emm-inventory'],
 						['INVISSUE',getText('EZMAXMOBILE.INVISSUE', null, 'Issues and Transfers'),'emm-transfer'],
 						['DIVIDER'],
 						['INSPECTOR',getText('EZMAXMOBILE.INSPECTION', null, 'Inspection'),'emm-inspect-1'],
