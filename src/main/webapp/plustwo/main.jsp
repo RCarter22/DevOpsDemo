@@ -36,7 +36,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
-			<h3 class="ui-title"><s:text name="ezmaxmobile.plustwo"/></h3>
+			<h3 class="ui-title"><s:text name="ezmaxmobile.wotrack"/></h3>
 			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="WONUM,DESCRIPTION,ASSETNUM,LOCATION,LEAD"><img src="../images/barcode.png"/></a>
 		</div>
 		<div class="ui-content">	

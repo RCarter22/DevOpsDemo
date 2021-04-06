@@ -23,6 +23,7 @@ import com.interprosoft.ezmaxmobile.common.model.EZMessage;
 import com.interprosoft.ezmaxmobile.common.service.SimpleService;
 import com.interprosoft.ezmaxmobile.common.util.MaximoExceptionUtil;
 import com.interprosoft.ezmaxmobile.common.util.PushUtil;
+import com.interprosoft.integrations.microsoft.models.EZEventPerson;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -78,9 +79,10 @@ public class PlusTWOAction  extends BaseAction {
 		try{	
 			clearMboSession(OWNERMBO);
 			clearAppSessions();
-			clearadvancedsearch();
+			// clearadvancedsearch();
 			clearMboSession("CURRENTWHERECLAUSE");
 			mbo = this.simpleService.getFakeMbo(OWNERMBO);
+			setMboAppName(APPNAME);
 			
 			MboSetRemote labTransSet = this.user.getSession().getMboSet("LABTRANS");
 			labTransSet.setQbe("LABOR.PERSONID", this.user.getPersonId());
@@ -113,9 +115,9 @@ public class PlusTWOAction  extends BaseAction {
 		try{	
 			populateMbo(OWNERMBO, APPNAME);
 			checkWOInspections(mbo);
-			// if (this.isPushEnabled()) {
-			// 	populateEventUtil(mbo);
-			// }
+			if (this.isPushEnabled()) {
+				populateEventUtil(mbo);
+			}
 			
 			mbo.setFieldFlag(new String[]{"DESCRIPTION", "AEPUSINGDEPARTMENT"}, MboConstants.REQUIRED, true);
 		} catch (NullPointerException e){
@@ -197,174 +199,174 @@ public class PlusTWOAction  extends BaseAction {
  		return SUCCESS;
  	}
  	
- 	// @Action(value="addevent",results={
- 	// 		@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
- 	// 		@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
- 	// 	}
- 	// )
- 	// public String addevent() {
- 	// 	try{	
- 	// 		populateMbo(OWNERMBO, APPNAME);
- 	// 		id = mbo.getUniqueIDValue();
+ 	@Action(value="addevent",results={
+ 			@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
+ 			@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
+ 		}
+ 	)
+ 	public String addevent() {
+ 		try{	
+ 			populateMbo(OWNERMBO, APPNAME);
+ 			id = mbo.getUniqueIDValue();
  			
- 	// 		PushUtil pushUtil = new PushUtil();
- 	// 		try {
- 	// 			pushUtil.setEventPersonArray(personOptions);
- 	// 			pushUtil.setGroup(this.groupOptions);
- 	// 			pushUtil.setAlert("[" + getText("wotrack.shortwonum") + mbo.getString("WONUM") + "] Work has been scheduled by " + this.user.getSession().getUserInfo().getDisplayName());
- 	// 			pushUtil.setDetails(mbo.getString("DESCRIPTION"));
- 	// 			pushUtil.setOpenLink(mbo.getThisMboSet().getApp().toLowerCase() + "/view.action?id="+mbo.getUniqueIDValue());
- 	// 			pushUtil.setSentBy(user.getSession().getUserInfo().getDisplayName() + " " + getText("notification.fromemm"));
- 	// 			pushUtil.setRefNum(APPNAME + "_" + id);
- 	// 			pushUtil.push();
- 	// 		}
- 	// 		catch(Exception e) {
- 	// 			if (e.getMessage() != null && !e.getMessage().equalsIgnoreCase("")) {
- 	// 				this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
- 	// 			}
- 	// 			else {
- 	// 				this.setMessage(new EZMessage(getText("notification.notsent"), EMMConstants.ERROR));
- 	// 			}
- 	// 			return ERROR;
- 	// 		}
+ 			PushUtil pushUtil = new PushUtil();
+ 			try {
+ 				pushUtil.setEventPersonArray(personOptions);
+ 				pushUtil.setGroup(this.groupOptions);
+ 				pushUtil.setAlert("[" + getText("wotrack.shortwonum") + mbo.getString("WONUM") + "] Work has been scheduled by " + this.user.getSession().getUserInfo().getDisplayName());
+ 				pushUtil.setDetails(mbo.getString("DESCRIPTION"));
+ 				pushUtil.setOpenLink(mbo.getThisMboSet().getApp().toLowerCase() + "/view.action?id="+mbo.getUniqueIDValue());
+ 				pushUtil.setSentBy(user.getSession().getUserInfo().getDisplayName() + " " + getText("notification.fromemm"));
+ 				pushUtil.setRefNum(APPNAME + "_" + id);
+ 				pushUtil.push();
+ 			}
+ 			catch(Exception e) {
+ 				if (e.getMessage() != null && !e.getMessage().equalsIgnoreCase("")) {
+ 					this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+ 				}
+ 				else {
+ 					this.setMessage(new EZMessage(getText("notification.notsent"), EMMConstants.ERROR));
+ 				}
+ 				return ERROR;
+ 			}
  			
- 	// 		//Event
- 	// 		//populateEventUtil(mbo) -> sets the event url session object to current view
- 	// 		//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
- 	// 		populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
- 	// 		eventUtil.setStartDate(mbo.getDate("SCHEDSTART"));
- 	// 		eventUtil.setEndDate(mbo.getDate("SCHEDFINISH"));			
- 	// 		eventUtil.setSubject(mbo.getString("DESCRIPTION"));
+ 			//Event
+ 			//populateEventUtil(mbo) -> sets the event url session object to current view
+ 			//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
+ 			populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
+ 			eventUtil.setStartDate(mbo.getDate("SCHEDSTART"));
+ 			eventUtil.setEndDate(mbo.getDate("SCHEDFINISH"));			
+ 			eventUtil.setSubject(mbo.getString("DESCRIPTION"));
  			
- 	// 		if (mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS") != null && 
- 	// 			!mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS").equalsIgnoreCase("")) {
- 	// 			eventUtil.setLocation(mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS"));
- 	// 		}
- 	// 		else {
- 	// 			eventUtil.setLocation(mbo.getString("LOCATION.DESCRIPTION"));
- 	// 		}
+ 			if (mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS") != null && 
+ 				!mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS").equalsIgnoreCase("")) {
+ 				eventUtil.setLocation(mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS"));
+ 			}
+ 			else {
+ 				eventUtil.setLocation(mbo.getString("LOCATION.DESCRIPTION"));
+ 			}
  			
- 	// 		if (mbo.getString("ONBEHALFOF") != null && !mbo.getString("ONBEHALFOF").equalsIgnoreCase("")) {
- 	// 			eventUtil.setRequester(mbo.getString("ONBEHALFOF.DISPLAYNAME"));
- 	// 			eventUtil.setRequesterEmail(mbo.getString("ONBEHALFOF.PRIMARYEMAIL"));
- 	// 		}
- 	// 		else {
- 	// 			eventUtil.setRequester(mbo.getString("REPORTEDBY.DISPLAYNAME"));
- 	// 			eventUtil.setRequesterEmail(mbo.getString("REPORTEDBY.PRIMARYEMAIL"));
- 	// 		}
+ 			if (mbo.getString("ONBEHALFOF") != null && !mbo.getString("ONBEHALFOF").equalsIgnoreCase("")) {
+ 				eventUtil.setRequester(mbo.getString("ONBEHALFOF.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("ONBEHALFOF.PRIMARYEMAIL"));
+ 			}
+ 			else {
+ 				eventUtil.setRequester(mbo.getString("REPORTEDBY.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("REPORTEDBY.PRIMARYEMAIL"));
+ 			}
  			
- 	// 		// When using local tenant/exchange server, this is the user sent.
- 	// 		EZEventPerson organizer = new EZEventPerson();
- 	// 		organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
- 	// 		organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());
- 	// 		eventUtil.setOrganizer(organizer);
- 	// 		eventUtil.setEventAttendeeArray(personOptions);
- 	// 		eventUtil.setBody(
- 	// 				"<b>" + mbo.getString("WONUM") + " - " + mbo.getString("DESCRIPTION") + "</b>"
- 	// 		);
+ 			// When using local tenant/exchange server, this is the user sent.
+ 			EZEventPerson organizer = new EZEventPerson();
+ 			organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
+ 			organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());
+ 			eventUtil.setOrganizer(organizer);
+ 			eventUtil.setEventAttendeeArray(personOptions);
+ 			eventUtil.setBody(
+ 					"<b>" + mbo.getString("WONUM") + " - " + mbo.getString("DESCRIPTION") + "</b>"
+ 			);
 
- 	// 		//EventMessage Status
- 	// 		eventUtil.setStatus("Scheduled For");
+ 			//EventMessage Status
+ 			eventUtil.setStatus("Scheduled For");
 
- 	// 		String msid = eventUtil.createEvent();		
- 	// 		//For locally use only
- 	// 		if (this.eventField != null && !this.eventField.equalsIgnoreCase("")) {
- 	// 			mbo.setValue(eventField, msid);
- 	// 			super.save();
- 	// 		}
- 	// 		this.setMessage(new EZMessage(getText("event.sent"), EMMConstants.INFO));
- 	// 	} catch (Exception e){
- 	// 		this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
- 	// 		this.addActionError(e.getMessage());
- 	// 		return ERROR;
- 	// 	}			
- 	// 	return SUCCESS;
- 	// }
+ 			String msid = eventUtil.createEvent();		
+ 			//For locally use only
+ 			if (this.eventField != null && !this.eventField.equalsIgnoreCase("")) {
+ 				mbo.setValue(eventField, msid);
+ 				super.save();
+ 			}
+ 			this.setMessage(new EZMessage(getText("event.sent"), EMMConstants.INFO));
+ 		} catch (Exception e){
+ 			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+ 			this.addActionError(e.getMessage());
+ 			return ERROR;
+ 		}			
+ 		return SUCCESS;
+ 	}
  	
- 	// @Action(value="editevent",results={
-	// 		@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
-	// 		@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
-	// 	}
-	// )
-	// public String editevent() {
-	// 	try{	
-	// 		populateMbo(OWNERMBO, APPNAME);
-	// 		id = mbo.getUniqueIDValue();
+ 	@Action(value="editevent",results={
+			@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
+			@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
+		}
+	)
+	public String editevent() {
+		try{	
+			populateMbo(OWNERMBO, APPNAME);
+			id = mbo.getUniqueIDValue();
 
-	// 		//populateEventUtil(mbo) -> sets the event url session object to current view
- 	// 		//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
- 	// 		populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
-	// 		eventUtil.setStartDate(mbo.getDate("SCHEDSTART"));
-	// 		eventUtil.setEndDate(mbo.getDate("SCHEDFINISH"));
-	// 		eventUtil.setSubject(mbo.getString("DESCRIPTION"));
+			//populateEventUtil(mbo) -> sets the event url session object to current view
+ 			//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
+ 			populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
+			eventUtil.setStartDate(mbo.getDate("SCHEDSTART"));
+			eventUtil.setEndDate(mbo.getDate("SCHEDFINISH"));
+			eventUtil.setSubject(mbo.getString("DESCRIPTION"));
 			
-	// 		if (mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS") != null && 
- 	// 			!mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS").equalsIgnoreCase("")) {
- 	// 			eventUtil.setLocation(mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS"));
- 	// 		}
- 	// 		else {
- 	// 			eventUtil.setLocation(mbo.getString("LOCATION.DESCRIPTION"));
- 	// 		}
+			if (mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS") != null && 
+ 				!mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS").equalsIgnoreCase("")) {
+ 				eventUtil.setLocation(mbo.getString("SERVICEADDRESS.FORMATTEDADDRESS"));
+ 			}
+ 			else {
+ 				eventUtil.setLocation(mbo.getString("LOCATION.DESCRIPTION"));
+ 			}
  			
- 	// 		if (mbo.getString("ONBEHALFOF") != null && !mbo.getString("ONBEHALFOF").equalsIgnoreCase("")) {
- 	// 			eventUtil.setRequester(mbo.getString("ONBEHALFOF.DISPLAYNAME"));
- 	// 			eventUtil.setRequesterEmail(mbo.getString("ONBEHALFOF.PRIMARYEMAIL"));
- 	// 		}
- 	// 		else {
- 	// 			eventUtil.setRequester(mbo.getString("REPORTEDBY.DISPLAYNAME"));
- 	// 			eventUtil.setRequesterEmail(mbo.getString("REPORTEDBY.PRIMARYEMAIL"));
- 	// 		}
+ 			if (mbo.getString("ONBEHALFOF") != null && !mbo.getString("ONBEHALFOF").equalsIgnoreCase("")) {
+ 				eventUtil.setRequester(mbo.getString("ONBEHALFOF.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("ONBEHALFOF.PRIMARYEMAIL"));
+ 			}
+ 			else {
+ 				eventUtil.setRequester(mbo.getString("REPORTEDBY.DISPLAYNAME"));
+ 				eventUtil.setRequesterEmail(mbo.getString("REPORTEDBY.PRIMARYEMAIL"));
+ 			}
 			
-	// 		EZEventPerson organizer = new EZEventPerson();
-	// 		organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
-	// 		organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());
-	// 		eventUtil.setOrganizer(organizer);
-	// 		eventUtil.setBody(
-	// 				"<b>" + mbo.getString("WONUM") + " - " + mbo.getString("DESCRIPTION") + "</b>"
-	// 		);			
-	// 		//EventMessage Status
-	// 		eventUtil.setStatus("Schedule Changed");
+			EZEventPerson organizer = new EZEventPerson();
+			organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
+			organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());
+			eventUtil.setOrganizer(organizer);
+			eventUtil.setBody(
+					"<b>" + mbo.getString("WONUM") + " - " + mbo.getString("DESCRIPTION") + "</b>"
+			);			
+			//EventMessage Status
+			eventUtil.setStatus("Schedule Changed");
 			
-	// 		eventUtil.editEvent();
-	// 		this.setMessage(new EZMessage(getText("event.updated"), EMMConstants.INFO));
-	// 	} catch (Exception e){
-	// 		this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
-	// 		this.addActionError(e.getMessage());
-	// 		return ERROR;
-	// 	}			
-	// 	return SUCCESS;
-	// }
+			eventUtil.editEvent();
+			this.setMessage(new EZMessage(getText("event.updated"), EMMConstants.INFO));
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}
 	
-	// @Action(value="deleteevent",results={
-	// 		@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
-	// 		@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
-	// 	}
-	// )
-	// public String deleteevent() {
-	// 	try{	
-	// 		populateMbo(OWNERMBO, APPNAME);
-	// 		id = mbo.getUniqueIDValue();
+	@Action(value="deleteevent",results={
+			@Result(name="success", location="view.action", type="redirect",params={"id","${id}"}),
+			@Result(name="error", location="view.action", type="redirect",params={"id","${id}"})
+		}
+	)
+	public String deleteevent() {
+		try{	
+			populateMbo(OWNERMBO, APPNAME);
+			id = mbo.getUniqueIDValue();
 
-	// 		//populateEventUtil(mbo) -> sets the event url session object to current view
- 	// 		//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
- 	// 		populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
-	// 		EZEventPerson organizer = new EZEventPerson();
-	// 		organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
-	// 		organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());			
-	// 		eventUtil.setOrganizer(organizer);
-	// 		if (this.eventField != null && !this.eventField.equalsIgnoreCase("")) {
-	// 			mbo.setValue(eventField, "");
-	// 			super.save();
-	// 		}
-	// 		eventUtil.cancelEvent();
-	// 		this.setMessage(new EZMessage(getText("event.cancelled"), EMMConstants.INFO));
-	// 	} catch (Exception e){
-	// 		this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
-	// 		this.addActionError(e.getMessage());
-	// 		return ERROR;
-	// 	}			
-	// 	return SUCCESS;
-	// }
+			//populateEventUtil(mbo) -> sets the event url session object to current view
+ 			//populateEventUtilWithUrl(mbo, url) -> uses event url passed in
+ 			populateEventUtilWithUrl(mbo,(String)this.getEventUrlSessionObject());
+			EZEventPerson organizer = new EZEventPerson();
+			organizer.setEmailAddress(this.user.getSession().getUserInfo().getEmail());
+			organizer.setDisplayName(this.user.getSession().getUserInfo().getDisplayName());			
+			eventUtil.setOrganizer(organizer);
+			if (this.eventField != null && !this.eventField.equalsIgnoreCase("")) {
+				mbo.setValue(eventField, "");
+				super.save();
+			}
+			eventUtil.cancelEvent();
+			this.setMessage(new EZMessage(getText("event.cancelled"), EMMConstants.INFO));
+		} catch (Exception e){
+			this.setMessage(new EZMessage(e.getMessage(), EMMConstants.ERROR));
+			this.addActionError(e.getMessage());
+			return ERROR;
+		}			
+		return SUCCESS;
+	}
  	
 
 	@Action(value="nextwo",results={

@@ -18,7 +18,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
-			<h3 class="ui-title"><s:text name="global.nonstock"/></h3>
+			<h3 class="ui-title"><s:text name="Nonstock"/></h3>
 			<!-- <a class="ui-btn-right" href="add.action"><img src="../images/plus.png"/></a> -->
 			<s:include value="../common/statusbar.jsp"/>
 		</div>

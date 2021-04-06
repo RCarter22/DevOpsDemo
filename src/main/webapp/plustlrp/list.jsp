@@ -30,7 +30,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
-			<h3 class="ui-title"><s:text name="ezmaxmobile.plustlrp"/></h3>			
+			<h3 class="ui-title"><s:text name="Labor Reporting (TR)"/></h3>			
 			<s:include value="../common/statusbar.jsp"/>
 		</div>
 		<div class="ui-content">

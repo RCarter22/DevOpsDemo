@@ -21,7 +21,7 @@
 			<s:else>
 				<a class="ui-btn-left" href="goback.action"><s:text name="global.back"/></a>
 			</s:else>
-			<h3 class="ui-title"><s:text name="plustasset.licenses"/></h3>
+			<h3 class="ui-title"><s:text name="Licenses"/></h3>
 			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a>
 		</div>
 	

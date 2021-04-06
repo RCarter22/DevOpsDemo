@@ -153,7 +153,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
         	<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
-            <h3 class="ui-title"><s:text name="ezmaxmobile.plustwo"/></h3>
+            <h3 class="ui-title"><s:text name="ezmaxmobile.wotrack"/></h3>
             <%-- <s:if test="!mbo.isNew()">                
             	<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="saveOrPrepBounce();"><s:text name="global.save"/></a>
 			</s:if>

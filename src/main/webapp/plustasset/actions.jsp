@@ -56,7 +56,7 @@
 		<li>
 			<a href="../plustassetalias/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
 				<img src="../images/multiasset.png" />
-				<h3><s:text name="plustasset.aliases"/></h3>
+				<h3><s:text name="Aliases"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('PLUSTNONIDENTITYALIASES').count()"/></span>
 				<span class="ui-arrow"></span>
 			</a>
@@ -64,7 +64,7 @@
 		<li>
 			<a href="../plustassetcust/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
 				<img src="../images/usergroup.png" />
-				<h3><s:text name="global.operator"/></h3>
+				<h3><s:text name="Operators and Fleet Groups"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('ASSETUSERCUST').count() + mbo.getMboSet('AEPASSETDEPT').count()"/></span>
 				<span class="ui-arrow"></span>
 			</a>
@@ -84,7 +84,7 @@
 		<li>
 			<a href="../plustlicense/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
 				<img src="../images/tag.png" />
-				<h3><s:text name="plustasset.licenses"/></h3>
+				<h3><s:text name="Licenses"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('PLUSTLICENSES').count()"/></span>
 				<span class="ui-arrow"></span>
 			</a>

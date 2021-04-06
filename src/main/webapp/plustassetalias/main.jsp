@@ -18,7 +18,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
-			<h3 class="ui-title"><s:text name="plustasset.aliases"/></h3>
+			<h3 class="ui-title"><s:text name="Aliases"/></h3>
 			<%-- <a class="ui-btn-right" href="add.action"><img src="../images/plus.png"/></a>
 			<a class="ui-btn-right <s:if test="mbo.toBeSaved() eq true">ui-btn-c</s:if>" onclick="emm.core.save()"><s:text name="global.save"/></a> --%>
 		</div>

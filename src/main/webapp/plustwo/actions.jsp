@@ -43,7 +43,7 @@
 		<li>
 			<a href="../nonstock/main.action?id=<s:property value='mbo.getUniqueIDValue()'/>">
 				<img src="../images/material.png" />
-				<h3><s:text name="global.nonstock"/></h3>
+				<h3><s:text name="Nonstock"/></h3>
 				<span class="ui-bubble"><s:property value="mbo.getMboSet('REP_ACTSERV').count()"/></span>
 				<span class="ui-arrow"></span>
 			</a>
