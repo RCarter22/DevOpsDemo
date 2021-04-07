@@ -6,16 +6,11 @@ package com.interprosoft.ezmaxmobile.login.action;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.Map;
 
 import net.sf.json.JSONObject;
 import net.sf.json.JSONSerializer;
 import net.sf.json.JsonConfig;
 import net.sf.json.util.PropertyFilter;
-import psdi.util.MXException;
 
 import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.InterceptorRef;
@@ -99,48 +94,6 @@ public final class LoginAction extends BaseAction {
 				return ERROR;
 			}
 			User user = loginService.login(username, password);
-
-			// extra user fields for offline usage
-			Map<Object, Object> extraFields = new HashMap<Object, Object>();
-
-			try {
-				// set the user's REPAIRFACILITY value so it can be referenced offline
-				extraFields.put("REPAIRFACILITY", user.getSession().getProfile().getDefaultRepairFacility());
-				extraFields.put("DEFSTOREROOM", user.getSession().getProfile().getDefaultStoreroom());
-
-				user.setExtFields(extraFields);
-				try {
-					user.buildUserInfo();
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InstantiationException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (NoSuchMethodException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (SecurityException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IllegalArgumentException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (InvocationTargetException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}catch (MXException e) {
-				e.printStackTrace();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}catch (UserException e) {
-				e.printStackTrace();
-			}
 			request.getSession().setAttribute("SESSION_USER", user);
 			setAuthorizeto(MaximoHelper.getInstance().getClientDisplayName());
 			if(user.isSelfServiceAcct())
