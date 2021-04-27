@@ -17,7 +17,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
-			<h1 class="ui-title"><s:text name="ezmaxmobile.plustinvus"/></h1>
+			<h1 class="ui-title"><s:text name="Inventory (Tr)us"/></h1>
 		</div>
 		<div class="ui-content">
 			<s:include value="../common/quicksearch.jsp">

@@ -17,12 +17,12 @@
 	
 	<!-- Begin of constants for weblogic -->
 	<!-- uncomment for weblogic deployment -->
-	<!-- 
+	
 	<constant name="struts.convention.action.disableJarScanning" value="true"/>
 	<constant name="struts.convention.action.fileProtocols" value="jar,zip" />
 	<constant name="struts.convention.action.includeJars" value=".*?/_wl_cls_gen.*?jar(!/)?" />
 	<constant name="struts.convention.result.path" value=""/>
-	 -->
+	
 	<!-- End of constants for weblogic -->
 	
 	<package name="mydefault" extends="struts-default">

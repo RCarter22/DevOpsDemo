@@ -18,7 +18,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<a class="ui-btn-left" href="../main.action"><img src="../images/homelink.png"/></a>
-			<h1 class="ui-title"><s:text name="ezmaxmobile.plustinv"/></h1>
+			<h1 class="ui-title"><s:text name="Inventory (Tr)"/></h1>
 			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="ITEMNUM,ITEM.DESCRIPTION,BINNUM"><img src="../images/barcode.png"/></a>
 		</div>
 		<div class="ui-content">
