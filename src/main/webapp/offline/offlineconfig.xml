@@ -57,7 +57,7 @@
 				<ACTION transentityname="SR" transentitykey="TICKETUID" name="INSERTSR" beanname="OfflineDataSyncAction" methodname="addSRLabTrans"/>
 			</SYNC_ACTIONS>
 		</ENTITY>	
-		<ENTITY name="TOOLTRANS">
+		<!-- <ENTITY name="TOOLTRANS">
 			<INDEXES>			
 				<INDEX name="IDX_TT_1">WONUM, SITEID</INDEX>
 			</INDEXES>
@@ -70,8 +70,8 @@
 			<SYNC_ACTIONS>
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addToolTrans"/>	
 			</SYNC_ACTIONS>
-		</ENTITY>	
-		<ENTITY name="WPLABOR">
+		</ENTITY>	 -->
+		<!-- <ENTITY name="WPLABOR">
 			<INDEXES>
 				<INDEX name="IDX_WPL_1">WPLABORID</INDEX>
 			</INDEXES>  
@@ -85,8 +85,8 @@
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addWPLabor"/>
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="UPDATE" beanname="OfflineDataSyncAction" methodname="editWPLabor"/>
 			</SYNC_ACTIONS>
-		</ENTITY>		
-		<ENTITY name="WPMATERIAL">
+		</ENTITY>		 -->
+		<!-- <ENTITY name="WPMATERIAL">
 			<INDEXES>
 				<INDEX name="IDX_WPM_1">WPITEMID</INDEX>
 			</INDEXES>  
@@ -100,7 +100,7 @@
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addWPMaterial"/>
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="UPDATE" beanname="OfflineDataSyncAction" methodname="editWPMaterial"/>
 			</SYNC_ACTIONS>
-		</ENTITY>		
+		</ENTITY>		 -->
 		<ENTITY name="MATUSETRANS">
 			<INDEXES>			
 				<INDEX name="IDX_MT_1">WONUM, SITEID</INDEX>
@@ -170,7 +170,7 @@
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editFailureReport"/>
 			</SYNC_ACTIONS>
 		</ENTITY>	
-		<ENTITY name="MULTIASSETLOCCI">
+		<!-- <ENTITY name="MULTIASSETLOCCI">
 			<INDEXES>			
 				<INDEX name="IDX_MULTI_1">WORKORDERID</INDEX>
 			</INDEXES>
@@ -185,7 +185,7 @@
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editMultiAssetLocCi"/>
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="EDIT_PRG" beanname="OfflineDataSyncAction" methodname="editMultiProgress"/>			
 			</SYNC_ACTIONS>
-		</ENTITY>		
+		</ENTITY>		 -->
 		<ENTITY name="SR">
 			<INDEXES>
 				<INDEX name="IDX_SR_1">TICKETUID</INDEX>
@@ -287,7 +287,7 @@
 				<ACTION transentityname="ASSETMETER" transentitykey="ASSETMETERID" name="UPDATE_METER" beanname="OfflineDataSyncAction" methodname="updateAssetMeter"/>
 			</SYNC_ACTIONS>
 		</ENTITY>
-		<ENTITY name="MR">
+		<!-- <ENTITY name="MR">
 			<INDEXES>
 				<INDEX name="IDX_MR_1">MRID</INDEX>
 			</INDEXES>
@@ -303,8 +303,8 @@
 				<ACTION transentityname="MR" transentitykey="MRID" name="EDIT" beanname="OfflineDataSyncAction" methodname="editMR"></ACTION>
 				<ACTION transentityname="MR" transentitykey="MRID" name="COMMIT" beanname="OfflineDataSyncAction" methodname="commitMR"></ACTION>
 			</SYNC_ACTIONS>
-		</ENTITY>
-		<ENTITY name="MRLINES">
+		</ENTITY> -->
+		<!-- <ENTITY name="MRLINES">
 			<INDEXES>
 				<INDEX name="IDX_MRLINE_1">MRLINEID</INDEX>
 			</INDEXES>
@@ -317,8 +317,8 @@
 			<SYNC_ACTIONS>
 				<ACTION transentityname="MR" transentitykey="MRID" name="INSERT" beanname="OfflineDataSyncAction" methodname="addMRLine"></ACTION>
 			</SYNC_ACTIONS>
-		</ENTITY>
-		<ENTITY name="WOSAFETYLINK">
+		</ENTITY> -->
+		<!-- <ENTITY name="WOSAFETYLINK">
 			<INDEXES>
 				<INDEX name="IDX_WS_1">WOSAFETYLINKID</INDEX>
 			</INDEXES>
@@ -328,8 +328,8 @@
 			<INIT_ACTION>
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getWosafetylinkListJson"></ACTION>
 			</INIT_ACTION>
-		</ENTITY>
-		<ENTITY name="WOHAZARDPREC">
+		</ENTITY> -->
+		<!-- <ENTITY name="WOHAZARDPREC">
 			<INDEXES>
 				<INDEX name="IDX_HP_1">WOHAZARDPRECID</INDEX>
 			</INDEXES>
@@ -339,8 +339,8 @@
 			<INIT_ACTION>
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getWoHazardPrecListJson"></ACTION>
 			</INIT_ACTION>
-		</ENTITY>
-		<ENTITY name="WOTAGLOCK">
+		</ENTITY> -->
+		<!-- <ENTITY name="WOTAGLOCK">
 			<INDEXES>
 				<INDEX name="IDX_TG_1">TAGLOCKID</INDEX>
 			</INDEXES>
@@ -350,8 +350,8 @@
 			<INIT_ACTION>
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getTagLockListJson"></ACTION>
 			</INIT_ACTION>
-		</ENTITY>
-		<ENTITY name="WOHAZARD">
+		</ENTITY> -->
+		<!-- <ENTITY name="WOHAZARD">
 			<INDEXES>
 				<INDEX name="IDX_WHAZ_1">WOHAZARDID</INDEX>
 			</INDEXES>
@@ -361,8 +361,8 @@
 			<INIT_ACTION>
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getWoHazardListJson"></ACTION>
 			</INIT_ACTION>
-		</ENTITY>
-		<ENTITY name="WOPRECAUTION">
+		</ENTITY> -->
+		<!-- <ENTITY name="WOPRECAUTION">
 			<INDEXES>
 				<INDEX name="IDX_PREC_1">WOPRECAUTIONID</INDEX>
 			</INDEXES>
@@ -383,8 +383,8 @@
 			<INIT_ACTION>
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getTagoutListJson"></ACTION>
 			</INIT_ACTION>
-		</ENTITY>
-		<ENTITY name="WOLOCKOUT">
+		</ENTITY> -->
+		<!-- <ENTITY name="WOLOCKOUT">
 			<INDEXES>
 				<INDEX name="IDX_LOCK_1">WOLOCKOUTID</INDEX>
 			</INDEXES>
@@ -394,7 +394,7 @@
 			<INIT_ACTION>
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getLockoutListJson"></ACTION>
 			</INIT_ACTION>
-		</ENTITY>
+		</ENTITY> -->
 		<ENTITY name="LOCATIONMETER">
 			<INDEXES>
 				<INDEX name="IDX_LOCM_1">LOCATION,METERNAME</INDEX>
@@ -409,7 +409,7 @@
 				<ACTION transentityname="LOCATIONMETER" transentitykey="LOCATIONMETERID" name="UPDATE_METER" beanname="OfflineDataSyncAction" methodname="updateLocationMeter"/>
 			</SYNC_ACTIONS>
 		</ENTITY>
-		<ENTITY name="ASSETSPEC">
+		<!-- <ENTITY name="ASSETSPEC">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">ASSETSPECID</COLUMN>
 			</COLUMNS>
@@ -420,8 +420,8 @@
 				<ACTION name="GENERATE" beanname="OfflineDataSyncAction" methodname="generateAssetSpec"/>
 				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editAssetSpec"/>
 			</SYNC_ACTIONS>
-		</ENTITY>
-		<ENTITY name="WORKORDERSPEC">
+		</ENTITY> -->
+		<!-- <ENTITY name="WORKORDERSPEC">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">WORKORDERSPECID</COLUMN>
 			</COLUMNS>
@@ -432,7 +432,7 @@
 				<ACTION name="GENERATE" beanname="OfflineDataSyncAction" methodname="generateWorkOrderSpec"/>
 				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editWorkOrderSpec"/>
 			</SYNC_ACTIONS>
-		</ENTITY>
+		</ENTITY> -->
 		<ENTITY name="DOWNTIME">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">DOWNTIMEID</COLUMN>
@@ -453,7 +453,7 @@
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAssetStatusesJson"/>
 			</INIT_ACTION>
 		</ENTITY>
-		<ENTITY name="TICKETSPEC">
+		<!-- <ENTITY name="TICKETSPEC">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">TICKETSPECID</COLUMN>
 			</COLUMNS>
@@ -464,7 +464,7 @@
 				<ACTION name="GENERATE" beanname="OfflineDataSyncAction" methodname="generateTicketSpec"/>
 				<ACTION name="EDIT" beanname="OfflineDataSyncAction" methodname="editTicketSpec"/>
 			</SYNC_ACTIONS>
-		</ENTITY>
+		</ENTITY> -->
 		<ENTITY name="INSPECTIONRESULT">
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y">INSPECTIONRESULTID</COLUMN>
@@ -515,11 +515,11 @@
 <!-- 				<ACTION beanname="OfflineDeltaSqlDataProviderAction" methodname="getDeltaMyLocationsJson"/> -->
 <!-- 			</DELTA_ACTION> -->
 		</SELECTION>
-		<SELECTION name="TOOLITEM">
+		<!-- <SELECTION name="TOOLITEM">
  			<INIT_ACTION>
 				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheToolItem"/>
 			</INIT_ACTION>
-		</SELECTION>
+		</SELECTION> -->
 		<SELECTION name="DOMAIN">
 			<INIT_ACTION>
 				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheDomain"/>
@@ -637,14 +637,14 @@
 				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheAllMeterGroup"/>
 			</INIT_ACTION>
 		</SELECTION>
-		<SELECTION name="AMCREW">
+		<!-- <SELECTION name="AMCREW">
 			<COLUMNS>
 				<COLUMN uniquekey="Y">AMCREWID</COLUMN>
 			</COLUMNS>
 			<INIT_ACTION>
 				<ACTION beanname="OfflineCachedDataProviderAction" methodname="cacheAMCrew"></ACTION>
 			</INIT_ACTION>
-		</SELECTION>
+		</SELECTION> -->
 		<SELECTION name="MEASUREPOINT">
 			<INDEXES>
 				<INDEX name="IDX_MPOINT_1">MEASUREPOINTID</INDEX>
