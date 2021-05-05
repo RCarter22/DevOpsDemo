@@ -728,6 +728,83 @@
 				<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getLocMeterReadingJson"/>
 			</INIT_ACTION>
 		</SELECTION>
+		<SELECTION name="PLUSTASSETALIAS">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">PLUSTASSETALIASID</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAssetAliasesJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="SERVRECTRANS">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">SERVRECTRANSID</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getServrectransJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="AEPASSETDEPT">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">AEPASSETDEPTID</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAepAssetDeptJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="PLUSTLICENSE">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">PLUSTLICENSEID</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAssetLicensesJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="ASSETUSERCUST">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">ASSETLOCUSERCUSTID</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAssetUsersJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="MAXUSER">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">USERID</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getMaxUserJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="PLUSTCOMP">
+			<COLUMNS>
+				<COLUMN>COMPONENT</COLUMN>
+				<COLUMN>DESCRIPTION</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getPlustCompJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="AEPMFGMAKEMODE">
+			<COLUMNS>
+				<COLUMN>MODEL</COLUMN>
+				<COLUMN>MANUFACTURER</COLUMN>
+				<COLUMN>MAKE</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getAEPMFGMAKEMODELJson"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		<SELECTION name="APPDOCTYPE">
+			<COLUMNS>
+				<COLUMN uniquekey="Y">APPDOCTYPEID</COLUMN>
+			</COLUMNS>				
+ 			<INIT_ACTION>
+			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getLegacyAppDoctype"/>
+			 </INIT_ACTION>
+		</SELECTION>
+		
+
 	</SELECTION_DEFS>
 	
 	<TX_SETTINGS>
