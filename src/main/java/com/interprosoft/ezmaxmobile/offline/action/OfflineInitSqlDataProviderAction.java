@@ -369,7 +369,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("SR.STATUS", "SR.REPORTEDPRIORITY", "SR.FAILURECODE", "SR.PROBLEMCODE")
 				.column("SR.SITEID", "SR.ORGID", "SR.OWNER", "SR.OWNERGROUP", "SR.STATUSDATE", "SR.REPORTDATE", "SR.ASSETORGID", "SR.ASSETSITEID", "SR.GLACCOUNT", "SR.ASSETNUM", "SR.AFFECTEDPERSON", "SR.CHANGEDATE")
 				.column("SR.CLASSSTRUCTUREID")
-				.column("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION") 
 				.from("TICKET SR")
 				.leftJoin("LONGDESCRIPTION LD", "SR.TICKETUID = LD.LDKEY AND LD.LDOWNERTABLE='TICKET' AND LD.LDOWNERCOL='DESCRIPTION'")
 				.where("SR.CLASS = 'SR'")
@@ -427,7 +427,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("W.AEPUSINGDEPARTMENT")
 				.column("CASE WHEN WM.METERNAME IS NOT NULL THEN '1' ELSE '0' END AS PLUSTPRIENTERED")
 				//IMPORTANT TO USE .columnAsString FOR LONGDESCRIPTION TABLE
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION")	
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION")	
 				.column("W.INSPFORMNUM", "NULL AS INSPECTIONRESULTID")
 				.from("WORKORDER W")
 				//.innerJoin("INVOICELINE I", "I.PONUM = ST.PONUM and I.POLINENUM = ST.POLINENUM")
@@ -485,7 +485,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("WOTASK.WOCLASS", "WOTASK.HISTORYFLAG")
 				.column("WOTASK.PLUSTCOMP", "WOTASK.PLUSTACCOMP","WOTASK.PLUSTREASON")
 				// IMPORTANT TO USE .columnAsString FOR LONGDESCRIPTION TABLE
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION") 
 				.column("WOTASK.INSPFORMNUM")
 				.from("WORKORDER W")
 				.innerJoin("WORKORDER WOTASK", "W.WONUM = WOTASK.PARENT AND W.SITEID = WOTASK.SITEID AND WOTASK.ISTASK = 1")
@@ -523,7 +523,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("SR.TICKETID", "SR.TICKETUID")
 				.column("WL.WORKLOGID", "WL.RECORDKEY", "WL.DESCRIPTION", "WL.CLASS", "WL.CREATEBY")
 				.column("WL.LOGTYPE", "WL.CREATEDATE", "WL.SITEID", "WL.ORGID")
-				.column("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION") 
 				.from("TICKET SR")
 				.innerJoin("WORKLOG WL", "SR.TICKETID = WL.RECORDKEY AND SR.CLASS = WL.CLASS")
 				.leftJoin("LONGDESCRIPTION LD", "WL.WORKLOGID = LD.LDKEY AND LD.LDOWNERTABLE='WORKLOG' AND LD.LDOWNERCOL='DESCRIPTION'")
@@ -631,7 +631,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("W.WONUM", "W.WORKORDERID")
 				.column("WL.WORKLOGID", "WL.RECORDKEY", "WL.DESCRIPTION", "WL.CLASS", "WL.CREATEBY")
 				.column("WL.LOGTYPE", "WL.CREATEDATE", "WL.SITEID", "WL.ORGID")
-				.column("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION") 
 				.from("WORKORDER W")
 				.innerJoin("WORKLOG WL", "W.WONUM = WL.RECORDKEY AND W.WOCLASS = WL.CLASS AND W.SITEID = WL.SITEID")
 				.leftJoin("LONGDESCRIPTION LD", "WL.WORKLOGID = LD.LDKEY AND LD.LDOWNERTABLE='WORKLOG' AND LD.LDOWNERCOL='DESCRIPTION'")
@@ -1496,7 +1496,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 			SelectQuery sql = new SelectQuery()
 				.column("M.MRID", "M.MRNUM", "M.DESCRIPTION", "M.STATUS", "M.SITEID", "M.ORGID")
 				.column("M.STATUSDATE", "M.REQUIREDDATE", "M.PRIORITY", "M.WONUM" , "M.LOCATION", "M.ENTERDATE")
-				.column("LD.LDTEXT AS LONGDESCRIPTION") 
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION") 
 				.from("MR M")
 				.leftJoin("LONGDESCRIPTION LD", "M.MRID = LD.LDKEY AND LD.LDOWNERTABLE='MR' AND LD.LDOWNERCOL='DESCRIPTION'")
 				.where("M.SITEID = '" + user.getSiteId() + "'")
@@ -1690,7 +1690,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 				.column("PC.NAME")
 				.column("PA.ALIAS")
 
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION")
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION")
 				.from("ASSET A")
 				.leftJoin(sql2,"AD", " AD.assetnum = A.ASSETNUM and AD.SITEID = A.SITEID")
 				.leftJoin("PLUSTLICENSE PL", "PL.ASSETNUM = A.ASSETNUM AND PL.AEPPRIMARY = 1")
@@ -2291,7 +2291,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		try {
 			SelectQuery sql = new SelectQuery()
 				.column("PLUSTASSETALIASID","ALIAS", "ASSETNUM", "ISDEFAULT", "ISACTIVE", "ISASSETNUM", "DESCRIPTION", "ORGID", "SITEID")
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION")
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION")
 				.from("PLUSTASSETALIAS")	
 				.leftJoin("LONGDESCRIPTION LD", "PLUSTASSETALIASID = LD.LDKEY AND LD.LDOWNERTABLE='PLUSTASSETALIAS' AND LD.LDOWNERCOL='DESCRIPTION'")
 				.where("SITEID = '" + this.user.getSiteId() + "'");
@@ -2321,7 +2321,7 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 		try {
 			SelectQuery sql = new SelectQuery()
 				.column("PLUSTLICENSEID", "ASSETNUM", "DESCRIPTION", "ORGID", "SITEID", "LICENSENUM", "STARTDATE", "ENDDATE")
-				.columnAsString("LD.LDTEXT AS LONGDESCRIPTION")
+				.column("DBMS_LOB.SUBSTR(LD.LDTEXT, 3700) AS LONGDESCRIPTION")
 				.from("PLUSTLICENSE")	
 				.leftJoin("LONGDESCRIPTION LD", "PLUSTLICENSEID = LD.LDKEY AND LD.LDOWNERTABLE='PLUSTLICENSE' AND LD.LDOWNERCOL='DESCRIPTION'")
 				.where("SITEID = '" + this.user.getSiteId() + "'");
