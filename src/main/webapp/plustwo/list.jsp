@@ -45,7 +45,7 @@
 		<s:include value="../common/menu.jsp"/>
 		<div class="ui-header">
 			<a class="ui-btn-left" onclick="emm.core.back()"><s:text name="global.back"/></a>
-			<h3 class="ui-title"><s:text name="ezmaxmobile.wotrack"/></h3>	
+			<h3 class="ui-title"><s:text name="Work Order Tracking (Tr)"/></h3>	
 			<a class="ui-btn-right" onclick="emm.core.ezscan(this)" data-search="WONUM,DESCRIPTION,ASSETNUM,LOCATION,LEAD"><img src="../images/barcode.png"/></a>		
 		</div>
 		<div class="ui-content">

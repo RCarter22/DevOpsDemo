@@ -14,7 +14,7 @@
 	<script type="text/javascript">
 		function approveLabor(id){
 			emm.util.confirm({
-				message: '<s:text name="global.approvelabor"/>',
+				message: '<s:text name="Apply Labor"/>',
 				yes: function(){
 					$('input[name="id"]').val(id);
 					$('input[name="currentAction"]').val(window.location);

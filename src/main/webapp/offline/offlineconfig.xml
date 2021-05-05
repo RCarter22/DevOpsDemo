@@ -805,6 +805,14 @@
         <FILE dir="offline/classification/services">*.*</FILE>
         <FILE dir="offline/inspector">*.*</FILE>
 		<FILE dir="offline/inspector/services">*.*</FILE>
+		<FILE dir="offline/plustasset">*.*</FILE> 
+        <FILE dir="offline/plustasset/services">*.*</FILE>
+		<FILE dir="offline/plustwo">*.*</FILE> 
+        <FILE dir="offline/plustwo/services">*.*</FILE>
+		<FILE dir="offline/plustinv">*.*</FILE> 
+        <FILE dir="offline/plustinv/services">*.*</FILE>
+		<FILE dir="offline/plustlrp">*.*</FILE> 
+        <FILE dir="offline/plustlrp/services">*.*</FILE>
 	</OFFLINE_FILE_CACHE>
 	
 </EZMAXMOBILE_OFFLINE_PROPERTIES>
