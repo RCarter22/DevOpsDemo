@@ -1,0 +1,61 @@
+pipeline {
+  agent any
+  options {
+     skipStagesAfterUnstable()
+   }
+
+
+  stages {
+    stage("Build"){
+      steps{
+      	sh './mvnw -U install'
+      }
+    }
+
+    stage("Test"){
+      steps{
+        sh './mvnw test'
+
+        // junit 'build/reports/junit.xml'
+      }
+    }
+
+    // stage("SonarQube Analysis"){
+    //   steps{
+    //     sh 'mvn sonar:sonar'
+
+    //   }
+    // }
+
+    stage("Nexus Archive and Deploy"){
+      steps{
+        sh './mvnw clean deploy'
+        // sh 'mvn -e clean tomcat7:deploy'
+
+       }
+     }
+
+  }
+}
+
+
+//   post {
+//        always {
+//           echo 'Job completed.'
+//        }
+//        success {
+//           echo 'SUCCESS!'
+//        }
+//
+//        failure {
+// 			mail to: ‘rcarter1@aep.com’,subject: "JOB FAILURE: ${env.JOB_NAME} - #${env.BUILD_NUMBER}",body: "<b>job Failed</b><br>Project: ${env.JOB_NAME} <br>Build Number:${env.BUILD_NUMBER}”
+//        }
+//        unstable {
+// 			mail to: ‘rcarter1@aep.com’,subject: "JOB BECAME UNSTABLE: ${env.JOB_NAME} - #${env.BUILD_NUMBER}",body: "<b>job Failed</b><br>Project: ${env.JOB_NAME} <br>Build Number:${env.BUILD_NUMBER}”
+//
+//        }
+//        fixed {
+// 			mail to: ‘rcarter1@aep.com’,subject: "Job is Back to Normal: ${env.JOB_NAME} - #${env.BUILD_NUMBER}",body: "<b>job Failed</b><br>Project: ${env.JOB_NAME} <br>Build Number:${env.BUILD_NUMBER}”
+//
+//        }
+// }
