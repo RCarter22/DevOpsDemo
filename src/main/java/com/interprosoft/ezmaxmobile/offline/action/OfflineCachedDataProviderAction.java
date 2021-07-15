@@ -220,7 +220,7 @@ public class OfflineCachedDataProviderAction extends BaseOfflineInitAction {
 			.column("ORGID")
 			.column("PLUSPCUSTOMER")
 			.from("SYNONYMDOMAIN")
-			.where("DOMAINID IN ('WOSTATUS', 'ITEMSTATUS', 'LOGTYPE', 'CATEGORY', 'LOCASSETSTATUS', 'ASSETTYPE', 'SRSTATUS', 'LTTYPE', 'REPAIRFACILITY' 'DISPLAYRESTYPE')");
+			.where("DOMAINID IN ('WOSTATUS', 'ITEMSTATUS', 'LOGTYPE', 'CATEGORY', 'LOCASSETSTATUS', 'ASSETTYPE', 'SRSTATUS', 'LTTYPE', 'REPAIRFACILITY', 'DISPLAYRESTYPE')");
 	    	
 		SelectQuery numericDomain = new SelectQuery()
 			.column("DOMAINID")

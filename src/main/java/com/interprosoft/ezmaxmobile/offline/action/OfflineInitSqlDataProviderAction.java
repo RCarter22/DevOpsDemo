@@ -2748,7 +2748,8 @@ public class OfflineInitSqlDataProviderAction extends BaseOfflineInitAction {
 	    	.column("METERREADINGID, METERNAME, ASSETNUM, ORGID, SITEID, READINGTYPE")
 			.column("DELTA, READING, READINGDATE, INSPECTOR, DIDROLLOVER")
 			.from("METERREADING")
-			.where("SITEID = '" + this.user.getSiteId()+ "'");
+			.where("SITEID = '" + this.user.getSiteId()+ "'")
+			.and("ENTERDATE > SYSDATE-3");
 	    	
 	    	jsonObj = getSqlResultJson("METERREADING", sql, pagination);
 	

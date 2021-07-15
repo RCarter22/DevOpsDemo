@@ -39,8 +39,8 @@
 			<INDEXES>
 				<INDEX name="IDX_LT_1">WONUM, SITEID, LABORCODE</INDEX>
 				<INDEX name="IDX_LT_2">WONUM, SITEID, LABORCODE, TIMERSTATUS</INDEX>
-				<INDEX name="IDX_SRLT_1">TICKETUID, SITEID, LABORCODE</INDEX>
-				<INDEX name="IDX_SRLT_2">TICKETUID, SITEID, LABORCODE, TIMERSTATUS</INDEX>
+				<!-- <INDEX name="IDX_SRLT_1">TICKETUID, SITEID, LABORCODE</INDEX>
+				<INDEX name="IDX_SRLT_2">TICKETUID, SITEID, LABORCODE, TIMERSTATUS</INDEX> -->
 			</INDEXES>
 			<COLUMNS>
 				<COLUMN uniquekey="Y" autokey="Y" autokeyprefix="LT">LABTRANSID</COLUMN>
@@ -54,7 +54,7 @@
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="START_TIMER" beanname="OfflineDataSyncAction" methodname="startTimer"/>
 				<ACTION transentityname="WORKORDER" transentitykey="WORKORDERID" name="STOP_TIMER" beanname="OfflineDataSyncAction" methodname="stopTimer"/>
 				<ACTION transentityname="LABTRANS" transentitykey="LABTRANSID" name="INSERTLR"  beanname="OfflineDataSyncAction" methodname="addLabRep"/>
-				<ACTION transentityname="SR" transentitykey="TICKETUID" name="INSERTSR" beanname="OfflineDataSyncAction" methodname="addSRLabTrans"/>
+				<!-- <ACTION transentityname="SR" transentitykey="TICKETUID" name="INSERTSR" beanname="OfflineDataSyncAction" methodname="addSRLabTrans"/> -->
 			</SYNC_ACTIONS>
 		</ENTITY>	
 		<!-- <ENTITY name="TOOLTRANS">
@@ -785,7 +785,7 @@
 			 	<ACTION beanname="OfflineInitSqlDataProviderAction" methodname="getPlustCompJson"/>
 			 </INIT_ACTION>
 		</SELECTION>
-		<SELECTION name="AEPMFGMAKEMODE">
+		<SELECTION name="AEPMFGMAKEMODEL">
 			<COLUMNS>
 				<COLUMN>MODEL</COLUMN>
 				<COLUMN>MANUFACTURER</COLUMN>
